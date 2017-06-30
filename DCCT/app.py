@@ -15,6 +15,8 @@ class DCCTWindow(QWizard):
         self._initialize_widgets()
         self._initialize_signals()
 
+        self._initialize_wizard_buttons()
+
     @pyqtSlot()
     def _read_serial_number(self):
         #TODO: Read serial number routine
@@ -56,6 +58,30 @@ class DCCTWindow(QWizard):
         self.pbStartTests.clicked.connect(self._start_test_sequence)
         self.pbSubmitTestReport.clicked.connect(self._submit_test_report)
 
+    def _initialize_wizard_buttons(self):
+        self.PageIntro.setButtonText(self.NextButton, "Próximo")
+        self.PageIntro.setButtonText(self.BackButton, "Anterior")
+        self.PageIntro.setButtonText(self.CancelButton, "Cancelar")
+
+        self.PageSerialNumber.setButtonText(self.NextButton, "Próximo")
+        self.PageSerialNumber.setButtonText(self.BackButton, "Anterior")
+        self.PageSerialNumber.setButtonText(self.CancelButton, "Cancelar")
+
+        self.PageConnectDCCT.setButtonText(self.NextButton, "Próximo")
+        self.PageConnectDCCT.setButtonText(self.BackButton, "Anterior")
+        self.PageConnectDCCT.setButtonText(self.CancelButton, "Cancelar")
+
+        self.PageConnectSerialPort.setButtonText(self.NextButton, "Próximo")
+        self.PageConnectSerialPort.setButtonText(self.BackButton, "Anterior")
+        self.PageConnectSerialPort.setButtonText(self.CancelButton, "Cancelar")
+
+        self.PageStartTest.setButtonText(self.NextButton, "Próximo")
+        self.PageStartTest.setButtonText(self.BackButton, "Anterior")
+        self.PageStartTest.setButtonText(self.CancelButton, "Cancelar")
+
+        self.PageSubmitReport.setButtonText(self.BackButton, "Anterior")
+        self.PageSubmitReport.setButtonText(self.CancelButton, "Cancelar")
+        self.PageSubmitReport.setButtonText(self.FinishButton, "Novo Teste")
 
 #app = QApplication(sys.argv)
 #GUI = Window()
