@@ -4,7 +4,6 @@ from PyQt5 import uic
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QWizard, QApplication
 
-
 class DCCTWindow(QWizard):
 
     def __init__(self, parent=None):
@@ -96,10 +95,6 @@ class DCCTWindow(QWizard):
     def _block_buttons(self):
         self.PageSubmitReport.wizard().button(self.FinishButton).setEnabled(False)
 
-#app = QApplication(sys.argv)
-#GUI = Window()
-#GUI.show()
-#sys.exit(app.exec_())
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     gui = DCCTWindow()
