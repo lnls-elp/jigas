@@ -64,7 +64,7 @@ class DCCTWindow(QWizard):
         self.cbEnableSerialNumberEdit.stateChanged.connect(self._treat_read_serial_edit)
         self.pbConnectSerialPort.clicked.connect(self._connect_serial_port)
         self.pbStartTests.clicked.connect(self._start_test_sequence)
-        self.pbSubmitTestReport.clicked.connect(self._submit_test_report)
+        #self.pbSubmitTestReport.clicked.connect(self._submit_test_report)
         self.finished.connect(self._finish_wizard_execution)
 
     def _initialize_wizard_buttons(self):
