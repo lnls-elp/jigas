@@ -208,73 +208,6 @@
      <string>Foto da Webcan?</string>
     </property>
    </widget>
-   <widget class="QWidget" name="layoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>120</y>
-      <width>210</width>
-      <height>72</height>
-     </rect>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QPushButton" name="pbReadSerialNumber">
-       <property name="minimumSize">
-        <size>
-         <width>90</width>
-         <height>70</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>90</width>
-         <height>70</height>
-        </size>
-       </property>
-       <property name="sizeIncrement">
-        <size>
-         <width>90</width>
-         <height>70</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Ler Serial</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
-        <widget class="QLineEdit" name="leSerialNumber">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>110</width>
-           <height>25</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>110</width>
-           <height>25</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="cbEnableSerialNumberEdit">
-         <property name="text">
-          <string>Digitar</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-    </layout>
-   </widget>
    <widget class="QLabel" name="label_10">
     <property name="geometry">
      <rect>
@@ -296,6 +229,96 @@
     <property name="pixmap">
      <pixmap>images/sirius_logo.jpeg</pixmap>
     </property>
+   </widget>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>120</y>
+      <width>212</width>
+      <height>93</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_3">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QPushButton" name="pbReadSerialNumber">
+         <property name="minimumSize">
+          <size>
+           <width>90</width>
+           <height>70</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>90</width>
+           <height>70</height>
+          </size>
+         </property>
+         <property name="sizeIncrement">
+          <size>
+           <width>90</width>
+           <height>70</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Ler Serial</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="QLineEdit" name="leSerialNumber">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>110</width>
+             <height>25</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>110</width>
+             <height>25</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="cbEnableSerialNumberEdit">
+           <property name="text">
+            <string>Digitar</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QLabel" name="lbReadSerialStatus">
+       <property name="minimumSize">
+        <size>
+         <width>210</width>
+         <height>10</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>210</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>ERRO. Digite Manualmente</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QWizardPage" name="PageConnectDCCT">
@@ -402,7 +425,7 @@
      <pixmap>images/sirius_logo.jpeg</pixmap>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>10</x>

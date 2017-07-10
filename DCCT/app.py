@@ -3,6 +3,8 @@ import sys
 from PyQt5 import uic
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QWizard, QApplication
+from dmreader import *
+from dcctdata import *
 
 class DCCTWindow(QWizard):
 
@@ -19,10 +21,19 @@ class DCCTWindow(QWizard):
         self._initialize_wizard_buttons()
         self._block_buttons()
 
+        self._dcct = DCCT()
+        self._log = DCCTLog()
+
 
     @pyqtSlot()
     def _read_serial_number(self):
-        #TODO: Read serial number routine
+        data = ReadDataMatrix()
+        if data == None:
+            self.lbReadSerialStatus.setText("<p color:'red'><b>ERRO. Digite Manualmente!</b><p/>")
+        else:
+            self._dcct.numero_serie = data
+            self._dcct.add_dcct() ## Remove this. Use only when test finish
+            self.leSerialNumber.setText(str(data))
         print("Read serial number")
 
     @pyqtSlot()
@@ -57,6 +68,7 @@ class DCCTWindow(QWizard):
         self.leBaudrate.setText(str(self._SERIAL_BAUDRATE))
         self.leBaudrate.setReadOnly(True)
         self.leSerialNumber.setReadOnly(True)
+        self.lbReadSerialStatus.setText("")
 
     def _initialize_signals(self):
         """ Configure basic signals """
