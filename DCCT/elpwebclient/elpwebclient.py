@@ -1,7 +1,7 @@
 import requests
 
 class ElpWebClient:
-    def __init__(self, url='http://localhost:5000'):
+    def __init__(self, url='http://35.188.141.59:80'):
         self._url = url
 
     """
