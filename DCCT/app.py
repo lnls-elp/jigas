@@ -2,7 +2,7 @@
 import sys
 from PyQt5 import uic
 from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QWizard, QApplication
+from PyQt5.QtWidgets import QWizard, QApplication, QWizardPage
 from dmreader import *
 from dcctdata import *
 
@@ -11,8 +11,6 @@ class DCCTWindow(QWizard):
     def __init__(self, parent=None):
         super(DCCTWindow, self).__init__(parent)
         uic.loadUi('wizard.ui', self)
-
-        self.finished.connect(self._finish_wizard_execution)
 
         self._SERIAL_BAUDRATE = 115200
 
@@ -106,6 +104,17 @@ class DCCTWindow(QWizard):
 
     def _block_buttons(self):
         self.PageSubmitReport.wizard().button(self.FinishButton).setEnabled(False)
+
+
+    def PageIntro.wizard().nextId(self):
+        pass
+#class IntroPage(QWizardPage):
+#    def __init__(self, parent=None):
+#        super(IntroPage, self).__init__(parent)
+#
+#    def nextId(self):
+#        pass
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
