@@ -22,7 +22,6 @@ class DCCTWindow(QWizard, Ui_Class):
         self._initialize_widgets()
         self._initialize_signals()
         self._initialize_wizard_buttons()
-        self._block_buttons()
 
         self._dcct = DCCT()
         self._log = DCCTLog()
@@ -53,13 +52,9 @@ class DCCTWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _start_test_sequence(self):
-        self.PageStartTest.wizard().button(self.NextButton).setEnabled(True)
+        #self.PageStartTest.wizard().button(self.NextButton).setEnabled(True)
         #TODO: Start test sequence thread
-
-    @pyqtSlot()
-    def _submit_test_report(self):
-        self.PageSubmitReport.wizard().button(self.FinishButton).setEnabled(True)
-        #TODO: Submit report to server
+        pass
 
     @pyqtSlot()
     def _finish_wizard_execution(self):
@@ -105,17 +100,84 @@ class DCCTWindow(QWizard, Ui_Class):
 
         self.PageSubmitReport.setButtonText(self.BackButton, "Anterior")
         self.PageSubmitReport.setButtonText(self.CancelButton, "Cancelar")
-        self.PageSubmitReport.setButtonText(self.FinishButton, "Novo Teste")
+        self.PageSubmitReport.setButtonText(self.NextButton, "Novo Teste")
 
-    def _block_buttons(self):
-        self.PageSubmitReport.wizard().button(self.FinishButton).setEnabled(False)
+    def _submit_test_report(self):
+        #TODO: Submit report to server
+        #dcct = self._dcct.add_dcct()
+        #log = self._log.add_log_dcct()
+        pass
 
-class Test(QWizardPage):
-    def __init__(self, parent=None):
-        super(Test, self).__init__(parent)
+    ## Initialize Pages for wizard
+    def _initialize_intro_page(self):
+        pass
+
+    def _initialize_page_serial_number(self):
+        pass
+
+    def _initialize_page_connect_dcct(self):
+        pass
+
+    def _initialize_page_connect_serial_port(self):
+        pass
+
+    def _initialize_page_start_test(self):
+        pass
+
+    def _initialize_page_submit_report(self):
+        self._submit_test_report()
+
+    #QWizardPage methods - Override
+    def initializePage(self, page):
+        if page == 0:
+            self._initialize_intro_page()
+            print(self.currentId())
+
+        elif page == 1:
+            self._initialize_page_serial_number()
+            print(self.currentId())
+
+        elif page == 2:
+            self._initialize_page_connect_dcct()
+            print(self.currentId())
+
+        elif page == 3:
+            self._initialize_page_connect_serial_port()
+            print(self.currentId())
+
+        elif page == 4:
+            self._initialize_page_start_test()
+            print(self.currentId())
+
+        elif page == 5:
+            self._initialize_page_submit_report()
+            print(self.currentId())
+        else:
+            pass
 
     def nextId(self):
-        return DCCTWindow.PageStartTest
+        current_id = self.currentId()
+        if current_id == 5:
+            return 1
+        else:
+            return current_id + 1
+
+    def isComplete(self):
+        return False
+
+    def isFinalPage(self):
+        return False
+
+    def validateCurrentPage(self):
+        if self.currentPage == 1:
+            return False
+        return True
+
+    def next(self):
+        if self.currentId() == 5:
+            while self.currentId() != 1:
+                self.back()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
