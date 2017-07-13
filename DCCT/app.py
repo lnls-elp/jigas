@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 import sys
+import glob
+import serial
 from PyQt5.uic import loadUiType
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QWizard, QApplication, QWizardPage
@@ -26,6 +28,13 @@ class DCCTWindow(QWizard, Ui_Class):
         self._dcct = DCCT()
         self._log = DCCTLog()
 
+        self._test = {}
+        self._test['serial_number_read'] = False
+        self._test['serial_port_test']   = False
+        self._test['final']              = False
+
+        self._list_serial_ports()
+
 
     @pyqtSlot()
     def _read_serial_number(self):
@@ -34,6 +43,7 @@ class DCCTWindow(QWizard, Ui_Class):
             self.lbReadSerialStatus.setText("<p color:'red'><b>ERRO. Digite Manualmente!</b><p/>")
         else:
             self._dcct.numero_serie = data
+            self._log.numero_serie_dcct = data
             self._dcct.add_dcct() ## Remove this. Use only when test finish
             self.leSerialNumber.setText(str(data))
         print("Read serial number")
@@ -66,7 +76,15 @@ class DCCTWindow(QWizard, Ui_Class):
         self.leBaudrate.setText(str(self._SERIAL_BAUDRATE))
         self.leBaudrate.setReadOnly(True)
         self.leSerialNumber.setReadOnly(True)
-        self.lbReadSerialStatus.setText("")
+        self.leSerialNumber.clear()
+        self.lbReadSerialStatus.clear()
+        self.cbEnableSerialNumberEdit.setChecked(False)
+        self.lbStatusComunicacao.setText("...")
+        self.lbStatusAuxSupply.setText("...")
+        self.lbTestStatus.setText("Clique para Iniciar Testes")
+        self.lbTestResult.setText("Aguarde...")
+        self.teTestReport.clear()
+        self.lbStatusSubmitRequest.setText("Aguarde...")
 
     def _initialize_signals(self):
         """ Configure basic signals """
@@ -108,24 +126,81 @@ class DCCTWindow(QWizard, Ui_Class):
         #log = self._log.add_log_dcct()
         pass
 
+    def _list_serial_ports(self):
+        if sys.platform.startswith('win'):
+            ports = ['COM%s' % (i + 1) for i in range(256)]
+        elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
+            ports = glob.glob('/dev/tty[A-Za-z]*')
+        elif sys.platform.startswith('darwin'):
+            ports = glob.glob('/dev/tty.*')
+        else:
+            raise EnvironmentError('Unsuported platform')
+
+        #result = []
+        for port in ports:
+            try:
+                s = serial.Serial(port)
+                s.close()
+                self.comboComPort.addItem(port)
+            except (OSError, serial.SerialException):
+                pass
+        #return result
+
     ## Initialize Pages for wizard
     def _initialize_intro_page(self):
-        pass
+        print("Intro iniciada!")
 
     def _initialize_page_serial_number(self):
         pass
 
     def _initialize_page_connect_dcct(self):
-        pass
+        print("Conexao de dcct iniciada!")
 
     def _initialize_page_connect_serial_port(self):
-        pass
+        print("Teste porta serial!")
 
     def _initialize_page_start_test(self):
-        pass
+        print("Start test iniciado!")
 
     def _initialize_page_submit_report(self):
+        print("Submit teste!")
         self._submit_test_report()
+
+    ## validate pages for wizard
+    def _validate_intro_page(self):
+        print('Validate Intro')
+        return True
+
+    def _validate_page_serial_number(self):
+        serial = self.leSerialNumber.text()
+        if serial is not "":
+            print("Tem alguma coisa")
+            self._dcct.numero_serie = int(serial)
+            self._log.numero_serie_dcct = int(serial)
+            return True
+        print("Não tem nada")
+        return False
+
+    def _validate_page_connect_dcct(self):
+        print('Validate Conn DCCT')
+        return True
+
+    def _validate_page_connect_serial_port(self):
+        print('Validate Conn Serial')
+        return True
+
+    def _validate_page_start_test(self):
+        print('Validate Start Test')
+        return True
+
+    def _validate_page_submit_report(self):
+        print('Validate Submit')
+        self._initialize_widgets()
+        for item in self._test:
+            self._test[item] = False
+        while self.currentId() is not 1:
+            self.back()
+        return False
 
     #QWizardPage methods - Override
     def initializePage(self, page):
@@ -155,23 +230,46 @@ class DCCTWindow(QWizard, Ui_Class):
         else:
             pass
 
-    def nextId(self):
+# Last minute validation (before the next page is showed)
+    def validateCurrentPage(self):
         current_id = self.currentId()
-        if current_id == 5:
-            return 1
-        else:
-            return current_id + 1
+        if current_id == 0:
+            return self._validate_intro_page()
 
-    def isComplete(self):
-        return False
+        elif current_id == 1:
+            print("Valida 1")
+            return self._validate_page_serial_number()
+
+        elif current_id == 2:
+            print("Valida 2")
+            return self._validate_page_connect_dcct()
+
+        elif current_id == 3:
+            print("Valida 3")
+            return self._validate_page_connect_serial_port()
+
+        elif current_id == 4:
+            print("Valida 4")
+            return self._validate_page_start_test()
+
+        elif current_id == 5:
+            print("Valida 5")
+            return self._validate_page_submit_report()
+
+        else:
+            return True
+
+#    def nextId(self):
+#        current_id = self.currentId()
+#        if current_id == 5:
+#            return 1
+#        else:
+#            return current_id + 1
+
 
     def isFinalPage(self):
         return False
 
-    def validateCurrentPage(self):
-        if self.currentPage == 1:
-            return False
-        return True
 
     def next(self):
         if self.currentId() == 5:

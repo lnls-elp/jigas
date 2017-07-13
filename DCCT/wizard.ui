@@ -514,7 +514,7 @@
    </widget>
   </widget>
   <widget class="QWizardPage" name="PageStartTest">
-   <widget class="QTextEdit" name="textEdit">
+   <widget class="QTextEdit" name="teTestReport">
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -713,6 +713,7 @@
     </property>
    </widget>
   </widget>
+  <widget class="QWizardPage" name="wizardPage"/>
  </widget>
  <resources/>
  <connections/>
