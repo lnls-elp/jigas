@@ -207,9 +207,7 @@ class DCCTWindow(QWizard, Ui_Class):
 
     def _initialize_page_submit_report(self):
         self._web_request.method = self._dcct.method
-        print(self._web_request.method)
         self._web_request.data = self._dcct.data
-        print(self._web_request.data)
         self._web_request.server_response.connect(self._treat_server_response)
         self._web_request.start()
 
