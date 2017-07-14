@@ -1,17 +1,18 @@
 from elpwebclient import *
 import simplejson as json
+from PyQt5.QtCore import pyqtSlot
 
 class DCCT:
 
-    def __init__(self, numero_serie=None):
-        self._serial_number = numero_serie
+    def __init__(self, serial_number=None):
+        self._serial_number = serial_number
 
     @property
-    def numero_serie(self):
+    def serial_number(self):
         return self._serial_number
 
-    @numero_serie.setter
-    def numero_serie(self, value):
+    @serial_number.setter
+    def serial_number(self, value):
         self._serial_number = value
 
     def _get_dcct_data(self):
@@ -26,14 +27,23 @@ class DCCT:
         response = client.do_request(method, data)
         return response
 
+    @property
+    def data(self):
+        return self._get_dcct_data()
+
+    @property
+    def method(self):
+        return "/AddDcct"
+
 class DCCTLog:
 
-    def __init__(self, resultado_teste=None, numero_serie_dcct=None, iload0=None,
+    def __init__(self, test_result=None, serial_number_dcct=None, iload0=None,
                     iload1=None, iload2=None, iload3=None, iload4=None, iload5=None,
-                    iload6=None, iload7=None, iload8=None, iload9=None, iload10=None):
+                    iload6=None, iload7=None, iload8=None, iload9=None, iload10=None,
+                    details=None):
 
-        self._resultado_teste   = resultado_teste
-        self._numero_serie_dcct = numero_serie_dcct
+        self._test_result   = test_result
+        self._serial_number_dcct = serial_number_dcct
         self._iload0            = iload0
         self._iload1            = iload1
         self._iload2            = iload2
@@ -45,22 +55,23 @@ class DCCTLog:
         self._iload8            = iload8
         self._iload9            = iload9
         self._iload10           = iload10
+        self._details           = details
 
     @property
-    def resultado_teste(self):
-        return self._resultado_teste
+    def test_result(self):
+        return self._test_result
 
-    @resultado_teste.setter
-    def resultado_teste(self, value):
-        self._resultado_teste = value
+    @test_result.setter
+    def test_result(self, value):
+        self._test_result = value
 
     @property
-    def numero_serie_dcct(self):
-        return self._numero_serie_dcct
+    def serial_number_dcct(self):
+        return self._serial_number_dcct
 
-    @numero_serie_dcct.setter
-    def numero_serie_dcct(self, value):
-        self._numero_serie_dcct = value
+    @serial_number_dcct.setter
+    def serial_number_dcct(self, value):
+        self._serial_number_dcct = value
 
     @property
     def iload0(self):
@@ -150,10 +161,18 @@ class DCCTLog:
     def iload10(self, value):
         self._iload10 = value
 
+    @property
+    def details(self):
+        return self._details
+
+    @details.setter
+    def details(self, value):
+        self._details = value
+
     def _get_dcct_log_data(self):
         data = {}
-        data['resultado_teste']     = self._resultado_teste
-        data['numero_serie_dcct']   = self._numero_serie_dcct
+        data['resultado_teste']     = self._test_result
+        data['numero_serie_dcct']   = self._serial_number_dcct
         data['iload0']              = self._iload0
         data['iload1']              = self._iload1
         data['iload2']              = self._iload2
@@ -165,6 +184,7 @@ class DCCTLog:
         data['iload8']              = self._iload8
         data['iload9']              = self._iload9
         data['iload10']             = self._iload10
+        data['details']             = self._details
         return data
 
     def add_log_dcct(self):

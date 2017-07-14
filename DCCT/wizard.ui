@@ -443,7 +443,7 @@
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="pbCommunicationTest">
        <property name="minimumSize">
         <size>
          <width>75</width>
@@ -720,6 +720,19 @@
     </property>
     <property name="pixmap">
      <pixmap>images/sirius_logo.jpeg</pixmap>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pbSubmitReport">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>160</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PushButton</string>
     </property>
    </widget>
   </widget>

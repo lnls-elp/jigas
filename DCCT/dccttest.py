@@ -2,7 +2,8 @@ from PyQt5.QtCore import pyqtSlot, QThread, pyqtSignal
 import serial
 
 class DCCTTest(QThread):
-    test_complete = pyqtSignal(dict)
+    test_complete       = pyqtSignal(dict)
+    connection_lost     = pyqtSignal()
 
     def __init__(self, comport=None, baudrate=None):
         QThread.__init__(self)
@@ -40,10 +41,18 @@ class DCCTTest(QThread):
             self._serial_port.open()
             return self._serial_port.is_open
 
+    def test_communication(self):
+        result = (False, False)     # Result for communication test and aux power supply
+        #TODO: Communication test
+        return result
+
     def _test_sequence(self):
+        # If serial connection is lost
+        if not self._serial_port.is_open:
+            self.connection_lost.emit()
         #TODO: Sequencia de Testes
         # ao finalizar, emitir signals
-
+        self.test_complete.emit(self._test_result)
 
     def run(self):
         #TODO: All
