@@ -40,6 +40,10 @@ class DCCTTest(QThread):
             self._serial_port.open()
             return self._serial_port.is_open
 
+    def _test_sequence(self):
+        #TODO: Sequencia de Testes
+        # ao finalizar, emitir signals
+
 
     def run(self):
         #TODO: All
