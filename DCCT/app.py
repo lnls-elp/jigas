@@ -34,8 +34,10 @@ class DCCTWindow(QWizard, Ui_Class):
         self._test['final']              = False
 
         self._list_serial_ports()
-        self._serial_port = serial.Serial()
+        #self._serial_port = serial.Serial()
+        self._serial_port_status = False
 
+        self._test_thread = DCCTTest()
 
     @pyqtSlot()
     def _read_serial_number(self):
@@ -59,17 +61,20 @@ class DCCTWindow(QWizard, Ui_Class):
     def _connect_serial_port(self):
         com = str(self.comboComPort.currentText())
         baud = int(self.leBaudrate.text())
-        self._serial_port.baudrate = baud
-        self._serial_port.port = com
-        self._serial_port.open()
-        if self._serial_port.is_open:
+#        self._serial_port.baudrate = baud
+#        self._serial_port.port = com
+#        self._serial_port.open()
+#        if self._serial_port.is_open:
+#            self.pbConnectSerialPort.setEnabled(False)
+        self._test_thread.baudrate = baud
+        self._test_thread.comport  = com
+        self._serial_port_status = self._test_thread.open_serial_port()
+        if self._serial_port_status:
             self.pbConnectSerialPort.setEnabled(False)
-            self.completeChanged.emit()
 
     @pyqtSlot()
     def _start_test_sequence(self):
-        #self.test_thread = DCCTtest()
-        #self.test_thread.test_complete.connect(self._finish_test)
+        self.test_thread.test_complete.connect(self._test_finished)
         #self.test_thread.start()
         #TODO: Start test sequence thread
         pass
@@ -81,7 +86,20 @@ class DCCTWindow(QWizard, Ui_Class):
 
     @pyqtSlot(dict)
     def _test_finished(self, test_result):
-        pass
+        self._log.resultado_teste   = test_result['result']
+        self._log.iload0            = test_result['iload'][0]
+        self._log.iload1            = test_result['iload'][1]
+        self._log.iload2            = test_result['iload'][2]
+        self._log.iload3            = test_result['iload'][3]
+        self._log.iload4            = test_result['iload'][4]
+        self._log.iload5            = test_result['iload'][5]
+        self._log.iload6            = test_result['iload'][6]
+        self._log.iload7            = test_result['iload'][7]
+        self._log.iload8            = test_result['iload'][8]
+        self._log.iload9            = test_result['iload'][9]
+        self._log.iload10            = test_result['iload'][10]
+        self.lbTestStatus.setText("Teste Finalizado!")
+        self.lbTestResult.setText(self._log.resultado_teste)
 
     def _initialize_widgets(self):
         """ Initial widgets configuration """
@@ -106,7 +124,6 @@ class DCCTWindow(QWizard, Ui_Class):
         self.pbStartTests.clicked.connect(self._start_test_sequence)
         #self.pbSubmitTestReport.clicked.connect(self._submit_test_report)
         self.finished.connect(self._finish_wizard_execution)
-        self.completeChanged = pyqtSignal()
 
     def _initialize_wizard_buttons(self):
         self.PageIntro.setButtonText(self.NextButton, "Próximo")
@@ -181,7 +198,7 @@ class DCCTWindow(QWizard, Ui_Class):
 
     ## validate pages for wizard
     def _validate_intro_page(self):
-        if self._serial_port.is_open:
+        if self._serial_port_status:
             return True
         return False
 
