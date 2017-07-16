@@ -6,35 +6,41 @@ import time
 
 class WebRequest(QThread):
 
-    server_response = pyqtSignal(dict)
+    server_response = pyqtSignal(dict, dict)
 
-    def __init__(self, method=None, data={}):
+    def __init__(self, device=None, log=None):
         QThread.__init__(self)
-        self._method = method
-        self._data = data
+        self._device = device
+        self._log = log
 
     @property
-    def method(self):
-        return self._method
+    def device(self):
+        return self._device
 
-    @method.setter
-    def method(self, value):
-        self._method = value
+    @device.setter
+    def device(self, value):
+        self._device = value
 
     @property
-    def data(self):
-        return self._data
+    def log(self):
+        return self._log
 
-    @data.setter
-    def data(self, value):
-        self._data = value
+    @log.setter
+    def log(self, value):
+        self._log = value
 
     def _create_request(self):
-        client = ElpWebClient()
-        data = self._data
-        method = self._method
-        res = client.do_request(method, data)
-        self.server_response.emit(res)
+        device_client = ElpWebClient()
+        device_data = self._device.data
+        device_method = self._device.method
+        device_res = device_client.do_request(device_method, device_data)
+
+        log_client = ElpWebClient()
+        log_data = self._log.data
+        log_method = self._log.method
+        log_res = log_client.do_request(log_method, log_data)
+
+        self.server_response.emit(device_res, log_res)
 
     def run(self):
         self._create_request()

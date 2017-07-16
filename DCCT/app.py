@@ -38,76 +38,9 @@ class DCCTWindow(QWizard, Ui_Class):
         self._initialize_signals()
         self._initialize_wizard_buttons()
 
-    @pyqtSlot()
-    def _read_serial_number(self):
-        #data = ReadDataMatrix()
-        #if data == None:
-        #    self.lbReadSerialStatus.setText("<p color:'red'><b>ERRO. Digite Manualmente!</b><p/>")
-        #else:
-        #    self._dcct.serial_number = data
-        #    self._log.serial_number_dcct = data
-        #    self.leSerialNumber.setText(str(data))
-        #print("Read serial number")
-        pass
-
-    @pyqtSlot()
-    def _treat_read_serial_edit(self):
-        if self.cbEnableSerialNumberEdit.isChecked():
-            self.leSerialNumber.setReadOnly(False)
-        else:
-            self.leSerialNumber.setReadOnly(True)
-
-    @pyqtSlot()
-    def _connect_serial_port(self):
-        com = str(self.comboComPort.currentText())
-        baud = int(self.leBaudrate.text())
-        self._test_thread.baudrate = baud
-        self._test_thread.comport  = com
-        self._serial_port_status = self._test_thread.open_serial_port()
-        if self._serial_port_status:
-            self.pbConnectSerialPort.setEnabled(False)
-
-    @pyqtSlot()
-    def _communication_test(self):
-        result = self._test_thread.test_communication()
-        if result[0]:
-            self.lbStatusComunicacao.setText("<p color:'green'>OK</p>")
-        else:
-            self.lbStatusComunicacao.setText("<p color:'red'>Falha</p>")
-
-        if result[1]:
-            self.lbStatusAuxSupply.setText("<p color:'green'>OK</p>")
-        else:
-            self.lbStatusAuxSupply.setText("<p color:'red'>Falha</p>")
-
-    @pyqtSlot()
-    def _start_test_sequence(self):
-        self._test_thread.test_complete.connect(self._test_finished)
-        self.test_thread.start()
-
-
-    @pyqtSlot()
-    def _finish_wizard_execution(self):
-        # Qdo usuario clica em cancel ou em finish
-        print("*****TERMINOU******")
-
-    @pyqtSlot(dict)
-    def _test_finished(self, test_result):
-        self._log.test_result   = test_result['result']
-        self._log.iload0        = test_result['iload'][0]
-        self._log.iload1        = test_result['iload'][1]
-        self._log.iload2        = test_result['iload'][2]
-        self._log.iload3        = test_result['iload'][3]
-        self._log.iload4        = test_result['iload'][4]
-        self._log.iload5        = test_result['iload'][5]
-        self._log.iload6        = test_result['iload'][6]
-        self._log.iload7        = test_result['iload'][7]
-        self._log.iload8        = test_result['iload'][8]
-        self._log.iload9        = test_result['iload'][9]
-        self._log.iload10       = test_result['iload'][10]
-        self.lbTestStatus.setText("Teste Finalizado!")
-        self.lbTestResult.setText(self._log.test_result)
-
+    """*************************************************
+    *************** GUI Initialization *****************
+    """
     def _initialize_widgets(self):
         """ Initial widgets configuration """
         self.leBaudrate.setText(str(self._SERIAL_BAUDRATE))
@@ -158,18 +91,9 @@ class DCCTWindow(QWizard, Ui_Class):
         self.PageSubmitReport.setButtonText(self.CancelButton, "Cancelar")
         self.PageSubmitReport.setButtonText(self.NextButton, "Novo Teste")
 
-
-    @pyqtSlot(dict)
-    def _treat_server_response(self, res):
-        print("RESPOSTA")
-        print(res)
-        if res['StatusCode'] == '200':
-            self.lbStatusSubmitRequest.setText("Sucesso!!!")
-            self._web_request_status = True
-        else:
-            self.lbStatusSubmitRequest.setText("Requisição Falhou!!")
-
-
+    """*************************************************
+    ************* System Initialization ****************
+    """
     def _list_serial_ports(self):
         if sys.platform.startswith('win'):
             ports = ['COM%s' % (i + 1) for i in range(256)]
@@ -180,7 +104,6 @@ class DCCTWindow(QWizard, Ui_Class):
         else:
             raise EnvironmentError('Unsuported platform')
 
-        #result = []
         for port in ports:
             try:
                 s = serial.Serial(port)
@@ -188,9 +111,10 @@ class DCCTWindow(QWizard, Ui_Class):
                 self.comboComPort.addItem(port)
             except (OSError, serial.SerialException):
                 pass
-        #return result
 
-    ## Initialize Pages for wizard
+    """*************************************************
+    ************* Pages Initialization *****************
+    """
     def _initialize_intro_page(self):
         pass
 
@@ -207,17 +131,18 @@ class DCCTWindow(QWizard, Ui_Class):
         print("Start test iniciado!")
 
     def _initialize_page_submit_report(self):
-        self._web_request.method = self._dcct.method
-        self._web_request.data = self._dcct.data
+        self._web_request.device = self._dcct
+        self._web_request.log = self._log
         self._web_request.server_response.connect(self._treat_server_response)
         self._web_request.start()
 
-    ## validate pages for wizard
+    """*************************************************
+    ************** Pages Validation ********************
+    """
     def _validate_intro_page(self):
-        #if self._serial_port_status:
-        #    return True
-        #return False
-        return True
+        if self._serial_port_status:
+            return True
+        return False
 
     def _validate_page_serial_number(self):
         serial = self.leSerialNumber.text()
@@ -248,7 +173,9 @@ class DCCTWindow(QWizard, Ui_Class):
             self.back()
         return False
 
-    #QWizardPage methods - Override
+    """*************************************************
+    *********** Default Methods (Wizard) ***************
+    """
     def initializePage(self, page):
         if page == 0:
             self._initialize_intro_page()
@@ -276,7 +203,6 @@ class DCCTWindow(QWizard, Ui_Class):
         else:
             pass
 
-# Last minute validation (before the next page is showed)
     def validateCurrentPage(self):
         current_id = self.currentId()
         if current_id == 0:
@@ -305,18 +231,100 @@ class DCCTWindow(QWizard, Ui_Class):
         else:
             return True
 
-#    def nextId(self):
-#        current_id = self.currentId()
-#        if current_id == 5:
-#            return 1
-#        else:
-#            return current_id + 1
-
     def next(self):
         if self.currentId() == 5:
             while self.currentId() != 1:
                 self.back()
 
+    """*************************************************
+    ******************* PyQt Slots *********************
+    """
+    @pyqtSlot()
+    def _read_serial_number(self):
+        data = ReadDataMatrix()
+        if data == None:
+            self.lbReadSerialStatus.setText("<p color:'red'><b>ERRO. Digite Manualmente!</b><p/>")
+        else:
+            self._dcct.serial_number = data
+            self._log.serial_number_dcct = data
+            self.leSerialNumber.setText(str(data))
+        print("Read serial number")
+
+    @pyqtSlot()
+    def _treat_read_serial_edit(self):
+        if self.cbEnableSerialNumberEdit.isChecked():
+            self.leSerialNumber.setReadOnly(False)
+        else:
+            self.leSerialNumber.setReadOnly(True)
+
+    @pyqtSlot()
+    def _connect_serial_port(self):
+        com = str(self.comboComPort.currentText())
+        baud = int(self.leBaudrate.text())
+        self._test_thread.baudrate = baud
+        self._test_thread.comport  = com
+        self._serial_port_status = self._test_thread.open_serial_port()
+        if self._serial_port_status:
+            self.pbConnectSerialPort.setEnabled(False)
+
+    @pyqtSlot()
+    def _communication_test(self):
+        result = self._test_thread.test_communication()
+        if result[0]:
+            self.lbStatusComunicacao.setText("<p color:'green'>OK</p>")
+        else:
+            self.lbStatusComunicacao.setText("<p color:'red'>Falha</p>")
+
+        if result[1]:
+            self.lbStatusAuxSupply.setText("<p color:'green'>OK</p>")
+        else:
+            self.lbStatusAuxSupply.setText("<p color:'red'>Falha</p>")
+
+    @pyqtSlot()
+    def _start_test_sequence(self):
+        self._test_thread.test_complete.connect(self._test_finished)
+        self.test_thread.start()
+
+    @pyqtSlot()
+    def _finish_wizard_execution(self):
+        pass
+
+    @pyqtSlot(dict)
+    def _test_finished(self, test_result):
+        self._log.test_result   = test_result['result']
+        self._log.iload0        = test_result['iload'][0]
+        self._log.iload1        = test_result['iload'][1]
+        self._log.iload2        = test_result['iload'][2]
+        self._log.iload3        = test_result['iload'][3]
+        self._log.iload4        = test_result['iload'][4]
+        self._log.iload5        = test_result['iload'][5]
+        self._log.iload6        = test_result['iload'][6]
+        self._log.iload7        = test_result['iload'][7]
+        self._log.iload8        = test_result['iload'][8]
+        self._log.iload9        = test_result['iload'][9]
+        self._log.iload10       = test_result['iload'][10]
+        self.lbTestStatus.setText("Teste Finalizado!")
+        self.lbTestResult.setText(self._log.test_result)
+
+    @pyqtSlot(dict, dict)
+    def _treat_server_response(self, device_res, log_res):
+        res_key = 'SucessCode'
+        err_key = 'error'
+        if res_key in device_res.keys() and res_key in log_res.keys():
+            if device_res[res_key] == '200' and log_res[res_key] == '200':
+                self.lbStatusSubmitRequest.setText('Sucesso!!!')
+                self.lbRespDevice.setText(device_res['Message'])
+                self.lbRespLog.setText(log_res['Message'])
+            else:
+                self.lbStatusSubmitRequest.setText('Falha!!!')
+                self.lbRespDevice.setText(device_res['Message'])
+                self.lbRespLog.setText(log_res['Message'])
+        elif err_key in device_res.keys() or err_key in log_res.keys():
+            self.lbStatusSubmitRequest.setText('Falha!!!')
+            self.lbRespDevice.setText(str(device_res))
+            self.lbRespLog.setText(str(log_res))
+
+        self._web_request_status = True
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

@@ -20,13 +20,6 @@ class DCCT:
         data['numero_serie'] = self._serial_number
         return data
 
-    def add_dcct(self):
-        client = ElpWebClient()
-        data = self._get_dcct_data()
-        method = "/AddDcct"
-        response = client.do_request(method, data)
-        return response
-
     @property
     def data(self):
         return self._get_dcct_data()
@@ -187,9 +180,10 @@ class DCCTLog:
         data['details']             = self._details
         return data
 
-    def add_log_dcct(self):
-        client = ElpWebClient()
-        data = self._get_dcct_log_data()
-        method = '/AddLogDcct'
-        response = client.do_request(method, data)
-        return response
+    @property
+    def data(self):
+        return self._get_dcct_log_data()
+
+    @property
+    def method(self):
+        return "/AddLogDcct"
