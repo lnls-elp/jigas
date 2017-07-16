@@ -7,7 +7,7 @@ from PyQt5.uic import loadUiType
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWizard, QApplication, QWizardPage
 from dccttest import DCCTTest
-from dmreader import *
+#from dmreader import *
 from dcctdata import *
 from webrequest import *
 
@@ -40,14 +40,15 @@ class DCCTWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _read_serial_number(self):
-        data = ReadDataMatrix()
-        if data == None:
-            self.lbReadSerialStatus.setText("<p color:'red'><b>ERRO. Digite Manualmente!</b><p/>")
-        else:
-            self._dcct.serial_number = data
-            self._log.serial_number_dcct = data
-            self.leSerialNumber.setText(str(data))
-        print("Read serial number")
+        #data = ReadDataMatrix()
+        #if data == None:
+        #    self.lbReadSerialStatus.setText("<p color:'red'><b>ERRO. Digite Manualmente!</b><p/>")
+        #else:
+        #    self._dcct.serial_number = data
+        #    self._log.serial_number_dcct = data
+        #    self.leSerialNumber.setText(str(data))
+        #print("Read serial number")
+        pass
 
     @pyqtSlot()
     def _treat_read_serial_edit(self):
@@ -213,9 +214,10 @@ class DCCTWindow(QWizard, Ui_Class):
 
     ## validate pages for wizard
     def _validate_intro_page(self):
-        if self._serial_port_status:
-            return True
-        return False
+        #if self._serial_port_status:
+        #    return True
+        #return False
+        return True
 
     def _validate_page_serial_number(self):
         serial = self.leSerialNumber.text()

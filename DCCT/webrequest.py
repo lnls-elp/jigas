@@ -34,8 +34,7 @@ class WebRequest(QThread):
         data = self._data
         method = self._method
         res = client.do_request(method, data)
-        res_dict - json.loads(res)
-        self.server_response.emit(res_dict)
+        self.server_response.emit(res)
 
     def run(self):
         self._create_request()
