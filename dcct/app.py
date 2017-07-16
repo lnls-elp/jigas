@@ -40,7 +40,7 @@ class DCCTWindow(QWizard, Ui_Class):
 
     """*************************************************
     *************** GUI Initialization *****************
-    """
+    *************************************************"""
     def _initialize_widgets(self):
         """ Initial widgets configuration """
         self.leBaudrate.setText(str(self._SERIAL_BAUDRATE))
@@ -93,7 +93,7 @@ class DCCTWindow(QWizard, Ui_Class):
 
     """*************************************************
     ************* System Initialization ****************
-    """
+    *************************************************"""
     def _list_serial_ports(self):
         if sys.platform.startswith('win'):
             ports = ['COM%s' % (i + 1) for i in range(256)]
@@ -114,7 +114,7 @@ class DCCTWindow(QWizard, Ui_Class):
 
     """*************************************************
     ************* Pages Initialization *****************
-    """
+    *************************************************"""
     def _initialize_intro_page(self):
         pass
 
@@ -138,7 +138,7 @@ class DCCTWindow(QWizard, Ui_Class):
 
     """*************************************************
     ************** Pages Validation ********************
-    """
+    *************************************************"""
     def _validate_intro_page(self):
         if self._serial_port_status:
             return True
@@ -175,7 +175,7 @@ class DCCTWindow(QWizard, Ui_Class):
 
     """*************************************************
     *********** Default Methods (Wizard) ***************
-    """
+    *************************************************"""
     def initializePage(self, page):
         if page == 0:
             self._initialize_intro_page()
@@ -238,7 +238,7 @@ class DCCTWindow(QWizard, Ui_Class):
 
     """*************************************************
     ******************* PyQt Slots *********************
-    """
+    *************************************************"""
     @pyqtSlot()
     def _read_serial_number(self):
         data = ReadDataMatrix()
