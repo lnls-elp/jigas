@@ -14,16 +14,17 @@ from webrequest import *
 UI_PATH = 'wizard.ui'
 Ui_Class, base = loadUiType(UI_PATH)
 
-class DCCTWindow(QWizard, Ui_Class):
+class PowerModuleWindow(QWizard, Ui_Class):
 
     def __init__(self, parent=None):
         QWizard.__init__(self, parent)
         self.setupUi(self)
 
         self._SERIAL_BAUDRATE = 115200
+        self._serial_numbers = [None for i in range(4)]
 
-        self._power_module = PowerModule()
-        self._log = PowerModuleLog()
+        self._power_module = []
+        self._log = []
 
         self._list_serial_ports()
         self._serial_port_status = False
@@ -163,21 +164,35 @@ class DCCTWindow(QWizard, Ui_Class):
         return False
 
     def _validate_page_serial_number(self):
-        serial = [self.leSerialNumber0.text(),
-                    self.leSerialNumber1.text(),
-                    self.leSerialNumber2.text(),
-                    self.leSerialNumber3.text()]
         validate = False
-        for item  in serial:
-            try:
-                int(item)
-                validate = True
-            except ValueError:
-                pass
+
+        try:
+            self._serial_numbers[0] = int(self.leSerialNumber0.text())
+            validate = True
+        except ValueError:
+            pass
+
+        try:
+            self._serial_numbers[1] = int(self.leSerialNumber1.text())
+            validate = True
+        except ValueError:
+            pass
+
+        try:
+            self._serial_numbers[2] = int(self.leSerialNumber2.text())
+            validate = True
+        except ValueError:
+            pass
+
+        try:
+            self._serial_numbers[3] = int(self.leSerialNumber3.text())
+            validate = True
+        except ValueError:
+            pass
+
         if validate:
             self._treat_serial_number_data(serial)
         return validate
-
 
     def _validate_page_connect_module(self):
         return True
@@ -192,6 +207,7 @@ class DCCTWindow(QWizard, Ui_Class):
     def _validate_page_submit_report(self):
         print('Validate Submit')
         self._initialize_widgets()
+        self._serial_numbers = [None for i in range(4)]
         while self.currentId() is not 1:
             self.back()
         return False
@@ -264,21 +280,59 @@ class DCCTWindow(QWizard, Ui_Class):
     *************************************************"""
     @pyqtSlot()
     def _read_serial_number_0(self):
-        data = ReadDataMatrix()
-        if data == None:
-            self.lbReadSerialStatus.setText("<p color:'red'><b>ERRO. Digite Manualmente!</b><p/>")
-        else:
-            self._dcct.serial_number = data
-            self._log.serial_number_dcct = data
-            self.leSerialNumber.setText(str(data))
-        print("Read serial number")
+        data = self._read_serial_number()
+        if data is not None:
+            self._serial_numbers[0] = data
+        self.leSerialNumber0.setText(str(data))
 
     @pyqtSlot()
-    def _treat_read_serial_edit(self):
-        if self.cbEnableSerialNumberEdit.isChecked():
-            self.leSerialNumber.setReadOnly(False)
+    def _read_serial_number_1(self):
+        data = self._read_serial_number()
+        if data is not None:
+            self._serial_numbers[1] = data
+            self.leSerialNumber1.setText(str(data))
+
+    @pyqtSlot()
+    def _read_serial_number_2(self):
+        data = self._read_serial_number()
+        if data is not None:
+            self._serial_numbers[2] = data
+            self.leSerialNumber2.setText(str(data))
+
+    @pyqtSlot()
+    def _read_serial_number_3(self):
+        data = self._read_serial_number()
+        if data is not None:
+            self._serial_numbers[3] = data
+            self.leSerialNumber3.setText(str(data))
+
+    @pyqtSlot()
+    def _treat_read_serial_edit_0(self):
+        if self.cbEnableSerialNumberEdit0.isChecked():
+            self.leSerialNumber0.setReadOnly(False)
         else:
-            self.leSerialNumber.setReadOnly(True)
+            self.leSerialNumber0.setReadOnly(True)
+
+    @pyqtSlot()
+    def _treat_read_serial_edit_1(self):
+        if self.cbEnableSerialNumberEdit1.isChecked():
+            self.leSerialNumber1.setReadOnly(False)
+        else:
+            self.leSerialNumber1.setReadOnly(True)
+
+    @pyqtSlot()
+    def _treat_read_serial_edit_2(self):
+        if self.cbEnableSerialNumberEdit2.isChecked():
+            self.leSerialNumber2.setReadOnly(False)
+        else:
+            self.leSerialNumber2.setReadOnly(True)
+
+    @pyqtSlot()
+    def _treat_read_serial_edit_3(self):
+        if self.cbEnableSerialNumberEdit3.isChecked():
+            self.leSerialNumber3.setReadOnly(False)
+        else:
+            self.leSerialNumber3.setReadOnly(True)
 
     @pyqtSlot()
     def _connect_serial_port(self):
@@ -312,20 +366,36 @@ class DCCTWindow(QWizard, Ui_Class):
     def _finish_wizard_execution(self):
         pass
 
-    @pyqtSlot(dict)
+    @pyqtSlot(list)
     def _test_finished(self, test_result):
-        self._log.test_result   = test_result['result']
-        self._log.iload0        = test_result['iload'][0]
-        self._log.iload1        = test_result['iload'][1]
-        self._log.iload2        = test_result['iload'][2]
-        self._log.iload3        = test_result['iload'][3]
-        self._log.iload4        = test_result['iload'][4]
-        self._log.iload5        = test_result['iload'][5]
-        self._log.iload6        = test_result['iload'][6]
-        self._log.iload7        = test_result['iload'][7]
-        self._log.iload8        = test_result['iload'][8]
-        self._log.iload9        = test_result['iload'][9]
-        self._log.iload10       = test_result['iload'][10]
+        for item in test_result:
+            log = PowerModuleLog()
+            log.test_result   = item['result']
+            log.iload0        = item['iload'][0]
+            log.iload1        = item['iload'][1]
+            log.iload2        = item['iload'][2]
+            log.iload3        = item['iload'][3]
+            log.iload4        = item['iload'][4]
+            log.iload5        = item['iload'][5]
+            log.vload0        = item['vload'][0]
+            log.vload1        = item['vload'][1]
+            log.vload2        = item['vload'][2]
+            log.vload3        = item['vload'][3]
+            log.vload4        = item['vload'][4]
+            log.vload5        = item['vload'][5]
+            log.vdclink0      = item['vdclink'][0]
+            log.vdclink1      = item['vdclink'][1]
+            log.vdclink2      = item['vdclink'][2]
+            log.vdclink3      = item['vdclink'][3]
+            log.vdclink4      = item['vdclink'][4]
+            log.vdclink5      = item['vdclink'][5]
+            log.temperatura0  = item['temperatura'][0]
+            log.temperatura1  = item['temperatura'][1]
+            log.temperatura2  = item['temperatura'][2]
+            log.temperatura3  = item['temperatura'][3]
+            log.temperatura4  = item['temperatura'][4]
+            log.temperatura5  = item['temperatura'][5]
+            self._log.append(log)
         self.lbTestStatus.setText("Teste Finalizado!")
         self.lbTestResult.setText(self._log.test_result)
 
@@ -353,7 +423,11 @@ class DCCTWindow(QWizard, Ui_Class):
     ***************** System Methods *******************
     *************************************************"""
     def _treat_serial_number_data(self, serial):
-        pass
+        for item in serial:
+            if item is not None:
+                power_module = PowerModule()
+                power_module.serial_number = item
+                self._power_module.append(power_module)
 
     def _read_serial_number(self):
         data = ReadDataMatrix()
@@ -370,6 +444,6 @@ class DCCTWindow(QWizard, Ui_Class):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    gui = DCCTWindow()
+    gui = PowerModuleWindow()
     gui.show()
     sys.exit(app.exec_())
