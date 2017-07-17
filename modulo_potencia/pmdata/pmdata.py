@@ -32,23 +32,39 @@ class PowerModuleLog:
 
     def __init__(self, test_result=None, serial_number_power_module=None, iload0=None,
                     iload1=None, iload2=None, iload3=None, iload4=None, iload5=None,
-                    iload6=None, iload7=None, iload8=None, iload9=None, iload10=None,
-                    details=None):
+                    vload0=None, vload1=None, vload2=None, vload3=None, vload4=None,
+                    vload5=None, vdclink0=None, vdclink1=None, vdclink2=None,
+                    vdclink3=None, vdclink4=None, vdclink5=None, temperatura0=None,
+                    temperatura1=None, temperatura2=None, temperatura3=None,
+                    temperatura4=None, temperatura5=None, details=None):
 
-        self._test_result   = test_result
-        self._serial_number_power_module = serial_number_dcct
-        self._iload0            = iload0
-        self._iload1            = iload1
-        self._iload2            = iload2
-        self._iload3            = iload3
-        self._iload4            = iload4
-        self._iload5            = iload5
-        self._iload6            = iload6
-        self._iload7            = iload7
-        self._iload8            = iload8
-        self._iload9            = iload9
-        self._iload10           = iload10
-        self._details           = details
+        self._test_result                   = test_result
+        self._serial_number_power_module    = serial_number_power_module
+        self._iload0                        = iload0
+        self._iload1                        = iload1
+        self._iload2                        = iload2
+        self._iload3                        = iload3
+        self._iload4                        = iload4
+        self._iload5                        = iload5
+        self._vload0                        = vload0
+        self._vload1                        = vload1
+        self._vload2                        = vload2
+        self._vload3                        = vload3
+        self._vload4                        = vload4
+        self._vload5                        = vload5
+        self._vdclink0                      = vdclink0
+        self._vdclink1                      = vdclink1
+        self._vdclink2                      = vdclink2
+        self._vdclink3                      = vdclink3
+        self._vdclink4                      = vdclink4
+        self._vdclink5                      = vdclink5
+        self._temperatura0                  = temperatura0
+        self._temperatura1                  = temperatura1
+        self._temperatura2                  = temperatura2
+        self._temperatura3                  = temperatura3
+        self._temperatura4                  = temperatura4
+        self._temperatura5                  = temperatura5
+        self._details                       = details
 
     @property
     def test_result(self):
@@ -115,44 +131,148 @@ class PowerModuleLog:
         self._iload5 = value
 
     @property
-    def iload6(self):
-        return self._iload6
+    def vload0(self):
+        return self._vload0
 
-    @iload6.setter
-    def iload6(self, value):
-        self._iload6 = value
-
-    @property
-    def iload7(self):
-        return self._iload7
-
-    @iload7.setter
-    def iload7(self, value):
-        self._iload2 = value
+    @vload0.setter
+    def vload0(self, value):
+        self._vload0 = value
 
     @property
-    def iload8(self):
-        return self._iload8
+    def vload1(self):
+        return self._vload1
 
-    @iload8.setter
-    def iload8(self, value):
-        self._iload8 = value
-
-    @property
-    def iload9(self):
-        return self._iload9
-
-    @iload9.setter
-    def iload9(self, value):
-        self._iload9 = value
+    @vload1.setter
+    def vload1(self, value):
+        self._vload1 = value
 
     @property
-    def iload10(self):
-        return self._iload10
+    def vload2(self):
+        return self._vload2
 
-    @iload10.setter
-    def iload10(self, value):
-        self._iload10 = value
+    @vload2.setter
+    def vload2(self, value):
+        self._vload2 = value
+
+    @property
+    def vload3(self):
+        return self._vload3
+
+    @vload3.setter
+    def vload3(self, value):
+        self._vload3 = value
+
+    @property
+    def vload4(self):
+        return self._vload4
+
+    @vload4.setter
+    def vload4(self, value):
+        self._vload4 = value
+
+    @property
+    def vload5(self):
+        return self._vload5
+
+    @vload5.setter
+    def vload5(self, value):
+        self._vload5 = value
+
+    @property
+    def vdclink0(self):
+        return self._vdclink0
+
+    @vdclink0.setter
+    def vdclink0(self, value):
+        self._vdclink0 = value
+
+    @property
+    def vdclink1(self):
+        return self._vdclink1
+
+    @vdclink1.setter
+    def vdclink1(self, value):
+        self._vdclink1 = value
+
+    @property
+    def vdclink2(self):
+        return self._vdclink2
+
+    @vdclink2.setter
+    def vdclink2(self, value):
+        self._vdclink2 = value
+
+    @property
+    def vdclink3(self):
+        return self._vdclink3
+
+    @vdclink3.setter
+    def vdclink3(self, value):
+        self._vdclink3 = value
+
+    @property
+    def vdclink4(self):
+        return self._vdclink4
+
+    @vdclink4.setter
+    def vdclink4(self, value):
+        self._vdclink4 = value
+
+    @property
+    def vdclink5(self):
+        return self._vdclink5
+
+    @vdclink5.setter
+    def vdclink5(self, value):
+        self._vdclink5 = value
+
+    @property
+    def temperatura0(self):
+        return self._temperatura0
+
+    @temperatura0.setter
+    def temperatura0(self, value):
+        self._temperatura0 = value
+
+    @property
+    def temperatura1(self):
+        return self._temperatura1
+
+    @temperatura1.setter
+    def temperatura1(self, value):
+        self._temperatura1 = value
+
+    @property
+    def temperatura2(self):
+        return self._temperatura2
+
+    @temperatura2.setter
+    def temperatura2(self, value):
+        self._temperatura2 = value
+
+    @property
+    def temperatura3(self):
+        return self._temperatura3
+
+    @temperatura3.setter
+    def temperatura3(self, value):
+        self._temperatura3 = value
+
+    @property
+    def temperatura4(self):
+        return self._temperatura4
+
+    @temperatura4.setter
+    def temperatura4(self, value):
+        self._temperatura4 = value
+
+    @property
+    def temperatura5(self):
+        return self._temperatura5
+
+    @temperatura5.setter
+    def temperatura5(self, value):
+        self._temperatura5 = value
 
     @property
     def details(self):
@@ -172,11 +292,24 @@ class PowerModuleLog:
         data['iload3']              = self._iload3
         data['iload4']              = self._iload4
         data['iload5']              = self._iload5
-        data['iload6']              = self._iload6
-        data['iload7']              = self._iload7
-        data['iload8']              = self._iload8
-        data['iload9']              = self._iload9
-        data['iload10']             = self._iload10
+        data['vload0']              = self._vload0
+        data['vload1']              = self._vload1
+        data['vload2']              = self._vload2
+        data['vload3']              = self._vload3
+        data['vload4']              = self._vload4
+        data['vload5']              = self._vload5
+        data['vdclink0']            = self._vdclink0
+        data['vdclink1']            = self._vdclink1
+        data['vdclink2']            = self._vdclink2
+        data['vdclink3']            = self._vdclink3
+        data['vdclink4']            = self._vdclink4
+        data['vdclink5']            = self._vdclink5
+        data['temperatura0']        = self._temperatura0
+        data['temperatura1']        = self._temperatura1
+        data['temperatura2']        = self._temperatura2
+        data['temperatura3']        = self._temperatura3
+        data['temperatura4']        = self._temperatura4
+        data['temperatura5']        = self._temperatura5
         data['details']             = self._details
         return data
 
