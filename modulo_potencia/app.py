@@ -16,6 +16,10 @@ Ui_Class, base = loadUiType(UI_PATH)
 
 class PowerModuleWindow(QWizard, Ui_Class):
 
+    # Page numbers
+    (num_intro_page, num_serial_number, num_connect_module,
+    num_serial_port, num_start_test, num_submit_report)     = range(6)
+
     def __init__(self, parent=None):
         QWizard.__init__(self, parent)
         self.setupUi(self)
