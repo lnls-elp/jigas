@@ -45,7 +45,8 @@ class PowerModuleTest(QThread):
             return self._serial_port.is_open
 
     def test_communication(self):
-        result = (False, False)     # Result for communication test and aux power supply
+        # Resultado teste de comunicação para os 4 módulos
+        result = [None for i in range(4)]
         #TODO: Communication test
         return result
 

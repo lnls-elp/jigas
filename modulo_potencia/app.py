@@ -6,9 +6,9 @@ import simplejson as json
 from PyQt5.uic import loadUiType
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWizard, QApplication, QWizardPage, QMessageBox
-from dccttest import DCCTTest
+from pmtest import PowerModuleTest
 #from dmreader import *
-from dcctdata import *
+from pmdata import *
 from webrequest import *
 
 UI_PATH = 'wizard.ui'
@@ -25,6 +25,8 @@ class PowerModuleWindow(QWizard, Ui_Class):
         self.setupUi(self)
 
         self._SERIAL_BAUDRATE = 115200
+        self._NUM_SLOTS = 4             # Number of slots
+
         self._serial_numbers = [None for i in range(4)]
 
         self._power_module = []
@@ -33,6 +35,9 @@ class PowerModuleWindow(QWizard, Ui_Class):
         self._list_serial_ports()
         self._serial_port_status = False
         self._web_request_status = False
+
+        self._num_used_slots = 0        # Number of slots with power modules
+        self._num_none_slots = 0        # Number of slots not enabled
 
         self._test_thread = PowerModuleTest()
         self._web_request = WebRequest()
@@ -64,9 +69,15 @@ class PowerModuleWindow(QWizard, Ui_Class):
         self.cbDisableModuleReadSerial1.setChecked(False)
         self.cbDisableModuleReadSerial2.setChecked(False)
         self.cbDisableModuleReadSerial3.setChecked(False)
-        self.lbStatusComunicacao.setText("...")
+        self.lbStatusComunicacao0.setText("NC")
+        self.lbStatusComunicacao1.setText("NC")
+        self.lbStatusComunicacao2.setText("NC")
+        self.lbStatusComunicacao3.setText("NC")
         self.lbTestStatus.setText("Clique para Iniciar Testes")
-        self.lbTestResult.setText("Aguarde...")
+        self.lbTestResult0.setText("NC")
+        self.lbTestResult1.setText("NC")
+        self.lbTestResult2.setText("NC")
+        self.lbTestResult3.setText("NC")
         self.teTestReport.clear()
         self.lbStatusSubmitRequest.setText("Aguarde...")
 
@@ -113,6 +124,14 @@ class PowerModuleWindow(QWizard, Ui_Class):
         self.PageSubmitReport.setButtonText(self.BackButton, "Anterior")
         self.PageSubmitReport.setButtonText(self.CancelButton, "Cancelar")
         self.PageSubmitReport.setButtonText(self.NextButton, "Novo Teste")
+
+    def _restart_class_attributes(self):
+        del self._power_module[:]
+        del self._log[:]
+        self._serial_numbers = [None for i in range(4)]
+        self._web_request_status = False
+        self._num_used_slots = 0
+        self._num_none_slots = 0
 
     """*************************************************
     ************* System Initialization ****************
@@ -168,35 +187,37 @@ class PowerModuleWindow(QWizard, Ui_Class):
         return False
 
     def _validate_page_serial_number(self):
-        validate = False
 
         try:
             self._serial_numbers[0] = int(self.leSerialNumber0.text())
-            validate = True
+            self._num_used_slots += 1
+            print("None: %d" % self._num_none_slots)
         except ValueError:
             pass
 
         try:
             self._serial_numbers[1] = int(self.leSerialNumber1.text())
-            validate = True
+            self._num_used_slots += 1
+            print("None: %d" % self._num_none_slots)
         except ValueError:
             pass
 
         try:
             self._serial_numbers[2] = int(self.leSerialNumber2.text())
-            validate = True
+            self._num_used_slots += 1
         except ValueError:
             pass
 
         try:
             self._serial_numbers[3] = int(self.leSerialNumber3.text())
-            validate = True
+            self._num_used_slots += 1
         except ValueError:
             pass
 
-        if validate:
-            self._treat_serial_number_data(serial)
-        return validate
+        if self._num_used_slots >= 1 and (self._num_used_slots + self._num_none_slots) == self._NUM_SLOTS:
+            self._treat_serial_number_data(self._serial_numbers)
+            return True
+        return False
 
     def _validate_page_connect_module(self):
         return True
@@ -211,6 +232,7 @@ class PowerModuleWindow(QWizard, Ui_Class):
     def _validate_page_submit_report(self):
         print('Validate Submit')
         self._initialize_widgets()
+        self._restart_class_attributes()
         self._serial_numbers = [None for i in range(4)]
         while self.currentId() is not 1:
             self.back()
@@ -339,6 +361,74 @@ class PowerModuleWindow(QWizard, Ui_Class):
             self.leSerialNumber3.setReadOnly(True)
 
     @pyqtSlot()
+    def _disbl_read_serial_edit_0(self):
+        if self.cbDisableModuleReadSerial0.isChecked():
+            self.leSerialNumber0.clear()
+            self.leSerialNumber0.setEnabled(False)
+            self.pbReadSerialNumber0.setEnabled(False)
+            self.cbEnableSerialNumberEdit0.setEnabled(False)
+            self._serial_numbers[0] = None
+            self._num_none_slots += 1
+            print("None: %d" % self._num_none_slots)
+        else:
+            self.leSerialNumber0.setEnabled(True)
+            self.pbReadSerialNumber0.setEnabled(True)
+            self.cbEnableSerialNumberEdit0.setEnabled(True)
+            self._num_none_slots -= 1
+            print("None: %d" % self._num_none_slots)
+
+    @pyqtSlot()
+    def _disbl_read_serial_edit_1(self):
+        if self.cbDisableModuleReadSerial1.isChecked():
+            self.leSerialNumber1.clear()
+            self.leSerialNumber1.setEnabled(False)
+            self.pbReadSerialNumber1.setEnabled(False)
+            self.cbEnableSerialNumberEdit1.setEnabled(False)
+            self._serial_numbers[1] = None
+            self._num_none_slots += 1
+            print("None: %d" % self._num_none_slots)
+        else:
+            self.leSerialNumber1.setEnabled(True)
+            self.pbReadSerialNumber1.setEnabled(True)
+            self.cbEnableSerialNumberEdit1.setEnabled(True)
+            self._num_none_slots -= 1
+            print("None: %d" % self._num_none_slots)
+
+    @pyqtSlot()
+    def _disbl_read_serial_edit_2(self):
+        if self.cbDisableModuleReadSerial2.isChecked():
+            self.leSerialNumber2.clear()
+            self.leSerialNumber2.setEnabled(False)
+            self.pbReadSerialNumber2.setEnabled(False)
+            self.cbEnableSerialNumberEdit2.setEnabled(False)
+            self._serial_numbers[2] = None
+            self._num_none_slots += 1
+            print("None: %d" % self._num_none_slots)
+        else:
+            self.leSerialNumber2.setEnabled(True)
+            self.pbReadSerialNumber2.setEnabled(True)
+            self.cbEnableSerialNumberEdit2.setEnabled(True)
+            self._num_none_slots -= 1
+            print("None: %d" % self._num_none_slots)
+
+    @pyqtSlot()
+    def _disbl_read_serial_edit_3(self):
+        if self.cbDisableModuleReadSerial3.isChecked():
+            self.leSerialNumber3.clear()
+            self.leSerialNumber3.setEnabled(False)
+            self.pbReadSerialNumber3.setEnabled(False)
+            self.cbEnableSerialNumberEdit3.setEnabled(False)
+            self._serial_numbers[3] = None
+            self._num_none_slots += 1
+            print("None: %d" % self._num_none_slots)
+        else:
+            self.leSerialNumber3.setEnabled(True)
+            self.pbReadSerialNumber3.setEnabled(True)
+            self.cbEnableSerialNumberEdit3.setEnabled(True)
+            self._num_none_slots -= 1
+            print("None: %d" % self._num_none_slots)
+
+    @pyqtSlot()
     def _connect_serial_port(self):
         com = str(self.comboComPort.currentText())
         baud = int(self.leBaudrate.text())
@@ -350,16 +440,16 @@ class PowerModuleWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _communication_test(self):
+        #Verificar status de comunicação?
         result = self._test_thread.test_communication()
-        if result[0]:
-            self.lbStatusComunicacao.setText("<p color:'green'>OK</p>")
-        else:
-            self.lbStatusComunicacao.setText("<p color:'red'>Falha</p>")
-
-        if result[1]:
-            self.lbStatusAuxSupply.setText("<p color:'green'>OK</p>")
-        else:
-            self.lbStatusAuxSupply.setText("<p color:'red'>Falha</p>")
+        if result[0] is not None:
+            self.lbStatusComunicacao0.setText(result[0])
+        if result[1] is not None:
+            self.lbStatusComunicacao1.setText(result[1])
+        if result[2] is not None:
+            self.lbStatusComunicacao2.setText(result[2])
+        if result[3] is not None:
+            self.lbStatusComunicacao23.setText(result[3])
 
     @pyqtSlot()
     def _start_test_sequence(self):
