@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Teste de DCCT</string>
+   <string>Teste de Bastidor</string>
   </property>
   <property name="wizardStyle">
    <enum>QWizard::ClassicStyle</enum>
@@ -21,9 +21,9 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>80</y>
-      <width>613</width>
-      <height>40</height>
+      <y>90</y>
+      <width>316</width>
+      <height>16</height>
      </rect>
     </property>
     <property name="font">
@@ -33,7 +33,7 @@
      </font>
     </property>
     <property name="text">
-     <string>1. Certifique-se de que  a jiga de testes esteja desligada e sem o DCCT</string>
+     <string>1. Certifique-se de que  a jiga de testes esteja desligada</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_3">
@@ -62,7 +62,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>150</y>
+      <y>160</y>
       <width>271</width>
       <height>60</height>
      </rect>
@@ -143,9 +143,9 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>120</y>
-      <width>201</width>
-      <height>17</height>
+      <y>130</y>
+      <width>155</width>
+      <height>16</height>
      </rect>
     </property>
     <property name="font">
@@ -192,7 +192,7 @@
      </font>
     </property>
     <property name="text">
-     <string>3. Leia o número de série do DCCT utilizando a câmera</string>
+     <string>3. Leia o número de série do Bastidor utilizando a câmera</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_20">
@@ -321,7 +321,7 @@
     </layout>
    </widget>
   </widget>
-  <widget class="QWizardPage" name="PageConnectDCCT">
+  <widget class="QWizardPage" name="PageConnectRack">
    <widget class="QLabel" name="label_11">
     <property name="geometry">
      <rect>
@@ -363,7 +363,7 @@
         </font>
        </property>
        <property name="text">
-        <string>4. Introduzir a placa de DCCTs a ser testada no slot 5 da Jiga do Bastidor.</string>
+        <string>4. Certifique-se de que a jiga do bastidor está conectada a uma tomada 220V.</string>
        </property>
       </widget>
      </item>
@@ -376,21 +376,21 @@
         </font>
        </property>
        <property name="text">
-        <string>5. Ligue Jiga de Testes</string>
+        <string>5. Ligue jiga de testes e bastidor.</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QLabel" name="label_7">
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;6. Clique em &amp;quot;Próximo&amp;quot;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;6. Clique em &amp;quot;Próximo&amp;quot;.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </item>
     </layout>
    </widget>
   </widget>
-  <widget class="QWizardPage" name="PageConnectSerialPort">
+  <widget class="QWizardPage" name="PageTestSerialPort">
    <widget class="QLabel" name="label_6">
     <property name="geometry">
      <rect>
@@ -432,12 +432,12 @@
      <pixmap>images/sirius_logo.jpeg</pixmap>
     </property>
    </widget>
-   <widget class="QWidget" name="layoutWidget">
+   <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>120</y>
-      <width>245</width>
+      <x>11</x>
+      <y>121</y>
+      <width>205</width>
       <height>77</height>
      </rect>
     </property>
@@ -489,32 +489,6 @@
          </property>
          <property name="text">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ef2929;&quot;&gt;FALHA&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_24">
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Fonte Auxiliar:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLabel" name="lbStatusAuxSupply">
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#4e9a06;&quot;&gt;OK&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
         </widget>
        </item>
@@ -697,7 +671,7 @@
      <pixmap>images/sirius_logo.jpeg</pixmap>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>40</x>

@@ -449,6 +449,7 @@ class PowerModuleWindow(QWizard, Ui_Class):
 
     @pyqtSlot(list)
     def _treat_server_response(self, result):
+        print(result)
         self.lbStatusSubmitRequest.setText('Teste Finalizado!!')
         if 'Success' not in result:
             self._web_request_status = False
