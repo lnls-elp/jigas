@@ -1,46 +1,62 @@
 from PyQt5.QtCore import QThread, pyqtSignal
 import simplejson as json
 from elpwebclient import *
+from pmdata import *
 import time
 
 
 class WebRequest(QThread):
 
-    server_response = pyqtSignal(dict, dict)
+    server_response = pyqtSignal(list)
 
-    def __init__(self, device=None, log=None):
+    (ret_success, ret_error) = ('Success', 'Fail')
+
+    res_key = 'StatusCode'
+    err_key = 'error'
+
+
+    def __init__(self, log_data=[]):
         QThread.__init__(self)
-        self._device = device
-        self._log = log
+        self._log_data = log_data
+        self._result = [None for i in range(4)]
 
     @property
-    def device(self):
-        return self._device
+    def log_data(self):
+        return self._log_data
 
-    @device.setter
-    def device(self, value):
-        self._device = value
+    @log_data.setter
+    def log_data(self, value):
+        self._log_data = value
 
-    @property
-    def log(self):
-        return self._log
-
-    @log.setter
-    def log(self, value):
-        self._log = value
 
     def _create_request(self):
-        device_client = ElpWebClient()
-        device_data = self._device.data
-        device_method = self._device.method
-        device_res = device_client.do_request(device_method, device_data)
+        for item in self._log_data:
+            if item is not None:
+                #Create request for device first
+                device = PowerModule(item.serial_number_power_module)
+                device_client = ElpWebClient()
+                device_data = device.data
+                device_method = device.method
+                device_res = device_client.do_request(device_method, device_data)
 
-        log_client = ElpWebClient()
-        log_data = self._log.data
-        log_method = self._log.method
-        log_res = log_client.do_request(log_method, log_data)
+                if res_key in device_res.keys():
+                    #Create request for log
+                    log_client = ElpWebClient()
+                    log_data = item.data
+                    log_method = item.method
+                    log_res = log_client.do_request(log_method, log_data)
+                    if res_key in log_res.keys():
+                        self._result[self._log_data.index(item)] = ret_success
+                    elif err_key in log_res.keys():
+                        self._result[self._log_data.index(item)] = ret_error
+                    else:
+                        self._result[self._log_data.index(item)] = log_res
+                else:
+                    self._result[self._log_data.index(item)] = ret_error
+            else:
+                self._result[self._log_data.index(item)] = None
 
-        self.server_response.emit(device_res, log_res)
+        self.server_response.emit(self._result)
 
     def run(self):
         self._create_request()

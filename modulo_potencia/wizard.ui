@@ -1194,16 +1194,16 @@
      <pixmap>../../../.designer/backup/images/sirius_logo.jpeg</pixmap>
     </property>
    </widget>
-   <widget class="QWidget" name="layoutWidget">
+   <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>160</y>
-      <width>524</width>
-      <height>67</height>
+      <x>41</x>
+      <y>161</y>
+      <width>480</width>
+      <height>40</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="verticalLayout_5">
+    <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="QLabel" name="lbStatusSubmitRequest">
        <property name="font">
@@ -1218,46 +1218,8 @@
       </widget>
      </item>
      <item>
-      <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="0">
-        <widget class="QLabel" name="lbStatusSubmitRequest_2">
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Dispositivo:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLabel" name="lbRespDevice">
-         <property name="minimumSize">
-          <size>
-           <width>430</width>
-           <height>17</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>430</width>
-           <height>17</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <item>
         <widget class="QLabel" name="lbStatusSubmitRequest_3">
          <property name="font">
           <font>
@@ -1266,12 +1228,12 @@
           </font>
          </property>
          <property name="text">
-          <string>Log:</string>
+          <string>Status:</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="1">
-        <widget class="QLabel" name="lbRespLog">
+       <item>
+        <widget class="QLabel" name="lbServerResponse">
          <property name="minimumSize">
           <size>
            <width>430</width>

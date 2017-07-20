@@ -1,23 +1,24 @@
 from PyQt5.QtCore import pyqtSlot, QThread, pyqtSignal
+from pmdata import *
 import serial
 
 class PowerModuleTest(QThread):
-    test_complete       = pyqtSignal(dict)
+    test_complete       = pyqtSignal(list)
     connection_lost     = pyqtSignal()
 
-    def __init__(self, comport=None, baudrate=None):
+    def __init__(self, comport=None, baudrate=None,
+                    mod0=None, mod1=None, mod2=None, mod3=None):
         QThread.__init__(self)
         self._comport = comport
         self._baudarate = baudrate
+        self._serial_mod0 = mod0
+        self._serial_mod1 = mod1
+        self._serial_mod2 = mod2
+        self._serial_mod3 = mod3
         self._serial_port = serial.Serial()
 
-        self._test_result = {}
-        self._test_result['result']         = ""
-        self._test_result['iload']          = []
-        self._test_result['vload']          = []
-        self._test_result['vdclink']        = []
-        self._test_result['temperatura']    = []
-        self._test_result['details']        = []
+        # 4 Power Module objets (emit when test finished)
+        self._log = [None for i in range(4)]
 
     @property
     def comport(self):
@@ -35,6 +36,38 @@ class PowerModuleTest(QThread):
     def baudrate(self, value):
         self._baudrate = value
 
+    @property
+    def serial_mod0(self):
+        return self._serial_mod0
+
+    @serial_mod0.setter
+    def serial_mod0(self, value):
+        self._serial_mod0 = value
+
+    @property
+    def serial_mod1(self):
+        return self._serial_mod1
+
+    @serial_mod1.setter
+    def serial_mod1(self, value):
+        self._serial_mod1 = value
+
+    @property
+    def serial_mod2(self):
+        return self._serial_mod2
+
+    @serial_mod2.setter
+    def serial_mod2(self, value):
+        self._serial_mod2 = value
+
+    @property
+    def serial_mod3(self):
+        return self._serial_mod3
+
+    @serial_mod3.setter
+    def serial_mod3(self, value):
+        self._serial_mod3 = value
+
     def open_serial_port(self):
         if self._comport is None or self._baudrate is None:
             return False
@@ -51,13 +84,26 @@ class PowerModuleTest(QThread):
         return result
 
     def _test_sequence(self):
-        # If serial connection is lost
+        serial = [self._serial_mod0, self._serial_mod1, self._serial_mod2,
+                    self._serial_mod3]
+
         if not self._serial_port.is_open:
             self.connection_lost.emit()
-        #TODO: Sequencia de Testes
-        # ao finalizar, emitir signals
-        self.test_complete.emit(self._test_result)
+            return
+
+        for item in serial:
+            if item is not None:
+                pmlog = PowerModuleLog()
+                pmlog.serial_number_power_module = item
+
+                # TODO: Faz os testes e seta os atributos de log
+
+                #salva na lista de logs para retornar
+                self._log[serial.indexOf(item)]
+        # Quando o teste terminar emitir o resultado em uma lista de objetos
+        # do tipo PowerModuleLog
+        self.test_complete.emit(self._log)
 
     def run(self):
-        #TODO: All
+        #self._test_sequence()
         pass

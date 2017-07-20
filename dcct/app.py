@@ -308,7 +308,7 @@ class DCCTWindow(QWizard, Ui_Class):
 
     @pyqtSlot(dict, dict)
     def _treat_server_response(self, device_res, log_res):
-        res_key = 'SucessCode'
+        res_key = 'StatusCode'
         err_key = 'error'
         if res_key in device_res.keys() and res_key in log_res.keys():
             if device_res[res_key] == '200' and log_res[res_key] == '200':
