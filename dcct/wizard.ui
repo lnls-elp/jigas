@@ -697,12 +697,12 @@
      <pixmap>images/sirius_logo.jpeg</pixmap>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>40</x>
       <y>160</y>
-      <width>524</width>
+      <width>625</width>
       <height>67</height>
      </rect>
     </property>
@@ -777,7 +777,7 @@
         <widget class="QLabel" name="lbRespLog">
          <property name="minimumSize">
           <size>
-           <width>430</width>
+           <width>550</width>
            <height>17</height>
           </size>
          </property>

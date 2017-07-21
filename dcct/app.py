@@ -7,7 +7,7 @@ from PyQt5.uic import loadUiType
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWizard, QApplication, QWizardPage
 from dccttest import DCCTTest
-#from dmreader import *
+from dmreader import *
 from dcctdata import *
 from webrequest import *
 
@@ -283,7 +283,7 @@ class DCCTWindow(QWizard, Ui_Class):
     @pyqtSlot()
     def _start_test_sequence(self):
         self._test_thread.test_complete.connect(self._test_finished)
-        self.test_thread.start()
+        self._test_thread.start()
 
     @pyqtSlot()
     def _finish_wizard_execution(self):
@@ -303,6 +303,8 @@ class DCCTWindow(QWizard, Ui_Class):
         self._log.iload8        = test_result['iload'][8]
         self._log.iload9        = test_result['iload'][9]
         self._log.iload10       = test_result['iload'][10]
+        self._log.details       = test_result['details']
+        print(test_result)
         self.lbTestStatus.setText("Teste Finalizado!")
         self.lbTestResult.setText(self._log.test_result)
 
@@ -311,20 +313,13 @@ class DCCTWindow(QWizard, Ui_Class):
         res_key = 'StatusCode'
         err_key = 'error'
         if res_key in device_res.keys() and res_key in log_res.keys():
-            if device_res[res_key] == '200' and log_res[res_key] == '200':
-                self.lbStatusSubmitRequest.setText('Sucesso!!!')
-                self.lbRespDevice.setText(device_res['Message'])
-                self.lbRespLog.setText(log_res['Message'])
-            else:
-                self.lbStatusSubmitRequest.setText('Falha!!!')
-                self.lbRespDevice.setText(device_res['Message'])
-                self.lbRespLog.setText(log_res['Message'])
-        elif err_key in device_res.keys() or err_key in log_res.keys():
+            self.lbStatusSubmitRequest.setText('Sucesso!!!')
+            self.lbRespDevice.setText(device_res['Message'])
+            self.lbRespLog.setText(log_res['Message'])
+        else:
             self.lbStatusSubmitRequest.setText('Falha!!!')
             self.lbRespDevice.setText(str(device_res))
             self.lbRespLog.setText(str(log_res))
-
-        self._web_request_status = True
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

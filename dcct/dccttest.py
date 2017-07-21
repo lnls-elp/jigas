@@ -15,6 +15,7 @@ class DCCTTest(QThread):
         self._test_result = {}
         self._test_result['result'] = ""
         self._test_result['iload']  = []
+        self._test_result['details'] = ""
 
     @property
     def comport(self):
@@ -44,6 +45,13 @@ class DCCTTest(QThread):
     def test_communication(self):
         result = (False, False)     # Result for communication test and aux power supply
         #TODO: Communication test
+        """
+            Simulação de teste
+        """
+        result = (True, True)
+        """
+            Fim da Simulação
+        """
         return result
 
     def _test_sequence(self):
@@ -51,9 +59,17 @@ class DCCTTest(QThread):
         if not self._serial_port.is_open:
             self.connection_lost.emit()
         #TODO: Sequencia de Testes
+        """
+            Simulação de valores
+        """
+        self._test_result['result'] = 'Reprovado'
+        self._test_result['iload'] = self._load_current[:]
+        """
+            Fim da Simulação
+        """
         # ao finalizar, emitir signals
         self.test_complete.emit(self._test_result)
 
     def run(self):
-        #TODO: All
-        pass
+        self._test_sequence()
+        #pass
