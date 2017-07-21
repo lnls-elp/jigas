@@ -39,20 +39,25 @@ class WebRequest(QThread):
                 device_method = device.method
                 device_res = device_client.do_request(device_method, device_data)
 
-                if res_key in device_res.keys():
+                print(device_res)
+
+                if self.res_key in device_res.keys():
                     #Create request for log
                     log_client = ElpWebClient()
                     log_data = item.data
                     log_method = item.method
                     log_res = log_client.do_request(log_method, log_data)
-                    if res_key in log_res.keys():
-                        self._result[self._log_data.index(item)] = ret_success
-                    elif err_key in log_res.keys():
-                        self._result[self._log_data.index(item)] = ret_error
+
+                    print(log_res)
+
+                    if self.res_key in log_res.keys():
+                        self._result[self._log_data.index(item)] = self.ret_success
+                    elif self.err_key in log_res.keys():
+                        self._result[self._log_data.index(item)] = self.ret_error
                     else:
                         self._result[self._log_data.index(item)] = log_res
                 else:
-                    self._result[self._log_data.index(item)] = ret_error
+                    self._result[self._log_data.index(item)] = self.ret_error
             else:
                 self._result[self._log_data.index(item)] = None
 

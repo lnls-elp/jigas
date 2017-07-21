@@ -1,6 +1,7 @@
 from PyQt5.QtCore import pyqtSlot, QThread, pyqtSignal
 from pmdata import *
 import serial
+import random
 
 class PowerModuleTest(QThread):
     test_complete       = pyqtSignal(list)
@@ -81,6 +82,13 @@ class PowerModuleTest(QThread):
         # Resultado teste de comunicação para os 4 módulos
         result = [None for i in range(4)]
         #TODO: Communication test
+        """
+            Simulação
+        """
+        result = ["OK", "Falha", "OK", "OK"]
+        """
+            Fim da simulação
+        """
         return result
 
     def _test_sequence(self):
@@ -98,12 +106,45 @@ class PowerModuleTest(QThread):
 
                 # TODO: Faz os testes e seta os atributos de log
 
+                """
+                    Simulação de valores
+                """
+                pmlog.test_result = "Aprovado"
+                pmlog.iload0 = random.uniform(1.0, 15.0)
+                pmlog.iload1 = random.uniform(1.0, 15.0)
+                pmlog.iload2 = random.uniform(1.0, 15.0)
+                pmlog.iload3 = random.uniform(1.0, 15.0)
+                pmlog.iload4 = random.uniform(1.0, 15.0)
+                pmlog.iload5 = random.uniform(1.0, 15.0)
+                pmlog.vload0 = random.uniform(1.0, 15.0)
+                pmlog.vload1 = random.uniform(1.0, 15.0)
+                pmlog.vload2 = random.uniform(1.0, 15.0)
+                pmlog.vload3 = random.uniform(1.0, 15.0)
+                pmlog.vload4 = random.uniform(1.0, 15.0)
+                pmlog.vload5 = random.uniform(1.0, 15.0)
+                pmlog.vdclink0 = random.uniform(1.0, 15.0)
+                pmlog.vdclink1 = random.uniform(1.0, 15.0)
+                pmlog.vdclink2 = random.uniform(1.0, 15.0)
+                pmlog.vdclink3 = random.uniform(1.0, 15.0)
+                pmlog.vdclink4 = random.uniform(1.0, 15.0)
+                pmlog.vdclink5 = random.uniform(1.0, 15.0)
+                pmlog.temperatura0 = random.uniform(1.0, 15.0)
+                pmlog.temperatura1 = random.uniform(1.0, 15.0)
+                pmlog.temperatura2 = random.uniform(1.0, 15.0)
+                pmlog.temperatura3 = random.uniform(1.0, 15.0)
+                pmlog.temperatura4 = random.uniform(1.0, 15.0)
+                pmlog.temperatura5 = random.uniform(1.0, 15.0)
+                pmlog.details = ""
+                """
+                    Fim da simulação
+                """
+
                 #salva na lista de logs para retornar
-                self._log[serial.indexOf(item)]
+                self._log[serial.index(item)] = pmlog
         # Quando o teste terminar emitir o resultado em uma lista de objetos
         # do tipo PowerModuleLog
         self.test_complete.emit(self._log)
 
     def run(self):
-        #self._test_sequence()
-        pass
+        self._test_sequence()
+        #pass

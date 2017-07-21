@@ -421,12 +421,12 @@ class PowerModuleWindow(QWizard, Ui_Class):
         if result[2] is not None:
             self.lbStatusComunicacao2.setText(result[2])
         if result[3] is not None:
-            self.lbStatusComunicacao23.setText(result[3])
+            self.lbStatusComunicacao3.setText(result[3])
 
     @pyqtSlot()
     def _start_test_sequence(self):
         self._test_thread.test_complete.connect(self._test_finished)
-        self.test_thread.start()
+        self._test_thread.start()
 
     @pyqtSlot()
     def _finish_wizard_execution(self):
@@ -435,17 +435,16 @@ class PowerModuleWindow(QWizard, Ui_Class):
     @pyqtSlot(list)
     def _test_finished(self, test_result):
         self._test_result = test_result[:]
-
         self.lbTestStatus.setText("Teste Finalizado!")
 
         if test_result[0] is not None:
-            self.lbTestResult0.setText(text_result[0].test_result)
+            self.lbTestResult0.setText(test_result[0].test_result)
         if test_result[1] is not None:
-            self.lbTestResult1.setText(text_result[1].test_result)
+            self.lbTestResult1.setText(test_result[1].test_result)
         if test_result[2] is not None:
-            self.lbTestResult2.setText(text_result[2].test_result)
+            self.lbTestResult2.setText(test_result[2].test_result)
         if test_result[3] is not None:
-            self.lbTestResult3.setText(text_result[3].test_result)
+            self.lbTestResult3.setText(test_result[3].test_result)
 
     @pyqtSlot(list)
     def _treat_server_response(self, result):
