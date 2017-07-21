@@ -29,7 +29,8 @@ class RackWindow(QWizard, Ui_Class):
 
         self._list_serial_ports()
         self._serial_port_status = False
-        self._web_request_status = False
+        self._test_serial_port_status = False
+        self._test_final_status = False
 
         self._test_thread = RackTest()
         self._web_request = WebRequest()
@@ -111,6 +112,11 @@ class RackWindow(QWizard, Ui_Class):
             except (OSError, serial.SerialException):
                 pass
 
+    def _restart_variables(self):
+        self._serial_port_status = False
+        self._test_serial_port_status = False
+        self._test_final_status = False
+
     """*************************************************
     ************* Pages Initialization *****************
     *************************************************"""
@@ -158,16 +164,19 @@ class RackWindow(QWizard, Ui_Class):
         return True
 
     def _validate_page_test_serial_port(self):
-        print('Validate Conn Serial')
-        return True
+        if self._test_serial_port_status:
+            return True
+        return False
 
     def _validate_page_start_test(self):
-        print('Validate Start Test')
-        return True
+        if self._test_final_status:
+            return True
+        return False
 
     def _validate_page_submit_report(self):
         print('Validate Submit')
         self._initialize_widgets()
+        self._restart_variables
         while self.currentId() is not 1:
             self.back()
         return False
@@ -273,12 +282,13 @@ class RackWindow(QWizard, Ui_Class):
             self.lbStatusComunicacao.setText("<p color:'green'>OK</p>")
         else:
             self.lbStatusComunicacao.setText("<p color:'red'>Falha</p>")
+        self._test_serial_port_status = True
 
 
     @pyqtSlot()
     def _start_test_sequence(self):
         self._test_thread.test_complete.connect(self._test_finished)
-        self.test_thread.start()
+        self._test_thread.start()
 
     @pyqtSlot()
     def _finish_wizard_execution(self):
@@ -286,38 +296,35 @@ class RackWindow(QWizard, Ui_Class):
 
     @pyqtSlot(dict)
     def _test_finished(self, test_result):
-        self._log.test_result   = test_result['result']
-        self._log.iout0        = test_result['iout'][0]
-        self._log.iout1        = test_result['iout'][1]
-        self._log.iout2        = test_result['iout'][2]
-        self._log.iout3        = test_result['iout'][3]
-        self._log.delta_iout0  = test_result['iout'][4]
-        self._log.delta_iout1  = test_result['iout'][5]
-        self._log.delta_iout2  = test_result['iout'][6]
-        self._log.delta_iout3  = test_result['iout'][7]
-        self._log.details      = test_result['details']
+        print(test_result)
+        self._log.test_result        = test_result['result']
+        self._log.iout0              = test_result['iout'][0]
+        self._log.iout1              = test_result['iout'][1]
+        self._log.iout2              = test_result['iout'][2]
+        self._log.iout3              = test_result['iout'][3]
+        self._log.delta_iout0        = test_result['iout'][4]
+        self._log.delta_iout1        = test_result['iout'][5]
+        self._log.delta_iout2        = test_result['iout'][6]
+        self._log.delta_iout3        = test_result['iout'][7]
+        self._log.details            = test_result['details']
+        self._log.serial_number_rack = self._rack.serial_number
+        print(self._log.data)
         self.lbTestStatus.setText("Teste Finalizado!")
         self.lbTestResult.setText(self._log.test_result)
+        self._test_final_status = True
 
     @pyqtSlot(dict, dict)
     def _treat_server_response(self, device_res, log_res):
         res_key = 'StatusCode'
         err_key = 'error'
         if res_key in device_res.keys() and res_key in log_res.keys():
-            if device_res[res_key] == '200' and log_res[res_key] == '200':
-                self.lbStatusSubmitRequest.setText('Sucesso!!!')
-                self.lbRespDevice.setText(device_res['Message'])
-                self.lbRespLog.setText(log_res['Message'])
-            else:
-                self.lbStatusSubmitRequest.setText('Falha!!!')
-                self.lbRespDevice.setText(device_res['Message'])
-                self.lbRespLog.setText(log_res['Message'])
-        elif err_key in device_res.keys() or err_key in log_res.keys():
+            self.lbStatusSubmitRequest.setText('Sucesso!!!')
+            self.lbRespDevice.setText(device_res['Message'])
+            self.lbRespLog.setText(log_res['Message'])
+        else:
             self.lbStatusSubmitRequest.setText('Falha!!!')
             self.lbRespDevice.setText(str(device_res))
             self.lbRespLog.setText(str(log_res))
-
-        self._web_request_status = True
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

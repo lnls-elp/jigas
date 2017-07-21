@@ -138,7 +138,7 @@ class RackLog:
     def _get_rack_log_data(self):
         data = {}
         data['resultado_teste']     = self._test_result
-        data['numero_serie_dcct']   = self._serial_number_dcct
+        data['numero_serie_bastidor']   = self._serial_number_rack
         data['iout0']               = self._iout0
         data['iout1']               = self._iout1
         data['iout2']               = self._iout2

@@ -676,7 +676,7 @@
      <rect>
       <x>40</x>
       <y>160</y>
-      <width>524</width>
+      <width>575</width>
       <height>67</height>
      </rect>
     </property>
@@ -751,7 +751,7 @@
         <widget class="QLabel" name="lbRespLog">
          <property name="minimumSize">
           <size>
-           <width>430</width>
+           <width>500</width>
            <height>17</height>
           </size>
          </property>

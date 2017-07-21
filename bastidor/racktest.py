@@ -44,6 +44,13 @@ class RackTest(QThread):
     def test_communication(self):
         result = False     # Result for communication test
         #TODO: Communication test
+        """
+            Simulação
+        """
+        result = True
+        """
+            Fim da simulação
+        """
         return result
 
     def _test_sequence(self):
@@ -51,9 +58,17 @@ class RackTest(QThread):
         if not self._serial_port.is_open:
             self.connection_lost.emit()
         #TODO: Sequencia de Testes
+        """
+            Simulação de valores
+        """
+        self._test_result['result'] = "Aprovado"
+        self._test_result['iout'] = [1, 2.0, 9.5, 3, 6, 5, 4.5, 1.2]
+        """
+            Fim da Simulação
+        """
         # ao finalizar, emitir signals
         self.test_complete.emit(self._test_result)
 
     def run(self):
-        #TODO: All
-        pass
+        self._test_sequence()
+        #pass
