@@ -70,9 +70,9 @@ class DCCTWindow(QWizard, Ui_Class):
         self.PageConnectDCCT.setButtonText(self.BackButton, "Anterior")
         self.PageConnectDCCT.setButtonText(self.CancelButton, "Cancelar")
 
-        self.PageConnectSerialPort.setButtonText(self.NextButton, "Próximo")
-        self.PageConnectSerialPort.setButtonText(self.BackButton, "Anterior")
-        self.PageConnectSerialPort.setButtonText(self.CancelButton, "Cancelar")
+        self.PageTestSerialPort.setButtonText(self.NextButton, "Próximo")
+        self.PageTestSerialPort.setButtonText(self.BackButton, "Anterior")
+        self.PageTestSerialPort.setButtonText(self.CancelButton, "Cancelar")
 
         self.PageStartTest.setButtonText(self.NextButton, "Novo Teste")
         self.PageStartTest.setButtonText(self.BackButton, "Anterior")

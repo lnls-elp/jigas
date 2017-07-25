@@ -396,7 +396,7 @@
     </property>
    </widget>
   </widget>
-  <widget class="QWizardPage" name="PageConnectSerialPort">
+  <widget class="QWizardPage" name="PageTestSerialPort">
    <widget class="QLabel" name="label_6">
     <property name="geometry">
      <rect>
