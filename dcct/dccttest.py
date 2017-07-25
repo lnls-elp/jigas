@@ -73,11 +73,11 @@ class DCCTTest(QThread):
         return result
 
     def _test_sequence(self):
-        #result = [None, None]
+        result = False
         # If serial connection is lost
         if not self._serial_port.is_open:
             self.connection_lost.emit()
-            # Encerrar Testes
+            #TODO: Encerra testes
 
         dcct = DCCT()
         dcct.serial_number = self._serial_number
@@ -106,13 +106,12 @@ class DCCTTest(QThread):
             log.iload10 = random.uniform(1.0, 9.0)
             log.details = ""
 
-            log_res = self._send_to_server(log)
+            result = self._send_to_server(log)
 
-        self.test_complete.emit(log_res)
+        self.test_complete.emit(result)
         """
             Fim da Simulação
         """
-        print("FIMMMMM")
 
     def _send_to_server(self, item):
         client = ElpWebClient()

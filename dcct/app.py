@@ -22,7 +22,7 @@ class DCCTWindow(QWizard, Ui_Class):
 
         self._list_serial_ports()
         self._serial_port_status = False
-        self._web_request_status = False
+        self._test_serial_port_status = False
 
         self._test_thread = DCCTTest()
 
@@ -112,7 +112,7 @@ class DCCTWindow(QWizard, Ui_Class):
     def _initialize_page_connect_dcct(self):
         pass
 
-    def _initialize_page_connect_serial_port(self):
+    def _initialize_page_test_serial_port(self):
         pass
 
     def _initialize_page_start_test(self):
@@ -139,9 +139,8 @@ class DCCTWindow(QWizard, Ui_Class):
     def _validate_page_connect_dcct(self):
         return True
 
-    def _validate_page_connect_serial_port(self):
-        print('Validate Conn Serial')
-        return True
+    def _validate_page_test_serial_port(self):
+        return self._test_serial_port_status
 
     def _validate_page_start_test(self):
         print('Validate Start Test')
@@ -168,7 +167,7 @@ class DCCTWindow(QWizard, Ui_Class):
             print(self.currentId())
 
         elif page == 3:
-            self._initialize_page_connect_serial_port()
+            self._initialize_page_test_serial_port()
             print(self.currentId())
 
         elif page == 4:
@@ -193,7 +192,7 @@ class DCCTWindow(QWizard, Ui_Class):
 
         elif current_id == 3:
             print("Valida 3")
-            return self._validate_page_connect_serial_port()
+            return self._validate_page_test_serial_port()
 
         elif current_id == 4:
             print("Valida 4")
@@ -249,6 +248,11 @@ class DCCTWindow(QWizard, Ui_Class):
             self.lbStatusAuxSupply.setText("<p color:'green'>OK</p>")
         else:
             self.lbStatusAuxSupply.setText("<p color:'red'>Falha</p>")
+
+        if result[0] and result[1]:
+            self._test_serial_port_status = True
+        else:
+            self._test_serial_port_status = False
 
     @pyqtSlot()
     def _start_test_sequence(self):
