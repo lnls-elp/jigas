@@ -535,9 +535,15 @@
      <rect>
       <x>0</x>
       <y>210</y>
-      <width>701</width>
+      <width>691</width>
       <height>211</height>
      </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>690</width>
+      <height>0</height>
+     </size>
     </property>
    </widget>
    <widget class="QLabel" name="label_21">
@@ -584,35 +590,35 @@
    <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
-      <x>1</x>
-      <y>121</y>
-      <width>553</width>
-      <height>74</height>
+      <x>3</x>
+      <y>123</y>
+      <width>358</width>
+      <height>72</height>
      </rect>
     </property>
-    <layout class="QHBoxLayout" name="horizontalLayout_4">
+    <layout class="QHBoxLayout" name="horizontalLayout_5">
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_5">
-       <item>
-        <widget class="QPushButton" name="pbStartTests">
-         <property name="minimumSize">
-          <size>
-           <width>90</width>
-           <height>70</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>90</width>
-           <height>70</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Iniciar 
+      <widget class="QPushButton" name="pbStartTests">
+       <property name="minimumSize">
+        <size>
+         <width>90</width>
+         <height>70</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>90</width>
+         <height>70</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Iniciar 
  Testes</string>
-         </property>
-        </widget>
-       </item>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QLabel" name="lbTestStatus">
          <property name="font">
@@ -626,27 +632,10 @@
          </property>
         </widget>
        </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QLabel" name="label_15">
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Resultado:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QGridLayout" name="gridLayout_4">
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_19">
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QLabel" name="label_15">
            <property name="font">
             <font>
              <weight>75</weight>
@@ -654,44 +643,12 @@
             </font>
            </property>
            <property name="text">
-            <string>Canal 1:</string>
+            <string>Resultado:</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
-          <widget class="QLabel" name="lbTestResult0">
-           <property name="minimumSize">
-            <size>
-             <width>190</width>
-             <height>16</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>Aguarde...</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_23">
-           <property name="font">
-            <font>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>Canal 2:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLabel" name="lbTestResult1">
+         <item>
+          <widget class="QLabel" name="lbTestResult">
            <property name="minimumSize">
             <size>
              <width>190</width>
@@ -710,154 +667,6 @@
           </widget>
          </item>
         </layout>
-       </item>
-      </layout>
-     </item>
-    </layout>
-   </widget>
-  </widget>
-  <widget class="QWizardPage" name="PageSubmitReport">
-   <widget class="QLabel" name="label_26">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>90</y>
-      <width>221</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <weight>75</weight>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>8. Envio de relatório</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_14">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>70</width>
-      <height>70</height>
-     </rect>
-    </property>
-    <property name="maximumSize">
-     <size>
-      <width>70</width>
-      <height>70</height>
-     </size>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="pixmap">
-     <pixmap>images/sirius_logo.jpeg</pixmap>
-    </property>
-   </widget>
-   <widget class="QWidget" name="layoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>40</x>
-      <y>160</y>
-      <width>625</width>
-      <height>67</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" name="verticalLayout_5">
-     <item>
-      <widget class="QLabel" name="lbStatusSubmitRequest">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Aguarde...</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="0">
-        <widget class="QLabel" name="lbStatusSubmitRequest_2">
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Dispositivo:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLabel" name="lbRespDevice">
-         <property name="minimumSize">
-          <size>
-           <width>430</width>
-           <height>17</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>430</width>
-           <height>17</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="lbStatusSubmitRequest_3">
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Log:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLabel" name="lbRespLog">
-         <property name="minimumSize">
-          <size>
-           <width>550</width>
-           <height>17</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>430</width>
-           <height>17</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
        </item>
       </layout>
      </item>

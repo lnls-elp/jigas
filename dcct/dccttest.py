@@ -6,6 +6,7 @@ import random
 
 class DCCTTest(QThread):
     test_complete       = pyqtSignal(bool)
+    update_gui          = pyqtSignal(str)
     connection_lost     = pyqtSignal()
 
     def __init__(self, comport=None, baudrate=None, serial_number=None, variant=None):

@@ -17,13 +17,8 @@ class DCCTWindow(QWizard, Ui_Class):
     def __init__(self, parent=None):
         QWizard.__init__(self, parent)
         self.setupUi(self)
-        #super(DCCTWindow, self).__init__(parent)
-        #uic.loadUi('wizard.ui', self)
 
         self._SERIAL_BAUDRATE = 115200
-
-        self._dcct = DCCT()
-        self._log = []
 
         self._list_serial_ports()
         self._serial_port_status = False
@@ -49,10 +44,8 @@ class DCCTWindow(QWizard, Ui_Class):
         self.lbStatusComunicacao.setText("...")
         self.lbStatusAuxSupply.setText("...")
         self.lbTestStatus.setText("Clique para Iniciar Testes")
-        self.lbTestResult0.setText("Aguarde...")
-        self.lbTestResult1.setText("Aguarde...")
+        self.lbTestResult.setText("Aguarde...")
         self.teTestReport.clear()
-        self.lbStatusSubmitRequest.setText("Aguarde...")
 
     def _initialize_signals(self):
         """ Configure basic signals """
@@ -81,13 +74,10 @@ class DCCTWindow(QWizard, Ui_Class):
         self.PageConnectSerialPort.setButtonText(self.BackButton, "Anterior")
         self.PageConnectSerialPort.setButtonText(self.CancelButton, "Cancelar")
 
-        self.PageStartTest.setButtonText(self.NextButton, "Próximo")
+        self.PageStartTest.setButtonText(self.NextButton, "Novo Teste")
         self.PageStartTest.setButtonText(self.BackButton, "Anterior")
         self.PageStartTest.setButtonText(self.CancelButton, "Cancelar")
 
-        self.PageSubmitReport.setButtonText(self.BackButton, "Anterior")
-        self.PageSubmitReport.setButtonText(self.CancelButton, "Cancelar")
-        self.PageSubmitReport.setButtonText(self.NextButton, "Novo Teste")
 
     """*************************************************
     ************* System Initialization ****************
@@ -126,18 +116,8 @@ class DCCTWindow(QWizard, Ui_Class):
         pass
 
     def _initialize_page_start_test(self):
-        print("Start test iniciado!")
+        self.teTestReport.clear()
 
-    def _initialize_page_submit_report(self):
-        dcct_request = WebRequest()
-        dcct_request.server_response.connect(self._treat_response_dcct)
-        dcct_request.items = [self._dcct]
-        dcct_request.start()
-
-        #log_request = WebRequest()
-        #log_request.server_response.connect(self._treat_response_log)
-        #log_request.items = self._log[:]
-        #log_request.start()
 
     """*************************************************
     ************** Pages Validation ********************
@@ -150,7 +130,6 @@ class DCCTWindow(QWizard, Ui_Class):
     def _validate_page_serial_number(self):
         serial = self.leSerialNumber.text()
         try:
-            self._dcct.serial_number = int(serial)
             self._test_thread.serial_number = int(serial)
             return True
         except ValueError:
@@ -166,15 +145,11 @@ class DCCTWindow(QWizard, Ui_Class):
 
     def _validate_page_start_test(self):
         print('Validate Start Test')
-        return True
-
-    def _validate_page_submit_report(self):
-        print('Validate Submit')
         self._initialize_widgets()
-        del self._log[:]
         while self.currentId() is not 1:
             self.back()
         return False
+
 
     """*************************************************
     *********** Default Methods (Wizard) ***************
@@ -200,9 +175,6 @@ class DCCTWindow(QWizard, Ui_Class):
             self._initialize_page_start_test()
             print(self.currentId())
 
-        elif page == 5:
-            self._initialize_page_submit_report()
-            print(self.currentId())
         else:
             pass
 
@@ -227,15 +199,11 @@ class DCCTWindow(QWizard, Ui_Class):
             print("Valida 4")
             return self._validate_page_start_test()
 
-        elif current_id == 5:
-            print("Valida 5")
-            return self._validate_page_submit_report()
-
         else:
             return True
 
     def next(self):
-        if self.currentId() == 5:
+        if self.currentId() == 4:
             while self.currentId() != 1:
                 self.back()
 
@@ -248,8 +216,7 @@ class DCCTWindow(QWizard, Ui_Class):
         if data == None:
             self.lbReadSerialStatus.setText("<p color:'red'><b>ERRO. Digite Manualmente!</b><p/>")
         else:
-            self._dcct.serial_number = data
-            self._log.serial_number_dcct = data
+            self._test_thread.serial_number = data
             self.leSerialNumber.setText(str(data))
         print("Read serial number")
 
@@ -286,6 +253,7 @@ class DCCTWindow(QWizard, Ui_Class):
     @pyqtSlot()
     def _start_test_sequence(self):
         self._test_thread.test_complete.connect(self._test_finished)
+        self._test_thread.update_gui.connect(self._update_test_log)
         self._test_thread.start()
 
     @pyqtSlot()
@@ -294,59 +262,14 @@ class DCCTWindow(QWizard, Ui_Class):
 
     @pyqtSlot(bool)
     def _test_finished(self, result):
-        """
-        self.lbTestStatus.setText("Teste Finalizado!")
-        if result[0] is not None:
-            self.lbTestResult0.setText(result[0].test_result)
-        else:
-            self.lbTestResult0.setText("NC")
-
-        if result[1] is not None:
-            self.lbTestResult1.setText(result[1].test_result)
-        else:
-            self.lbTestResult1.setText("NC")
-
-        self._log = result
-        """
         if result:
-            self.lbTestResult0.setText("Aprovado")
-
-    @pyqtSlot(list)
-    def _treat_response_log(self, response):
-        res_key = 'StatusCode'
-        err_key = 'error'
-        result = [None, None]
-        if response[0] is not None:
-            if res_key in response[0].keys() and err_key not in response[0].keys():
-                result[0] = True
-            else:
-                result[0] = False
-
-        if response[1] is not None:
-            if res_key in response[1].keys() and err_key not in response[1].keys():
-                result[1] = True
-            else:
-                result[1] = False
-
-        if False in result:
-            self.lbStatusSubmitRequest.setText('Falha!!!')
-            self.lbRespDevice.setText(str(device_res))
-            self.lbRespLog.setText(str(log_res))
-            self._web_request_status = False
-        elif True in result:
-            self.lbStatusSubmitRequest.setText('Sucesso!!!')
-            self.lbRespDevice.setText(device_res['Message'])
-            self.lbRespLog.setText(log_res['Message'])
-            self._web_request_status = True
-
-    @pyqtSlot(list)
-    def _treat_response_dcct(self, response):
-        res_key = 'StatusCode'
-        err_key = 'error'
-        if res_key in response[0].keys() and err_key not in response[0].keys():
-            self._web_request_status = True
+            self.lbTestResult.setText("Aprovado")
         else:
-            self._web_request_status = False
+            self.lbTestResult.setText("Reprovado")
+
+    @pyqtSlot(str)
+    def _update_test_log(self, value):
+        self.teTestReport.append(value)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
