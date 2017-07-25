@@ -1,46 +1,47 @@
 from PyQt5.QtCore import QThread, pyqtSignal
 import simplejson as json
 from elpwebclient import *
-import time
-
+from dcctdata import *
 
 class WebRequest(QThread):
 
-    server_response = pyqtSignal(dict, dict)
+    server_response = pyqtSignal(list)
 
-    def __init__(self, device=None, log=None):
+    def __init__(self, items = []):
         QThread.__init__(self)
-        self._device = device
-        self._log = log
+        self._items = items
+        self._response = []
 
     @property
-    def device(self):
-        return self._device
+    def items(self):
+        return self._items
 
-    @device.setter
-    def device(self, value):
-        self._device = value
-
-    @property
-    def log(self):
-        return self._log
-
-    @log.setter
-    def log(self, value):
-        self._log = value
+    @items.setter
+    def items(self, value):
+        self._items = value
 
     def _create_request(self):
-        device_client = ElpWebClient()
-        device_data = self._device.data
-        device_method = self._device.method
-        device_res = device_client.do_request(device_method, device_data)
+        for item in self._items:
+            if item is not None:
+                client = ElpWebClient()
+                client_data = item.data
+                client_method = item.method
+                client_response = client.do_request(client_method, client_data)
+                result = self._parse_response(client_response)
+                self._response.append(result)
+            else:
+                self._response.append(None)
 
-        log_client = ElpWebClient()
-        log_data = self._log.data
-        log_method = self._log.method
-        log_res = log_client.do_request(log_method, log_data)
+        self.server_response.emit(self._response)
 
-        self.server_response.emit(device_res, log_res)
+    def _parse_response(self, response):
+        res_key = 'StatusCode'
+        err_key = 'error'
+
+        if res_key in response.keys() and err_key not in response.keys():
+            return True
+        else:
+            return False
 
     def run(self):
         self._create_request()

@@ -8,8 +8,6 @@ from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWizard, QApplication, QWizardPage
 from dccttest import DCCTTest
 from dmreader import *
-from dcctdata import *
-from webrequest import *
 
 UI_PATH = 'wizard.ui'
 Ui_Class, base = loadUiType(UI_PATH)
@@ -25,14 +23,13 @@ class DCCTWindow(QWizard, Ui_Class):
         self._SERIAL_BAUDRATE = 115200
 
         self._dcct = DCCT()
-        self._log = DCCTLog()
+        self._log = []
 
         self._list_serial_ports()
         self._serial_port_status = False
         self._web_request_status = False
 
         self._test_thread = DCCTTest()
-        self._web_request = WebRequest()
 
         self._initialize_widgets()
         self._initialize_signals()
@@ -52,7 +49,8 @@ class DCCTWindow(QWizard, Ui_Class):
         self.lbStatusComunicacao.setText("...")
         self.lbStatusAuxSupply.setText("...")
         self.lbTestStatus.setText("Clique para Iniciar Testes")
-        self.lbTestResult.setText("Aguarde...")
+        self.lbTestResult0.setText("Aguarde...")
+        self.lbTestResult1.setText("Aguarde...")
         self.teTestReport.clear()
         self.lbStatusSubmitRequest.setText("Aguarde...")
 
@@ -125,16 +123,21 @@ class DCCTWindow(QWizard, Ui_Class):
         pass
 
     def _initialize_page_connect_serial_port(self):
-        print("Teste porta serial!")
+        pass
 
     def _initialize_page_start_test(self):
         print("Start test iniciado!")
 
     def _initialize_page_submit_report(self):
-        self._web_request.device = self._dcct
-        self._web_request.log = self._log
-        self._web_request.server_response.connect(self._treat_server_response)
-        self._web_request.start()
+        dcct_request = WebRequest()
+        dcct_request.server_response.connect(self._treat_response_dcct)
+        dcct_request.items = [self._dcct]
+        dcct_request.start()
+
+        #log_request = WebRequest()
+        #log_request.server_response.connect(self._treat_response_log)
+        #log_request.items = self._log[:]
+        #log_request.start()
 
     """*************************************************
     ************** Pages Validation ********************
@@ -146,13 +149,12 @@ class DCCTWindow(QWizard, Ui_Class):
 
     def _validate_page_serial_number(self):
         serial = self.leSerialNumber.text()
-        if serial is not "":
-            try:
-                self._dcct.serial_number = int(serial)
-                self._log.serial_number_dcct = int(serial)
-                return True
-            except ValueError:
-                pass
+        try:
+            self._dcct.serial_number = int(serial)
+            self._test_thread.serial_number = int(serial)
+            return True
+        except ValueError:
+            pass
         return False
 
     def _validate_page_connect_dcct(self):
@@ -169,6 +171,7 @@ class DCCTWindow(QWizard, Ui_Class):
     def _validate_page_submit_report(self):
         print('Validate Submit')
         self._initialize_widgets()
+        del self._log[:]
         while self.currentId() is not 1:
             self.back()
         return False
@@ -289,37 +292,61 @@ class DCCTWindow(QWizard, Ui_Class):
     def _finish_wizard_execution(self):
         pass
 
-    @pyqtSlot(dict)
-    def _test_finished(self, test_result):
-        self._log.test_result   = test_result['result']
-        self._log.iload0        = test_result['iload'][0]
-        self._log.iload1        = test_result['iload'][1]
-        self._log.iload2        = test_result['iload'][2]
-        self._log.iload3        = test_result['iload'][3]
-        self._log.iload4        = test_result['iload'][4]
-        self._log.iload5        = test_result['iload'][5]
-        self._log.iload6        = test_result['iload'][6]
-        self._log.iload7        = test_result['iload'][7]
-        self._log.iload8        = test_result['iload'][8]
-        self._log.iload9        = test_result['iload'][9]
-        self._log.iload10       = test_result['iload'][10]
-        self._log.details       = test_result['details']
-        print(test_result)
+    @pyqtSlot(bool)
+    def _test_finished(self, result):
+        """
         self.lbTestStatus.setText("Teste Finalizado!")
-        self.lbTestResult.setText(self._log.test_result)
+        if result[0] is not None:
+            self.lbTestResult0.setText(result[0].test_result)
+        else:
+            self.lbTestResult0.setText("NC")
 
-    @pyqtSlot(dict, dict)
-    def _treat_server_response(self, device_res, log_res):
+        if result[1] is not None:
+            self.lbTestResult1.setText(result[1].test_result)
+        else:
+            self.lbTestResult1.setText("NC")
+
+        self._log = result
+        """
+        if result:
+            self.lbTestResult0.setText("Aprovado")
+
+    @pyqtSlot(list)
+    def _treat_response_log(self, response):
         res_key = 'StatusCode'
         err_key = 'error'
-        if res_key in device_res.keys() and res_key in log_res.keys():
-            self.lbStatusSubmitRequest.setText('Sucesso!!!')
-            self.lbRespDevice.setText(device_res['Message'])
-            self.lbRespLog.setText(log_res['Message'])
-        else:
+        result = [None, None]
+        if response[0] is not None:
+            if res_key in response[0].keys() and err_key not in response[0].keys():
+                result[0] = True
+            else:
+                result[0] = False
+
+        if response[1] is not None:
+            if res_key in response[1].keys() and err_key not in response[1].keys():
+                result[1] = True
+            else:
+                result[1] = False
+
+        if False in result:
             self.lbStatusSubmitRequest.setText('Falha!!!')
             self.lbRespDevice.setText(str(device_res))
             self.lbRespLog.setText(str(log_res))
+            self._web_request_status = False
+        elif True in result:
+            self.lbStatusSubmitRequest.setText('Sucesso!!!')
+            self.lbRespDevice.setText(device_res['Message'])
+            self.lbRespLog.setText(log_res['Message'])
+            self._web_request_status = True
+
+    @pyqtSlot(list)
+    def _treat_response_dcct(self, response):
+        res_key = 'StatusCode'
+        err_key = 'error'
+        if res_key in response[0].keys() and err_key not in response[0].keys():
+            self._web_request_status = True
+        else:
+            self._web_request_status = False
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

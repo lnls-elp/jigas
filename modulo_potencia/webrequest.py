@@ -2,8 +2,6 @@ from PyQt5.QtCore import QThread, pyqtSignal
 import simplejson as json
 from elpwebclient import *
 from pmdata import *
-import time
-
 
 class WebRequest(QThread):
 
@@ -39,16 +37,12 @@ class WebRequest(QThread):
                 device_method = device.method
                 device_res = device_client.do_request(device_method, device_data)
 
-                print(device_res)
-
                 if self.res_key in device_res.keys():
                     #Create request for log
                     log_client = ElpWebClient()
                     log_data = item.data
                     log_method = item.method
                     log_res = log_client.do_request(log_method, log_data)
-
-                    print(log_res)
 
                     if self.res_key in log_res.keys():
                         self._result[self._log_data.index(item)] = self.ret_success

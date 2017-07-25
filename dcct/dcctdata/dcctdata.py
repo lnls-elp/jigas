@@ -4,8 +4,9 @@ from PyQt5.QtCore import pyqtSlot
 
 class DCCT:
 
-    def __init__(self, serial_number=None):
+    def __init__(self, serial_number=None, variant=None):
         self._serial_number = serial_number
+        self._variant       = variant
 
     @property
     def serial_number(self):
@@ -15,9 +16,18 @@ class DCCT:
     def serial_number(self, value):
         self._serial_number = value
 
+    @property
+    def variant(self):
+        return self._variant
+
+    @variant.setter
+    def variant(self, value):
+        self._variant = value
+
     def _get_dcct_data(self):
         data = {}
-        data['numero_serie'] = self._serial_number
+        data['numero_serie']    = self._serial_number
+        data['variante']        = self._variant
         return data
 
     @property
@@ -30,25 +40,34 @@ class DCCT:
 
 class DCCTLog:
 
-    def __init__(self, test_result=None, serial_number_dcct=None, iload0=None,
-                    iload1=None, iload2=None, iload3=None, iload4=None, iload5=None,
-                    iload6=None, iload7=None, iload8=None, iload9=None, iload10=None,
-                    details=None):
+    def __init__(self, id_canal_dcct=None, test_result=None, serial_number_dcct=None,
+                    iload0=None, iload1=None, iload2=None, iload3=None, iload4=None,
+                    iload5=None, iload6=None, iload7=None, iload8=None, iload9=None,
+                    iload10=None, details=None):
 
-        self._test_result   = test_result
-        self._serial_number_dcct = serial_number_dcct
-        self._iload0            = iload0
-        self._iload1            = iload1
-        self._iload2            = iload2
-        self._iload3            = iload3
-        self._iload4            = iload4
-        self._iload5            = iload5
-        self._iload6            = iload6
-        self._iload7            = iload7
-        self._iload8            = iload8
-        self._iload9            = iload9
-        self._iload10           = iload10
-        self._details           = details
+        self._id_canal_dcct         = id_canal_dcct
+        self._test_result           = test_result
+        self._serial_number_dcct    = serial_number_dcct
+        self._iload0                = iload0
+        self._iload1                = iload1
+        self._iload2                = iload2
+        self._iload3                = iload3
+        self._iload4                = iload4
+        self._iload5                = iload5
+        self._iload6                = iload6
+        self._iload7                = iload7
+        self._iload8                = iload8
+        self._iload9                = iload9
+        self._iload10               = iload10
+        self._details               = details
+
+    @property
+    def id_canal_dcct(self):
+        return self._test_result
+
+    @id_canal_dcct.setter
+    def id_canal_dcct(self, value):
+        self._id_canal_dcct = value
 
     @property
     def test_result(self):
@@ -164,6 +183,7 @@ class DCCTLog:
 
     def _get_dcct_log_data(self):
         data = {}
+        data['id_canal_dcct']       = self._id_canal_dcct
         data['resultado_teste']     = self._test_result
         data['numero_serie_dcct']   = self._serial_number_dcct
         data['iload0']              = self._iload0
