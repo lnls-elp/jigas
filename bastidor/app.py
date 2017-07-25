@@ -7,14 +7,16 @@ from PyQt5.uic import loadUiType
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWizard, QApplication, QWizardPage
 from racktest import RackTest
-#from dmreader import *
-from rackdata import *
-from webrequest import *
+from dmreader import *
 
 UI_PATH = 'wizard.ui'
 Ui_Class, base = loadUiType(UI_PATH)
 
 class RackWindow(QWizard, Ui_Class):
+
+    # Page numbers
+    (num_intro_page, num_serial_number, num_connect_rack,
+    num_serial_port, num_start_test)     = range(5)
 
     def __init__(self, parent=None):
         QWizard.__init__(self, parent)
@@ -47,7 +49,6 @@ class RackWindow(QWizard, Ui_Class):
         self.lbTestStatus.setText("Clique para Iniciar Testes")
         self.lbTestResult.setText("Aguarde...")
         self.teTestReport.clear()
-        self.lbStatusSubmitRequest.setText("Aguarde...")
 
     def _initialize_signals(self):
         """ Configure basic signals """
@@ -56,7 +57,6 @@ class RackWindow(QWizard, Ui_Class):
         self.pbConnectSerialPort.clicked.connect(self._connect_serial_port)
         self.pbStartTests.clicked.connect(self._start_test_sequence)
         self.pbCommunicationTest.clicked.connect(self._communication_test)
-        #self._web_request.server_response.connect(self._treat_server_response)
         self.finished.connect(self._finish_wizard_execution)
 
     def _initialize_wizard_buttons(self):
@@ -76,13 +76,9 @@ class RackWindow(QWizard, Ui_Class):
         self.PageTestSerialPort.setButtonText(self.BackButton, "Anterior")
         self.PageTestSerialPort.setButtonText(self.CancelButton, "Cancelar")
 
-        self.PageStartTest.setButtonText(self.NextButton, "Próximo")
+        self.PageStartTest.setButtonText(self.NextButton, "Novo Teste")
         self.PageStartTest.setButtonText(self.BackButton, "Anterior")
         self.PageStartTest.setButtonText(self.CancelButton, "Cancelar")
-
-        self.PageSubmitReport.setButtonText(self.BackButton, "Anterior")
-        self.PageSubmitReport.setButtonText(self.CancelButton, "Cancelar")
-        self.PageSubmitReport.setButtonText(self.NextButton, "Novo Teste")
 
     """*************************************************
     ************* System Initialization ****************
@@ -154,7 +150,7 @@ class RackWindow(QWizard, Ui_Class):
     def _validate_page_start_test(self):
         self._initialize_widgets()
         self._restart_variables
-        while self.currentId() is not 1:
+        while self.currentId() is not self.num_serial_number:
             self.back()
         return False
 
@@ -162,23 +158,23 @@ class RackWindow(QWizard, Ui_Class):
     *********** Default Methods (Wizard) ***************
     *************************************************"""
     def initializePage(self, page):
-        if page == 0:
+        if page == self.num_intro_page:
             self._initialize_intro_page()
             print(self.currentId())
 
-        elif page == 1:
+        elif page == self.num_serial_number:
             self._initialize_page_serial_number()
             print(self.currentId())
 
-        elif page == 2:
+        elif page == self.num_connect_rack:
             self._initialize_page_connect_rack()
             print(self.currentId())
 
-        elif page == 3:
+        elif page == self.num_serial_port:
             self._initialize_page_test_serial_port()
             print(self.currentId())
 
-        elif page == 4:
+        elif page == self.num_start_test:
             self._initialize_page_start_test()
             print(self.currentId())
 
@@ -187,22 +183,22 @@ class RackWindow(QWizard, Ui_Class):
 
     def validateCurrentPage(self):
         current_id = self.currentId()
-        if current_id == 0:
+        if current_id == self.num_intro_page:
             return self._validate_intro_page()
 
-        elif current_id == 1:
+        elif current_id == self.num_serial_number:
             print("Valida 1")
             return self._validate_page_serial_number()
 
-        elif current_id == 2:
+        elif current_id == self.num_connect_rack:
             print("Valida 2")
             return self._validate_page_connect_rack()
 
-        elif current_id == 3:
+        elif current_id == self.num_serial_port:
             print("Valida 3")
             return self._validate_page_test_serial_port()
 
-        elif current_id == 4:
+        elif current_id == self.num_start_test:
             print("Valida 4")
             return self._validate_page_start_test()
 
@@ -210,8 +206,8 @@ class RackWindow(QWizard, Ui_Class):
             return True
 
     def next(self):
-        if self.currentId() == 4:
-            while self.currentId() != 1:
+        if self.currentId() == self.num_start_test:
+            while self.currentId() != self.num_serial_number:
                 self.back()
 
     """*************************************************

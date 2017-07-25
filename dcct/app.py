@@ -14,6 +14,10 @@ Ui_Class, base = loadUiType(UI_PATH)
 
 class DCCTWindow(QWizard, Ui_Class):
 
+    # Page numbers
+    (num_intro_page, num_serial_number, num_connect_dcct,
+    num_serial_port, num_start_test)     = range(5)
+
     def __init__(self, parent=None):
         QWizard.__init__(self, parent)
         self.setupUi(self)
@@ -118,7 +122,6 @@ class DCCTWindow(QWizard, Ui_Class):
     def _initialize_page_start_test(self):
         self.teTestReport.clear()
 
-
     """*************************************************
     ************** Pages Validation ********************
     *************************************************"""
@@ -145,7 +148,7 @@ class DCCTWindow(QWizard, Ui_Class):
     def _validate_page_start_test(self):
         print('Validate Start Test')
         self._initialize_widgets()
-        while self.currentId() is not 1:
+        while self.currentId() is not self.num_serial_number:
             self.back()
         return False
 
@@ -154,23 +157,23 @@ class DCCTWindow(QWizard, Ui_Class):
     *********** Default Methods (Wizard) ***************
     *************************************************"""
     def initializePage(self, page):
-        if page == 0:
+        if page == self.num_intro_page:
             self._initialize_intro_page()
             print(self.currentId())
 
-        elif page == 1:
+        elif page == self.num_serial_number:
             self._initialize_page_serial_number()
             print(self.currentId())
 
-        elif page == 2:
+        elif page == self.num_connect_dcct:
             self._initialize_page_connect_dcct()
             print(self.currentId())
 
-        elif page == 3:
+        elif page == self.num_serial_port:
             self._initialize_page_test_serial_port()
             print(self.currentId())
 
-        elif page == 4:
+        elif page == self.num_start_test:
             self._initialize_page_start_test()
             print(self.currentId())
 
@@ -179,22 +182,22 @@ class DCCTWindow(QWizard, Ui_Class):
 
     def validateCurrentPage(self):
         current_id = self.currentId()
-        if current_id == 0:
+        if current_id == self.num_intro_page:
             return self._validate_intro_page()
 
-        elif current_id == 1:
+        elif current_id == self.num_serial_number:
             print("Valida 1")
             return self._validate_page_serial_number()
 
-        elif current_id == 2:
+        elif current_id == self.num_connect_dcct:
             print("Valida 2")
             return self._validate_page_connect_dcct()
 
-        elif current_id == 3:
+        elif current_id == self.num_serial_port:
             print("Valida 3")
             return self._validate_page_test_serial_port()
 
-        elif current_id == 4:
+        elif current_id == self.num_start_test:
             print("Valida 4")
             return self._validate_page_start_test()
 
@@ -202,8 +205,8 @@ class DCCTWindow(QWizard, Ui_Class):
             return True
 
     def next(self):
-        if self.currentId() == 4:
-            while self.currentId() != 1:
+        if self.currentId() == self.num_start_test:
+            while self.currentId() != self.num_serial_number:
                 self.back()
 
     """*************************************************

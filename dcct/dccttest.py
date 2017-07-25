@@ -1,6 +1,6 @@
 from PyQt5.QtCore import pyqtSlot, QThread, pyqtSignal
-from dcctdata import *
-from elpwebclient import *
+from dcctdata import DCCT, DCCTLog
+from elpwebclient import ElpWebClient
 import serial
 import random
 

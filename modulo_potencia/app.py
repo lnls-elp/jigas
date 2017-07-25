@@ -8,8 +8,6 @@ from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWizard, QApplication, QWizardPage, QMessageBox
 from pmtest import PowerModuleTest
 from dmreader import *
-from pmdata import *
-from webrequest import *
 
 UI_PATH = 'wizard.ui'
 Ui_Class, base = loadUiType(UI_PATH)
@@ -18,7 +16,7 @@ class PowerModuleWindow(QWizard, Ui_Class):
 
     # Page numbers
     (num_intro_page, num_serial_number, num_connect_module,
-    num_serial_port, num_start_test, num_submit_report)     = range(6)
+    num_serial_port, num_start_test)     = range(5)
 
     def __init__(self, parent=None):
         QWizard.__init__(self, parent)
@@ -28,9 +26,7 @@ class PowerModuleWindow(QWizard, Ui_Class):
 
         self._list_serial_ports()
         self._serial_port_status = False
-        self._web_request_status = False
-
-        self._test_result = [None for i in range(4)]
+        self._test_serial_port_status = False
 
         self._test_thread = PowerModuleTest()
 
@@ -71,7 +67,6 @@ class PowerModuleWindow(QWizard, Ui_Class):
         self.lbTestResult2.setText("NC")
         self.lbTestResult3.setText("NC")
         self.teTestReport.clear()
-        self.lbStatusSubmitRequest.setText("Aguarde...")
 
     def _initialize_signals(self):
         """ Configure basic signals """
@@ -109,17 +104,9 @@ class PowerModuleWindow(QWizard, Ui_Class):
         self.PageTestSerialPort.setButtonText(self.BackButton, "Anterior")
         self.PageTestSerialPort.setButtonText(self.CancelButton, "Cancelar")
 
-        self.PageStartTest.setButtonText(self.NextButton, "Próximo")
+        self.PageStartTest.setButtonText(self.NextButton, "Novo Teste")
         self.PageStartTest.setButtonText(self.BackButton, "Anterior")
         self.PageStartTest.setButtonText(self.CancelButton, "Cancelar")
-
-        self.PageSubmitReport.setButtonText(self.BackButton, "Anterior")
-        self.PageSubmitReport.setButtonText(self.CancelButton, "Cancelar")
-        self.PageSubmitReport.setButtonText(self.NextButton, "Novo Teste")
-
-    def _restart_variables(self):
-        del self._test_result[:]
-        self._web_request_status = False
 
     """*************************************************
     ************* System Initialization ****************
@@ -158,13 +145,7 @@ class PowerModuleWindow(QWizard, Ui_Class):
         pass
 
     def _initialize_page_start_test(self):
-        pass
-
-    def _initialize_page_submit_report(self):
-        self._web_request = WebRequest()
-        self._web_request.server_response.connect(self._treat_server_response)
-        self._web_request.log_data = self._test_result[:]
-        self._web_request.start()
+        self.teTestReport.clear()
 
     """*************************************************
     ************** Pages Validation ********************
@@ -216,17 +197,11 @@ class PowerModuleWindow(QWizard, Ui_Class):
         return True
 
     def _validate_page_test_serial_port(self):
-        return True
+        return self._test_serial_port_status
 
     def _validate_page_start_test(self):
-        print('Validate Start Test')
-        return True
-
-    def _validate_page_submit_report(self):
-        print('Validate Submit')
         self._initialize_widgets()
-        self._restart_variables()
-        while self.currentId() is not 1:
+        while self.currentId() is not self.num_serial_number:
             self.back()
         return False
 
@@ -234,63 +209,56 @@ class PowerModuleWindow(QWizard, Ui_Class):
     *********** Default Methods (Wizard) ***************
     *************************************************"""
     def initializePage(self, page):
-        if page == 0:
+        if page == self.num_intro_page:
             self._initialize_intro_page()
             print(self.currentId())
 
-        elif page == 1:
+        elif page == self.num_serial_number:
             self._initialize_page_serial_number()
             print(self.currentId())
 
-        elif page == 2:
+        elif page == self.num_connect_module:
             self._initialize_page_connect_module()
             print(self.currentId())
 
-        elif page == 3:
+        elif page == self.num_serial_port:
             self._initialize_page_test_serial_port()
             print(self.currentId())
 
-        elif page == 4:
+        elif page == self.num_start_test:
             self._initialize_page_start_test()
             print(self.currentId())
 
-        elif page == 5:
-            self._initialize_page_submit_report()
-            print(self.currentId())
         else:
             pass
 
     def validateCurrentPage(self):
         current_id = self.currentId()
-        if current_id == 0:
+        if current_id == self.num_intro_page:
             return self._validate_intro_page()
 
-        elif current_id == 1:
+        elif current_id == self.num_serial_number:
             print("Valida 1")
             return self._validate_page_serial_number()
 
-        elif current_id == 2:
+        elif current_id == self.num_connect_module:
             print("Valida 2")
             return self._validate_page_connect_module()
 
-        elif current_id == 3:
+        elif current_id == self.num_serial_port:
             print("Valida 3")
             return self._validate_page_test_serial_port()
 
-        elif current_id == 4:
+        elif current_id == self.num_start_test:
             print("Valida 4")
             return self._validate_page_start_test()
-
-        elif current_id == 5:
-            print("Valida 5")
-            return self._validate_page_submit_report()
 
         else:
             return True
 
     def next(self):
-        if self.currentId() == 5:
-            while self.currentId() != 1:
+        if self.currentId() == self.num_start_test:
+            while self.currentId() != self.num_serial_number:
                 self.back()
 
     """*************************************************
@@ -423,9 +391,15 @@ class PowerModuleWindow(QWizard, Ui_Class):
         if result[3] is not None:
             self.lbStatusComunicacao3.setText(result[3])
 
+        if False not in result:
+            self._test_serial_port_status = True
+        else:
+            self._test_serial_port_status = False
+
     @pyqtSlot()
     def _start_test_sequence(self):
         self._test_thread.test_complete.connect(self._test_finished)
+        self._test_thread.update_gui.connect(self._update_test_log)
         self._test_thread.start()
 
     @pyqtSlot()
@@ -437,25 +411,37 @@ class PowerModuleWindow(QWizard, Ui_Class):
         self._test_result = test_result[:]
         self.lbTestStatus.setText("Teste Finalizado!")
 
-        if test_result[0] is not None:
-            self.lbTestResult0.setText(test_result[0].test_result)
-        if test_result[1] is not None:
-            self.lbTestResult1.setText(test_result[1].test_result)
-        if test_result[2] is not None:
-            self.lbTestResult2.setText(test_result[2].test_result)
-        if test_result[3] is not None:
-            self.lbTestResult3.setText(test_result[3].test_result)
-
-    @pyqtSlot(list)
-    def _treat_server_response(self, result):
-        print(result)
-        self.lbStatusSubmitRequest.setText('Teste Finalizado!!')
-        if 'Success' not in result:
-            self._web_request_status = False
-            self.lbServerResponse.setText("Falha na comunicação com o servidor")
+        if test_result[0]:
+            self.lbTestResult0.setText("Aprovado")
+        elif test_result[0] is False:
+            self.lbTestResult0.setText("Reprovado")
         else:
-            self._web_request_status = True
-            self.lbServerResponse.setText("Sucesso!!")
+            self.lbTestResult0.setText("NC")
+
+        if test_result[1]:
+            self.lbTestResult1.setText("Aprovado")
+        elif test_result[1] is False:
+            self.lbTestResult1.setText("Reprovado")
+        else:
+            self.lbTestResult1.setText("NC")
+
+        if test_result[2]:
+            self.lbTestResult2.setText("Aprovado")
+        elif test_result[2] is False:
+            self.lbTestResult2.setText("Reprovado")
+        else:
+            self.lbTestResult2.setText("NC")
+
+        if test_result[3]:
+            self.lbTestResult3.setText("Aprovado")
+        elif test_result[3] is False:
+            self.lbTestResult3.setText("Reprovado")
+        else:
+            self.lbTestResult3.setText("NC")
+
+    @pyqtSlot(str)
+    def _update_test_log(self, value):
+        self.teTestReport.append(value)
 
     """*************************************************
     ***************** System Methods *******************
