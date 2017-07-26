@@ -94,7 +94,6 @@ class UDCTest(QThread):
         client_data = item.data
         client_method = item.method
         client_response = client.do_request(client_method, client_data)
-        print(client_response)
         server_status = self._parse_response(client_response)
         return server_status
 
