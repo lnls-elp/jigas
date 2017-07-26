@@ -220,7 +220,6 @@ class RackWindow(QWizard, Ui_Class):
         else:
             self._test_thread.serial_number = data
             self.leSerialNumber.setText(str(data))
-        print("Read serial number")
 
     @pyqtSlot()
     def _treat_read_serial_edit(self):

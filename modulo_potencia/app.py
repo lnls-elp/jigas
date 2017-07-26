@@ -265,28 +265,28 @@ class PowerModuleWindow(QWizard, Ui_Class):
     *************************************************"""
     @pyqtSlot()
     def _read_serial_number_0(self):
-        data = self._read_serial_number()
+        data = ReadDataMatrix()
         if data is not None:
             self._test_thread.serial_mod0 = data
-        self.leSerialNumber0.setText(str(data))
+            self.leSerialNumber0.setText(str(data))
 
     @pyqtSlot()
     def _read_serial_number_1(self):
-        data = self._read_serial_number()
+        data = ReadDataMatrix()
         if data is not None:
             self._test_thread.serial_mod1 = data
             self.leSerialNumber1.setText(str(data))
 
     @pyqtSlot()
     def _read_serial_number_2(self):
-        data = self._read_serial_number()
+        data = ReadDataMatrix()
         if data is not None:
             self._test_thread.serial_mod2 = data
             self.leSerialNumber2.setText(str(data))
 
     @pyqtSlot()
     def _read_serial_number_3(self):
-        data = self._read_serial_number()
+        data = ReadDataMatrix()
         if data is not None:
             self._test_thread.serial_mod3 = data
             self.leSerialNumber3.setText(str(data))
@@ -442,21 +442,6 @@ class PowerModuleWindow(QWizard, Ui_Class):
     def _update_test_log(self, value):
         self.teTestReport.append(value)
 
-    """*************************************************
-    ***************** System Methods *******************
-    *************************************************"""
-    def _read_serial_number(self):
-        data = ReadDataMatrix()
-        if data == None:
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Information)
-            msg.setText("Erro de Leitura")
-            msg.setInformativeText("Pressione ESC e tente novamente \
-                                    ou insira manualmente")
-            msg.setWindowTitle("Erro de Leitura")
-            msg._exec()
-        else:
-            return data
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
