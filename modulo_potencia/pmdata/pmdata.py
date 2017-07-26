@@ -1,4 +1,3 @@
-from elpwebclient import *
 import simplejson as json
 from PyQt5.QtCore import pyqtSlot
 

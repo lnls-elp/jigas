@@ -1,6 +1,6 @@
 from PyQt5.QtCore import pyqtSlot, QThread, pyqtSignal
-from rackdata import *
-from elpwebclient import *
+from rackdata import Rack, RackLog
+from elpwebclient import ElpWebClient
 import serial
 import random
 
