@@ -84,6 +84,22 @@ class PowerSupplyLog:
         self._result_test_on_off = value
 
     @property
+    def iout_add_20_duty_cycle(self):
+        return self._iout_add_20_duty_cycle
+
+    @iout_add_20_duty_cycle.setter
+    def iout_add_20_duty_cycle(self, value):
+        self._iout_add_20_duty_cycle = value
+
+    @property
+    def iout_less_20_duty_cycle(self):
+        return self._iout_less_20_duty_cycle
+
+    @iout_less_20_duty_cycle.setter
+    def iout_less_20_duty_cycle(self, value):
+        self._iout_less_20_duty_cycle = value
+
+    @property
     def iout0(self):
         return self._iout0
 
