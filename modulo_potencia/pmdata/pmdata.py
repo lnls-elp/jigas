@@ -1,6 +1,3 @@
-import simplejson as json
-from PyQt5.QtCore import pyqtSlot
-
 class PowerModule:
 
     def __init__(self, serial_number=None):

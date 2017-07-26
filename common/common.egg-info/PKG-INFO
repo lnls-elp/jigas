@@ -1,0 +1,11 @@
+Metadata-Version: 1.1
+Name: common
+Version: 0.0.1
+Summary: Python common packages for test applications
+Home-page: https://github.com/lnls-elp/jigas/common
+Author: Allef Pablo Araujo
+Author-email: UNKNOWN
+License: MIT License
+Download-URL: https://github.com/lnls-elp/jigas/common
+Description: UNKNOWN
+Platform: UNKNOWN

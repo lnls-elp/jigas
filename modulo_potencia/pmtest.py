@@ -1,6 +1,6 @@
 from PyQt5.QtCore import pyqtSlot, QThread, pyqtSignal
 from pmdata import PowerModule, PowerModuleLog
-from elpwebclient import ElpWebClient
+from common.elpwebclient import ElpWebClient
 import serial
 import random
 

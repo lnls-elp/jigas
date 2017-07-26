@@ -1,7 +1,3 @@
-from elpwebclient import *
-import simplejson as json
-from PyQt5.QtCore import pyqtSlot
-
 class UDC:
 
     def __init__(self, serial_number=None, variant=None):

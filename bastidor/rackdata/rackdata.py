@@ -1,7 +1,3 @@
-from elpwebclient import *
-import simplejson as json
-from PyQt5.QtCore import pyqtSlot
-
 class Rack:
 
     def __init__(self, serial_number=None):

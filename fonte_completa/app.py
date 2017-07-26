@@ -1,13 +1,12 @@
 #!/usr/bin/python3
-import sys
-import glob
-import serial
-import simplejson as json
-from PyQt5.uic import loadUiType
-from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from PyQt5.QtWidgets import QWizard, QApplication, QWizardPage
+from PyQt5.QtCore import pyqtSlot, pyqtSignal
+from common.dmreader import ReadDataMatrix
 from pstest import PowerSupplyTest
-from dmreader import *
+from PyQt5.uic import loadUiType
+import serial
+import glob
+import sys
 
 UI_PATH = 'wizard.ui'
 Ui_Class, base = loadUiType(UI_PATH)
