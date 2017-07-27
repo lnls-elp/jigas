@@ -76,6 +76,6 @@ def ReadDataMatrix(frameWidth = 640, frameHeight = 480, cropSize = 220):
 #        print('Leitura cancelada')
 #    else:
 #        print('Serial-Number lido: ' + str(data))
-#    
+#
 #if __name__ == '__main__':
 #    main()
