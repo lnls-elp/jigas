@@ -1,7 +1,6 @@
-from PyQt5.QtCore import QThread, pyqtSignal
 import requests
 
-class ElpWebClient(QThread):
+class ElpWebClient:
     def __init__(self, url='http://localhost:5000'):
         self._url = url
 
