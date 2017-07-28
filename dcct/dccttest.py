@@ -3,6 +3,8 @@ from common.elpwebclient import ElpWebClient
 from dcctdata import DCCT, DCCTLog
 import serial
 import random
+import pyDRS
+import time
 
 class DCCTTest(QThread):
     test_complete       = pyqtSignal(bool)
@@ -16,6 +18,7 @@ class DCCTTest(QThread):
         self._serial_number = serial_number
         self._variant = variant
         self._serial_port = serial.Serial()
+        self.FBP = pyDRS.SerialDRS()
 
         self._load_current = [0, 2, 4, 6, 8, 10, -10, -8, -6, -4, -2]
 
@@ -57,23 +60,29 @@ class DCCTTest(QThread):
         else:
             self._serial_port.baudrate  = self._baudrate
             self._serial_port.port      = self._comport
-            self._serial_port.open()
-            return self._serial_port.is_open
+            #self._serial_port.open()
+            return self.FBP.Connect(self._comport, self._baudrate)
 
     def test_communication(self):
         result = (False, False)     # Result for communication test and aux power supply
         #TODO: Communication test
-        """
-            Simulação de teste
-        """
-        result = (True, True)
-        """
-            Fim da Simulação
-        """
+        self.FBP.Write_sigGen_Aux(1)
+
+        if type(self.FBP.Read_vDCMod1()) == float:
+            result = (True,True)
+        else:
+            result = (False, False)
+
         return result
 
     def _test_sequence(self):
         result = False
+        list_log = []
+        current_DCCT  = []
+        current_DCCT1 = []
+        current_DCCT2 = []
+        self._variant = '2'
+
         # If serial connection is lost
         if not self._serial_port.is_open:
             self.connection_lost.emit()
@@ -86,32 +95,109 @@ class DCCTTest(QThread):
 
         if res:
             #TODO: Sequencia de Testes
-            """
-            Simulação de valores
-            """
-            log = DCCTLog()
-            log.id_canal_dcct = 1
-            log.test_result = "Aprovado"
-            log.serial_number_dcct = self._serial_number
-            log.iload0 = random.uniform(1.0, 9.0)
-            log.iload1 = random.uniform(1.0, 9.0)
-            log.iload2 = random.uniform(1.0, 9.0)
-            log.iload3 = random.uniform(1.0, 9.0)
-            log.iload4 = random.uniform(1.0, 9.0)
-            log.iload5 = random.uniform(1.0, 9.0)
-            log.iload6 = random.uniform(1.0, 9.0)
-            log.iload7 = random.uniform(1.0, 9.0)
-            log.iload8 = random.uniform(1.0, 9.0)
-            log.iload9 = random.uniform(1.0, 9.0)
-            log.iload10 = random.uniform(1.0, 9.0)
-            log.details = ""
 
-            result = self._send_to_server(log)
+            #self.FBP = pyDRS.SerialDRS()
+            #self.FBP.Connect(self._comport, self._baudarate)
+            self.FBP.Write_sigGen_Aux(1) # Usando 1 modulo de potência
+            self.FBP.TurnOn()
+            self.update_gui.emit('Fonte ligada')
+            self.FBP.ClosedLoop()
+            self.update_gui.emit('Malha fechada')
+
+            if self._variant == '2':
+                list_log.append(DCCTLog())
+                list_log.append(DCCTLog())
+
+                for i in self._load_current:
+                    self.FBP.SetISlowRef(i)
+                    self.update_gui.emit('Testando DCCTs com corrente de ' + str(i) + 'A')
+                    time.sleep(2) # Alterar para 30s
+                    current_DCCT1.append(self.FBP.Read_iMod3())
+                    current_DCCT2.append(self.FBP.Read_iMod4())
+
+                current_DCCT.append(current_DCCT1)
+                current_DCCT.append(current_DCCT2)
+
+                for j in range(0, 2):
+                    for k in range(0, len(self._load_current)):
+                        if round(current_DCCT[j][k]) == self._load_current[k]:
+                            string_result = 'Aprovado'
+                            result = True
+                        else:
+                            string_result = 'Reprovado'
+                            result = False
+                            break
+                    list_log[j].test_result = string_result
+                    self.update_gui.emit('DCCT' + str(j+1) + ' ' + str(list_log[j].test_result))
+
+                for l in range(0, 2):
+                    list_log[l].iload0 = current_DCCT[l][0]
+                    list_log[l].iload1 = current_DCCT[l][1]
+                    list_log[l].iload2 = current_DCCT[l][2]
+                    list_log[l].iload3 = current_DCCT[l][3]
+                    list_log[l].iload4 = current_DCCT[l][4]
+                    list_log[l].iload5 = current_DCCT[l][5]
+                    list_log[l].iload6 = current_DCCT[l][6]
+                    list_log[l].iload7 = current_DCCT[l][7]
+                    list_log[l].iload8 = current_DCCT[l][8]
+                    list_log[l].iload9 = current_DCCT[l][9]
+                    list_log[l].iload10 = current_DCCT[l][10]
+                    list_log[l].id_canal_dcct = l+1
+                    list_log[l].serial_number_dcct = self._serial_number
+
+                if self._send_to_server(list_log[0]):
+                    self.update_gui.emit('Dados enviados para o servidor')
+                else:
+                    self.update_gui.emit('Erro no envio de dados para o servidor')
+
+                if self._send_to_server(list_log[1]):
+                    self.update_gui.emit('Dados enviados para o servidor')
+                else:
+                    self.update_gui.emit('Erro no envio de dados para o servidor')
+
+            elif self._variant == '1':
+                list_log.append(DCCTLog())
+                list_log.append(None)
+
+                for i in self._load_current:
+                    self.FBP.SetISlowRef(i)
+                    self.update_gui.emit('Testando DCCTs com corrente de ' + str(i) + 'A')
+                    time.sleep(2) # Alterar para 30s
+                    current_DCCT1.append(self.FBP.Read_iMod3())
+
+                for j in range(0, len(self._load_current)):
+                    if round(current_DCCT1[j]) == self._load_current[j]:
+                        string_result = 'Aprovado'
+                        result = True
+                    else:
+                        string_result = 'Reprovado'
+                        result = False
+                        break
+                list_log[0].test_result = string_result
+                self.update_gui.emit('DCCT1 ' + str(list_log[0].test_result))
+
+                list_log[0].iload0 = current_DCCT1[0]
+                list_log[0].iload1 = current_DCCT1[1]
+                list_log[0].iload2 = current_DCCT1[2]
+                list_log[0].iload3 = current_DCCT1[3]
+                list_log[0].iload4 = current_DCCT1[4]
+                list_log[0].iload5 = current_DCCT1[5]
+                list_log[0].iload6 = current_DCCT1[6]
+                list_log[0].iload7 = current_DCCT1[7]
+                list_log[0].iload8 = current_DCCT1[8]
+                list_log[0].iload9 = current_DCCT1[9]
+                list_log[0].iload10 = current_DCCT1[10]
+
+                if self._send_to_server(list_log[0]):
+                    self.update_gui.emit('Dados enviados para o servidor')
+                else:
+                    self.update_gui.emit('Erro no envio de dados para o servidor')
+
+            self.FBP.TurnOff()
+            self.FBP.Disconnect()
+
 
         self.test_complete.emit(result)
-        """
-            Fim da Simulação
-        """
 
     def _send_to_server(self, item):
         client = ElpWebClient()
