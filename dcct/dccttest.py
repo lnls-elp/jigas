@@ -81,7 +81,7 @@ class DCCTTest(QThread):
         current_DCCT  = []
         current_DCCT1 = []
         current_DCCT2 = []
-        self._variant = '2'
+        self._variant = 'CONF A'
 
         # If serial connection is lost
         if not self._serial_port.is_open:
@@ -104,7 +104,7 @@ class DCCTTest(QThread):
             self.FBP.ClosedLoop()
             self.update_gui.emit('Malha fechada')
 
-            if self._variant == '2':
+            if self._variant == 'CONF A':
                 list_log.append(DCCTLog())
                 list_log.append(DCCTLog())
 
@@ -155,7 +155,7 @@ class DCCTTest(QThread):
                 else:
                     self.update_gui.emit('Erro no envio de dados para o servidor')
 
-            elif self._variant == '1':
+            elif self._variant == 'CONF B':
                 list_log.append(DCCTLog())
                 list_log.append(None)
 

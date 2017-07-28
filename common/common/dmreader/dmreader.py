@@ -62,7 +62,10 @@ def ReadDataMatrix(frameWidth = 640, frameHeight = 480, cropSize = 220):
             if data == []:
                 print('Tente novamente...')
             else:
-                data = int(decode(crop_img)[0].data)
+                data = decode(crop_img)[0].data
+                data = data.decode('utf-8').split('\r\n')
+                if len(data) > 2:
+                    data = data[0:2]
                 break
 
     # Release camera application
