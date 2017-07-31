@@ -17,7 +17,7 @@ class DCCTTest(QThread):
         self._baudarate = baudrate
         self._serial_number = serial_number
         self._variant = variant
-        self._serial_port = serial.Serial()
+        #self._serial_port = serial.Serial()
         self.FBP = pyDRS.SerialDRS()
 
         self._load_current = [0, 2, 4, 6, 8, 10, -10, -8, -6, -4, -2]
@@ -58,14 +58,13 @@ class DCCTTest(QThread):
         if self._comport is None or self._baudrate is None:
             return False
         else:
-            self._serial_port.baudrate  = self._baudrate
-            self._serial_port.port      = self._comport
+            #self._serial_port.baudrate  = self._baudrate
+            #self._serial_port.port      = self._comport
             #self._serial_port.open()
             return self.FBP.Connect(self._comport, self._baudrate)
 
     def test_communication(self):
         result = (False, False)     # Result for communication test and aux power supply
-        #TODO: Communication test
         self.FBP.Write_sigGen_Aux(1)
 
         if type(self.FBP.Read_vDCMod1()) == float:
@@ -81,11 +80,6 @@ class DCCTTest(QThread):
         current_DCCT  = []
         current_DCCT1 = []
         current_DCCT2 = []
-
-        # If serial connection is lost
-        if not self._serial_port.is_open:
-            self.connection_lost.emit()
-            #TODO: Encerra testes
 
         dcct = DCCT()
         dcct.serial_number = self._serial_number

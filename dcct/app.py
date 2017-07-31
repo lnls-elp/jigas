@@ -107,6 +107,10 @@ class DCCTWindow(QWizard, Ui_Class):
             except (OSError, serial.SerialException):
                 pass
 
+    def _restart_variables(self):
+        self._serial_port_status = False
+        self._test_serial_port_status = False
+
     def _restart_test_thread(self):
         self._test_thread.test_complete.disconnect()
         self._test_thread.update_gui.disconnect()
@@ -162,6 +166,7 @@ class DCCTWindow(QWizard, Ui_Class):
     def _validate_page_start_test(self):
         print('Validate Start Test')
         self._initialize_widgets()
+        self._restart_variables()
         self._restart_test_thread()
         while self.currentId() is not self.num_serial_number:
             self.back()
@@ -283,7 +288,7 @@ class DCCTWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _finish_wizard_execution(self):
-        pass
+        self._restart_test_thread()
 
     @pyqtSlot(bool)
     def _test_finished(self, result):
@@ -295,6 +300,7 @@ class DCCTWindow(QWizard, Ui_Class):
     @pyqtSlot(str)
     def _update_test_log(self, value):
         self.teTestReport.append(value)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

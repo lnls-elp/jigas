@@ -54,13 +54,12 @@ class RackTest(QThread):
 
     def test_communication(self):
         result = False     # Result for communication test
-        #TODO: Communication test
         self.FBP.Write_sigGen_Aux(0)
 
         if type(self.FBP.Read_vDCMod1()) == float:
             result = True
         else:
-            result = True
+            result = False
 
         return result
 
@@ -71,11 +70,6 @@ class RackTest(QThread):
         list_iout1 = []
         list_iout2 = []
         list_iout3 = []
-
-        # If serial connection is lost
-        if not self._serial_port.is_open:
-            self.connection_lost.emit()
-            #TODO: Encerra testes
 
         rack = Rack()
         rack.serial_number = self._serial_number

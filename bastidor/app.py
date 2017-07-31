@@ -105,7 +105,6 @@ class RackWindow(QWizard, Ui_Class):
     def _restart_variables(self):
         self._serial_port_status = False
         self._test_serial_port_status = False
-        self._test_final_status = False
 
     def _restart_test_thread(self):
         self._test_thread.test_complete.disconnect()
@@ -126,7 +125,7 @@ class RackWindow(QWizard, Ui_Class):
         pass
 
     def _initialize_page_test_serial_port(self):
-        print("Teste porta serial!")
+        pass
 
     def _initialize_page_start_test(self):
         self.teTestReport.clear()
@@ -274,8 +273,7 @@ class RackWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _finish_wizard_execution(self):
-        self._test_thread.quit()
-        self._test_thread.wait()
+        self._restart_test_thread()
 
     @pyqtSlot(bool)
     def _test_finished(self, result):
