@@ -107,6 +107,11 @@ class DCCTWindow(QWizard, Ui_Class):
             except (OSError, serial.SerialException):
                 pass
 
+    def _restart_variables(self):
+        self._serial_port_status = False
+        self._test_serial_port_status = False
+        self._test_final_status = False
+
     def _restart_test_thread(self):
         self._test_thread.test_complete.disconnect()
         self._test_thread.update_gui.disconnect()
@@ -163,6 +168,7 @@ class DCCTWindow(QWizard, Ui_Class):
         print('Validate Start Test')
         self._initialize_widgets()
         self._restart_test_thread()
+        self._restart_variables()
         while self.currentId() is not self.num_serial_number:
             self.back()
         return False
