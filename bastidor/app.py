@@ -267,7 +267,7 @@ class RackWindow(QWizard, Ui_Class):
 
     @pyqtSlot(str)
     def _update_test_log(self, value):
-        self.teTestReport.append(values)
+        self.teTestReport.append(value)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

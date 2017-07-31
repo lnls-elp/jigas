@@ -3,6 +3,8 @@ from common.elpwebclient import ElpWebClient
 from rackdata import Rack, RackLog
 import serial
 import random
+import pyDRS
+import time
 
 class RackTest(QThread):
     test_complete       = pyqtSignal(bool)
@@ -15,7 +17,7 @@ class RackTest(QThread):
         self._baudarate = baudrate
         self._serial_number = serial_number
         self._serial_port = serial.Serial()
-
+        self.FBP = pyDRS.SerialDRS()
 
     @property
     def serial_number(self):
@@ -47,23 +49,33 @@ class RackTest(QThread):
         else:
             self._serial_port.baudrate  = self._baudrate
             self._serial_port.port      = self._comport
-            self._serial_port.open()
-            return self._serial_port.is_open
+            #self._serial_port.open()
+            return self.FBP.Connect(self._comport, self._baudrate)
 
     def test_communication(self):
         result = False     # Result for communication test
         #TODO: Communication test
-        """
-            Simulação
-        """
-        result = True
-        """
-            Fim da simulação
-        """
+        self.FBP.Write_sigGen_Aux(0)
+
+        if type(self.FBP.Read_vDCMod1()) == float:
+            result = True
+        else:
+            result = True
+
         return result
 
     def _test_sequence(self):
         result = False
+        list_iout0 = []
+        list_iout1 = []
+        list_iout2 = []
+        list_iout3 = []
+
+        iout0 = 0
+        iout1 = 0
+        iout2 = 0
+        iout3 = 0
+
         # If serial connection is lost
         if not self._serial_port.is_open:
             self.connection_lost.emit()
@@ -75,26 +87,63 @@ class RackTest(QThread):
 
         if res:
             #TODO: Sequencia de Testes
-            """
-            Simulação de valores
-            """
+
+            self.FBP.Write_sigGen_Aux(0) # Usando 0 modulos de potência
             log = RackLog()
+
+            for i in range(0, 11):
+                list_iout0.append(self.FBP.Read_iMod1())
+                list_iout1.append(self.FBP.Read_iMod2())
+                list_iout2.append(self.FBP.Read_iMod3())
+                list_iout3.append(self.FBP.Read_iMod4())
+                time.sleep(2) # Alterar para 60s
+                self.update_gui.emit('leitura ' + str(i+1) + ':')
+                self.update_gui.emit('iout0 = ' + str(list_iout0[i]) + ' A')
+                self.update_gui.emit('iout1 = ' + str(list_iout1[i]) + ' A')
+                self.update_gui.emit('iout2 = ' + str(list_iout2[i]) + ' A')
+                self.update_gui.emit('iout3 = ' + str(list_iout3[i]) + ' A')
+
+            for j in range(0, 11):
+                iout0 = iout0 + list_iout0[j]
+                iout1 = iout1 + list_iout1[j]
+                iout2 = iout2 + list_iout2[j]
+                iout3 = iout3 + list_iout3[j]
+
+            iout0 = iout0/10
+            iout1 = iout1/10
+            iout2 = iout2/10
+            iout3 = iout3/10
+            print(round(iout0))
+            print(round(iout1))
+            print(round(iout2))
+            print(round(iout3))
+            if (round(iout0)==-2) and (round(iout1)==1) and (round(iout2)==3) and (round(iout3)==-3):
+                log.test_result = 'Aprovado'
+                self.update_gui.emit('Aprovado')
+                result = True
+            else:
+                log.test_result = 'Reprovado'
+                self.update_gui.emit('Reprovado')
+                result = False
+
+            log.iout0 = iout0
+            log.iout1 = iout1
+            log.iout2 = iout2
+            log.iout3 = iout3
+            log.delta_iout0 = max(list_iout0) - min(list_iout0)
+            log.delta_iout1 = max(list_iout1) - min(list_iout1)
+            log.delta_iout2 = max(list_iout2) - min(list_iout2)
+            log.delta_iout3 = max(list_iout3) - min(list_iout3)
+
             log.serial_number_rack = self._serial_number
-            log.test_result = "Reprovado"
-            log.iout0       = random.uniform(1.0, 10.0)
-            log.iout1       = random.uniform(1.0, 10.0)
-            log.iout2       = random.uniform(1.0, 10.0)
-            log.iout3       = random.uniform(1.0, 10.0)
-            log.delta_iout0       = random.uniform(1.0, 10.0)
-            log.delta_iout1       = random.uniform(1.0, 10.0)
-            log.delta_iout2       = random.uniform(1.0, 10.0)
-            log.delta_iout3       = random.uniform(1.0, 10.0)
             log.details     = ""
 
-            result = self._send_to_server(log)
-            """
-            Fim da Simulação
-            """
+            if self._send_to_server(log):
+                self.update_gui.emit('Dados enviados para o servidor')
+            else:
+                self.update_gui.emit('Erro no envio de dados para o servidor')
+
+
         # ao finalizar, emitir signals
         self.test_complete.emit(result)
 
