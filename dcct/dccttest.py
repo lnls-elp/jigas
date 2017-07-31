@@ -81,7 +81,6 @@ class DCCTTest(QThread):
         current_DCCT  = []
         current_DCCT1 = []
         current_DCCT2 = []
-        self._variant = 'CONF A'
 
         # If serial connection is lost
         if not self._serial_port.is_open:

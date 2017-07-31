@@ -21,7 +21,7 @@ class RackWindow(QWizard, Ui_Class):
         QWizard.__init__(self, parent)
         self.setupUi(self)
 
-        self._SERIAL_BAUDRATE = 115200
+        self._SERIAL_BAUDRATE = 6000000
 
         # self._material_bastidor = {''}
 
@@ -107,6 +107,12 @@ class RackWindow(QWizard, Ui_Class):
         self._test_serial_port_status = False
         self._test_final_status = False
 
+    def _restart_test_thread(self):
+        self._test_thread.test_complete.disconnect()
+        self._test_thread.update_gui.disconnect()
+        self._test_thread.quit()
+        self._test_thread.wait()
+
     """*************************************************
     ************* Pages Initialization *****************
     *************************************************"""
@@ -150,7 +156,8 @@ class RackWindow(QWizard, Ui_Class):
 
     def _validate_page_start_test(self):
         self._initialize_widgets()
-        self._restart_variables
+        self._restart_variables()
+        self._restart_test_thread()
         while self.currentId() is not self.num_serial_number:
             self.back()
         return False
@@ -263,13 +270,12 @@ class RackWindow(QWizard, Ui_Class):
     def _start_test_sequence(self):
         self._test_thread.test_complete.connect(self._test_finished)
         self._test_thread.update_gui.connect(self._update_test_log)
-        if self._test_thread.isRunning():
-            self._test_thread.quit()
         self._test_thread.start()
 
     @pyqtSlot()
     def _finish_wizard_execution(self):
-        pass
+        self._test_thread.quit()
+        self._test_thread.wait()
 
     @pyqtSlot(bool)
     def _test_finished(self, result):
