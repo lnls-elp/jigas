@@ -65,16 +65,12 @@ class RackTest(QThread):
         return result
 
     def _test_sequence(self):
-        result = False
+        result     = False
+        test_setup = False
         list_iout0 = []
         list_iout1 = []
         list_iout2 = []
         list_iout3 = []
-
-        iout0 = 0
-        iout1 = 0
-        iout2 = 0
-        iout3 = 0
 
         # If serial connection is lost
         if not self._serial_port.is_open:
@@ -103,49 +99,46 @@ class RackTest(QThread):
                 self.update_gui.emit('iout2 = ' + str(list_iout2[i]) + ' A')
                 self.update_gui.emit('iout3 = ' + str(list_iout3[i]) + ' A')
 
-            for j in range(0, 11):
-                iout0 = iout0 + list_iout0[j]
-                iout1 = iout1 + list_iout1[j]
-                iout2 = iout2 + list_iout2[j]
-                iout3 = iout3 + list_iout3[j]
+                if (abs(round(list_iout0[i]))>=12) or (abs(round(list_iout1[i]))>=12) or (abs(round(list_iout2[i]))>=12) or (abs(round(list_iout3[i]))>=12):
+                    self.update_gui.emit('ERRO: REPITA O PROCEDIMENTO DE CONEXÕES DO BASTIDOR E INICIE UM NOVO TESTE')
+                    test_setup = False
+                    break
+                else:
+                    test_setup = True
 
-            iout0 = iout0/10
-            iout1 = iout1/10
-            iout2 = iout2/10
-            iout3 = iout3/10
-            print(round(iout0))
-            print(round(iout1))
-            print(round(iout2))
-            print(round(iout3))
-            if (round(iout0)==-2) and (round(iout1)==1) and (round(iout2)==3) and (round(iout3)==-3):
-                log.test_result = 'Aprovado'
-                self.update_gui.emit('Aprovado')
-                result = True
-            else:
-                log.test_result = 'Reprovado'
-                self.update_gui.emit('Reprovado')
-                result = False
+            if test_setup:
+                for j in range(0, 11):
+                    if (round(list_iout0[j])==-2) and (round(list_iout1[j])==1) and (round(list_iout2[j])==3) and (round(list_iout3[j])==-3):
+                        log.test_result = 'Aprovado'
+                        result = True
+                    else:
+                        log.test_result = 'Reprovado'
+                        result = False
+                        break
+                if result:
+                    self.update_gui.emit('Aprovado')
+                else:
+                    self.update_gui.emit('Reprovado')
 
-            log.iout0 = iout0
-            log.iout1 = iout1
-            log.iout2 = iout2
-            log.iout3 = iout3
-            log.delta_iout0 = max(list_iout0) - min(list_iout0)
-            log.delta_iout1 = max(list_iout1) - min(list_iout1)
-            log.delta_iout2 = max(list_iout2) - min(list_iout2)
-            log.delta_iout3 = max(list_iout3) - min(list_iout3)
+                log.iout0       = sum(list_iout0)/len(list_iout0)
+                log.iout1       = sum(list_iout1)/len(list_iout1)
+                log.iout2       = sum(list_iout2)/len(list_iout2)
+                log.iout3       = sum(list_iout3)/len(list_iout3)
+                log.delta_iout0 = max(list_iout0) - min(list_iout0)
+                log.delta_iout1 = max(list_iout1) - min(list_iout1)
+                log.delta_iout2 = max(list_iout2) - min(list_iout2)
+                log.delta_iout3 = max(list_iout3) - min(list_iout3)
 
-            log.serial_number_rack = self._serial_number
-            log.details     = ""
+                log.serial_number_rack = self._serial_number
+                log.details            = ""
 
-            if self._send_to_server(log):
-                self.update_gui.emit('Dados enviados para o servidor')
-            else:
-                self.update_gui.emit('Erro no envio de dados para o servidor')
+                if self._send_to_server(log):
+                    self.update_gui.emit('Dados enviados para o servidor')
+                else:
+                    self.update_gui.emit('Erro no envio de dados para o servidor')
 
-
-        # ao finalizar, emitir signals
-        self.test_complete.emit(result)
+                # ao finalizar, emitir signals
+                self.test_complete.emit(result)
 
     def _send_to_server(self, item):
         client = ElpWebClient()
