@@ -21,7 +21,7 @@ class RackWindow(QWizard, Ui_Class):
         QWizard.__init__(self, parent)
         self.setupUi(self)
 
-        self._SERIAL_BAUDRATE = 115200
+        self._SERIAL_BAUDRATE = 6000000
 
         # self._material_bastidor = {''}
 

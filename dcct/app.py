@@ -46,6 +46,8 @@ class DCCTWindow(QWizard, Ui_Class):
         self.leSerialNumber.clear()
         self.lbReadSerialStatus.clear()
         self.cbEnableSerialNumberEdit.setChecked(False)
+        self.rbConfA.setChecked(True)
+        self.gbVariante.setEnabled(False)
         self.lbStatusComunicacao.setText("...")
         self.lbStatusAuxSupply.setText("...")
         self.lbTestStatus.setText("Clique para Iniciar Testes")
@@ -141,6 +143,11 @@ class DCCTWindow(QWizard, Ui_Class):
         serial = self.leSerialNumber.text()
         try:
             self._test_thread.serial_number = int(serial)
+            if self.gbVariante.isEnabled():
+                if self.rbConfA.isChecked():
+                    self._test_thread.variant = 'CONF A'
+                else:
+                    self._test_thread.variant = 'CONF B'
             return True
         except ValueError:
             pass
@@ -235,8 +242,10 @@ class DCCTWindow(QWizard, Ui_Class):
     def _treat_read_serial_edit(self):
         if self.cbEnableSerialNumberEdit.isChecked():
             self.leSerialNumber.setReadOnly(False)
+            self.gbVariante.setEnabled(True)
         else:
             self.leSerialNumber.setReadOnly(True)
+            self.gbVariante.setEnabled(False)
 
     @pyqtSlot()
     def _connect_serial_port(self):
