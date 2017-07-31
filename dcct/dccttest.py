@@ -32,11 +32,11 @@ class DCCTTest(QThread):
 
     @property
     def variant(self):
-        return self._variante
+        return self._variant
 
     @variant.setter
     def variant(self, value):
-        self._variante = value
+        self._variant = value
 
     @property
     def comport(self):
@@ -58,12 +58,10 @@ class DCCTTest(QThread):
         if self._comport is None or self._baudrate is None:
             return False
         else:
-            #self._serial_port.baudrate  = self._baudrate
-            #self._serial_port.port      = self._comport
-            #self._serial_port.open()
             return self.FBP.Connect(self._comport, self._baudrate)
 
     def test_communication(self):
+        print(self.FBP.is_open())
         result = (False, False)     # Result for communication test and aux power supply
         self.FBP.Write_sigGen_Aux(1)
 
@@ -86,6 +84,7 @@ class DCCTTest(QThread):
         dcct.variant = self._variant
         res = self._send_to_server(dcct)
 
+        print(dcct.variant)
         if res:
             #TODO: Sequencia de Testes
 
@@ -96,7 +95,7 @@ class DCCTTest(QThread):
             self.update_gui.emit('Fonte ligada')
             self.FBP.ClosedLoop()
             self.update_gui.emit('Malha fechada')
-
+            print('variante ' + str(self._variant))
             if self._variant == 'CONF A':
                 list_log.append(DCCTLog())
                 list_log.append(DCCTLog())
@@ -180,6 +179,8 @@ class DCCTTest(QThread):
                 list_log[0].iload8 = current_DCCT1[8]
                 list_log[0].iload9 = current_DCCT1[9]
                 list_log[0].iload10 = current_DCCT1[10]
+                list_log[0].id_canal_dcct = 1
+                list_log[0].serial_number_dcct = self._serial_number
 
                 if self._send_to_server(list_log[0]):
                     self.update_gui.emit('Dados enviados para o servidor')
@@ -187,8 +188,6 @@ class DCCTTest(QThread):
                     self.update_gui.emit('Erro no envio de dados para o servidor')
 
             self.FBP.TurnOff()
-            self.FBP.Disconnect()
-
 
         self.test_complete.emit(result)
 
@@ -197,6 +196,7 @@ class DCCTTest(QThread):
         client_data = item.data
         client_method = item.method
         client_response = client.do_request(client_method, client_data)
+        print(client_response)
         server_status = self._parse_response(client_response)
         return server_status
 

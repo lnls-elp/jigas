@@ -16,7 +16,7 @@ class RackTest(QThread):
         self._comport = comport
         self._baudarate = baudrate
         self._serial_number = serial_number
-        self._serial_port = serial.Serial()
+        #self._serial_port = serial.Serial()
         self.FBP = pyDRS.SerialDRS()
 
     @property
@@ -47,9 +47,6 @@ class RackTest(QThread):
         if self._comport is None or self._baudrate is None:
             return False
         else:
-            self._serial_port.baudrate  = self._baudrate
-            self._serial_port.port      = self._comport
-            #self._serial_port.open()
             return self.FBP.Connect(self._comport, self._baudrate)
 
     def test_communication(self):
@@ -81,7 +78,7 @@ class RackTest(QThread):
             self.FBP.Write_sigGen_Aux(0) # Usando 0 modulos de potência
             log = RackLog()
 
-            for i in range(0, 11):
+            for i in range(0, 10):
                 list_iout0.append(self.FBP.Read_iMod1())
                 list_iout1.append(self.FBP.Read_iMod2())
                 list_iout2.append(self.FBP.Read_iMod3())
@@ -101,7 +98,7 @@ class RackTest(QThread):
                     test_setup = True
 
             if test_setup:
-                for j in range(0, 11):
+                for j in range(0, 10):
                     if (round(list_iout0[j])==-2) and (round(list_iout1[j])==1) and (round(list_iout2[j])==3) and (round(list_iout3[j])==-3):
                         log.test_result = 'Aprovado'
                         result = True

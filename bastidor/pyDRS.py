@@ -42,7 +42,7 @@ ListHRADCInputType = ['Vin_bipolar','Vin_unipolar_p','Vin_unipolar_n','Iin_bipol
 class SerialDRS(object):
 
     ser = serial.Serial()
-    
+
     def __init__(self):
         #self.ser=serial.Serial()
         self.MasterAdd              = '\x00'
@@ -50,7 +50,7 @@ class SerialDRS(object):
         self.BCastAdd               = '\xFF'
         self.ComWriteVar            = '\x20'
         self.WriteFloatSizePayload  = '\x00\x05'
-        self.WriteDoubleSizePayload = '\x00\x03'        
+        self.WriteDoubleSizePayload = '\x00\x03'
         self.ComReadVar             = '\x10\x00\x01'
         self.ComRequestCurve        = '\x40'
         self.ComSendWfmRef          = '\x41'
@@ -65,7 +65,7 @@ class SerialDRS(object):
                                 'OUT2_OVERVOLTAGE','LEAKAGE_OVERCURRENT','AC_OVERCURRENT']
         self.ListSoftInterlocks = ['IGBT1_OVERTEMP','IGBT2_OVERTEMP','L1_OVERTEMP','L2_OVERTEMP','HEATSINK_OVERTEMP','WATER_OVERTEMP',
                                    'RECTFIER1_OVERTEMP','RECTFIER2_OVERTEMP','AC_TRANSF_OVERTEMP','WATER_FLUX_FAULT','OVER_HUMIDITY_FAULT']
-        
+
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     ======================================================================
                     Funções Internas da Classe
@@ -75,7 +75,7 @@ class SerialDRS(object):
     def float_to_hex(self, value):
         hex_value = struct.pack('f', value)
         return hex_value.decode('ISO-8859-1')
-    
+
     # Converte double para hexadecimal
     def double_to_hex(self,value):
         hex_value = struct.pack('H',value)
@@ -91,7 +91,7 @@ class SerialDRS(object):
         hex_value = struct.pack('>H',value)
         return hex_value.decode('ISO-8859-1')
 
-    # Função Checksum    
+    # Função Checksum
     def checksum(self, packet):
         b=bytearray(packet.encode('ISO-8859-1'))
         csum =(256-sum(b))%256
@@ -99,11 +99,14 @@ class SerialDRS(object):
         send_msg = packet + hcsum.decode(encoding='ISO-8859-1')
         return send_msg
 
-    # Função de leitura de variável 
+    # Função de leitura de variável
     def read_var(self,var_id):
         send_msg = self.checksum(self.SlaveAdd+self.ComReadVar+var_id)
         self.ser.write(send_msg.encode('ISO-8859-1'))
-        
+
+    def is_open(self):
+        return self.ser.is_open
+
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     ======================================================================
                 Métodos de Chamada de Entidades Funções BSMP
@@ -124,20 +127,20 @@ class SerialDRS(object):
         send_msg     = self.checksum(self.SlaveAdd+send_packet)
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
-    
+
     def OpenLoop(self):
         payload_size = self.size_to_hex(1) #Payload: ID
         send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('OpenLoop'))
         send_msg     = self.checksum(self.SlaveAdd+send_packet)
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
-    
+
     def ClosedLoop(self):
         payload_size = self.size_to_hex(1) #Payload: ID
         send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('ClosedLoop'))
         send_msg     = self.checksum(self.SlaveAdd+send_packet)
         self.ser.write(send_msg.encode('ISO-8859-1'))
-        return self.ser.read(6) 
+        return self.ser.read(6)
 
     def OpMode(self,op_mode):
         payload_size = self.size_to_hex(1+2) #Payload: ID + ps_opmode
@@ -146,7 +149,7 @@ class SerialDRS(object):
         send_msg     = self.checksum(self.SlaveAdd+send_packet)
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
-    
+
     def RemoteInterface(self):
         payload_size = self.size_to_hex(1) #Payload: ID
         send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('RemoteInterface'))
@@ -258,14 +261,14 @@ class SerialDRS(object):
         send_msg       = self.checksum(self.SlaveAdd+send_packet)
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
-    
+
     def ResetWfmRef(self):
         payload_size   = self.size_to_hex(1) #Payload: ID
         send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('ResetWfmRef'))
         send_msg       = self.checksum(self.SlaveAdd+send_packet)
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
-		
+
     def SetRSAddress(self,rs_address):
         payload_size = self.size_to_hex(1+2) #Payload: ID + rs_address
         hex_add = self.double_to_hex(rs_address)
@@ -286,7 +289,7 @@ class SerialDRS(object):
         send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('DisableSamplesBuffer'))
         send_msg       = self.checksum(self.SlaveAdd+send_packet)
         self.ser.write(send_msg.encode('ISO-8859-1'))
-        return self.ser.read(6)    
+        return self.ser.read(6)
 
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     ======================================================================
@@ -294,19 +297,19 @@ class SerialDRS(object):
     O retorno do método são os valores double/float da respectiva variavel
     ======================================================================
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-    
+
     def Read_iLoad1(self):
         self.read_var(self.index_to_hex(ListVar.index('iLoad1')))
         reply_msg = self.ser.read(9)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
-    
+
     def Read_iLoad2(self):
         self.read_var(self.index_to_hex(ListVar.index('iLoad2')))
         reply_msg = self.ser.read(9)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
-    
+
     def Read_iMod1(self):
         self.read_var(self.index_to_hex(ListVar.index('iMod1')))
         reply_msg = self.ser.read(9)
@@ -324,60 +327,60 @@ class SerialDRS(object):
         reply_msg = self.ser.read(9)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
-    
+
     def Read_iMod4(self):
         self.read_var(self.index_to_hex(ListVar.index('iMod4')))
         reply_msg = self.ser.read(9)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
-    
+
     def Read_vLoad(self):
         self.read_var(self.index_to_hex(ListVar.index('vLoad')))
         reply_msg = self.ser.read(9)
         val = struct.unpack('BBHfB',reply_msg)
-        return val[3]  
+        return val[3]
 
     def Read_vDCMod1(self):
         self.read_var(self.index_to_hex(ListVar.index('vDCMod1')))
         reply_msg = self.ser.read(9)
         val = struct.unpack('BBHfB',reply_msg)
-        return val[3]    
+        return val[3]
 
     def Read_vDCMod2(self):
         self.read_var(self.index_to_hex(ListVar.index('vDCMod2')))
         reply_msg = self.ser.read(9)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
-    
+
     def Read_vDCMod3(self):
         self.read_var(self.index_to_hex(ListVar.index('vDCMod3')))
         reply_msg = self.ser.read(9)
         val = struct.unpack('BBHfB',reply_msg)
-        return val[3] 
+        return val[3]
 
     def Read_vDCMod4(self):
         self.read_var(self.index_to_hex(ListVar.index('vDCMod4')))
         reply_msg = self.ser.read(9)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
-    
+
     def Read_vOutMod1(self):
         self.read_var(self.index_to_hex(ListVar.index('vOutMod1')))
         reply_msg = self.ser.read(9)
         val = struct.unpack('BBHfB',reply_msg)
-        return val[3]    
+        return val[3]
 
     def Read_vOutMod2(self):
         self.read_var(self.index_to_hex(ListVar.index('vOutMod2')))
         reply_msg = self.ser.read(9)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
-    
+
     def Read_vOutMod3(self):
         self.read_var(self.index_to_hex(ListVar.index('vOutMod3')))
         reply_msg = self.ser.read(9)
         val = struct.unpack('BBHfB',reply_msg)
-        return val[3] 
+        return val[3]
 
     def Read_vOutMod4(self):
         self.read_var(self.index_to_hex(ListVar.index('vOutMod4')))
@@ -450,18 +453,18 @@ class SerialDRS(object):
         reply_msg = self.ser.read(9)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
-    
+
     def Read_wfmRef_Gain(self):
         self.read_var(self.index_to_hex(ListVar.index('wfmRef_Gain')))
         reply_msg = self.ser.read(9)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
-    
+
     def Read_wfmRef_Offset(self):
         self.read_var(self.index_to_hex(ListVar.index('wfmRef_Offset')))
         reply_msg = self.ser.read(9)
         val = struct.unpack('BBHfB',reply_msg)
-        return val[3]     
+        return val[3]
 
     def Read_sigGen_Enable(self):
         self.read_var(self.index_to_hex(ListVar.index('sigGen_Enable')))
@@ -537,42 +540,42 @@ class SerialDRS(object):
 
     def Read_ps_Model(self):
         self.read_var(self.index_to_hex(ListVar.index('ps_Model')))
-        reply_msg = self.ser.read(7)    
+        reply_msg = self.ser.read(7)
         val = struct.unpack('BBHHB',reply_msg)
         return val[3]
 
     def Read_wfmRef_PtrBufferStart(self):
         self.read_var(self.index_to_hex(ListVar.index('wfmRef_PtrBufferStart')))
-        reply_msg = self.ser.read(9)    
+        reply_msg = self.ser.read(9)
         val = struct.unpack('BBHLB',reply_msg)
         return val[3]
 
     def Read_wfmRef_PtrBufferEnd(self):
         self.read_var(self.index_to_hex(ListVar.index('wfmRef_PtrBufferEnd')))
-        reply_msg = self.ser.read(9)    
+        reply_msg = self.ser.read(9)
         val = struct.unpack('BBHLB',reply_msg)
         return val[3]
 
     def Read_wfmRef_PtrBufferK(self):
         self.read_var(self.index_to_hex(ListVar.index('wfmRef_PtrBufferK')))
-        reply_msg = self.ser.read(9)    
+        reply_msg = self.ser.read(9)
         val = struct.unpack('BBHLB',reply_msg)
         return val[3]
-    
+
     def Read_wfmRef_SyncMode(self):
         self.read_var(self.index_to_hex(ListVar.index('wfmRef_SyncMode')))
-        reply_msg = self.ser.read(7)    
+        reply_msg = self.ser.read(7)
         val = struct.unpack('BBHHB',reply_msg)
         return val[3]
 
-		
+
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     ======================================================================
                 Métodos de Escrita de Valores das Variáveis BSMP
             O retorno do método são os bytes de retorno da mensagem
     ======================================================================
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-    
+
     def Write_sigGen_Freq(self,float_value):
         hex_float    = self.float_to_hex(float_value)
         send_packet  = self.ComWriteVar+self.WriteFloatSizePayload+self.index_to_hex(ListVar.index('sigGen_Freq'))+hex_float
@@ -640,7 +643,7 @@ class SerialDRS(object):
            val.append(self.float_to_hex(float(data[k])))
         payload_size  = struct.pack('>H', (len(val)*4)+3).decode('ISO-8859-1')
         curva_hex     = ''.join(val)
-        send_packet   = self.ComSendWfmRef+payload_size+self.index_to_hex(ListCurv.index('wfmRef_Curve'))+block_hex+curva_hex 
+        send_packet   = self.ComSendWfmRef+payload_size+self.index_to_hex(ListCurv.index('wfmRef_Curve'))+block_hex+curva_hex
         send_msg      = self.checksum(self.SlaveAdd+send_packet)
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(5)
@@ -671,7 +674,7 @@ class SerialDRS(object):
         except:
             pass
         return val
-    
+
     def Send_fullwfmRef_Curve(self,block_idx,data):
         block_hex = struct.pack('>H',block_idx).decode('ISO-8859-1')
         val   = []
@@ -679,7 +682,7 @@ class SerialDRS(object):
            val.append(self.float_to_hex(float(data[k])))
         payload_size  = struct.pack('>H', (len(val)*4)+3).decode('ISO-8859-1')
         curva_hex     = ''.join(val)
-        send_packet   = self.ComSendWfmRef+payload_size+self.index_to_hex(ListCurv.index('fullwfmRef_Curve'))+block_hex+curva_hex 
+        send_packet   = self.ComSendWfmRef+payload_size+self.index_to_hex(ListCurv.index('fullwfmRef_Curve'))+block_hex+curva_hex
         send_msg      = self.checksum(self.SlaveAdd+send_packet)
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(5)
@@ -719,14 +722,14 @@ class SerialDRS(object):
             #print(time.time()-t0)
         self.EnableSamplesBuffer()
         return buff
-        
-    
+
+
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     ======================================================================
                             Funções Serial
     ======================================================================
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-        
+
     def Connect(self,port='COM2',baud=6000000):
         try:
             SerialDRS.ser = serial.Serial(port,baud,timeout=3) #port format should be 'COM'+number
@@ -744,19 +747,3 @@ class SerialDRS(object):
 
     def SetSlaveAdd(self,address):
         self.SlaveAdd = struct.pack('B',address).decode('ISO-8859-1')
-    
-
-
-    
-    
-    
-
-    
-                        
-
-    
-                
-        
-
-
-    

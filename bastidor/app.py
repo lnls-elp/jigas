@@ -273,7 +273,7 @@ class RackWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _finish_wizard_execution(self):
-        self._restart_test_thread()
+        pass
 
     @pyqtSlot(bool)
     def _test_finished(self, result):

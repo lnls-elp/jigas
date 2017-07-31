@@ -61,7 +61,6 @@ class DCCTWindow(QWizard, Ui_Class):
         self.pbConnectSerialPort.clicked.connect(self._connect_serial_port)
         self.pbStartTests.clicked.connect(self._start_test_sequence)
         self.pbCommunicationTest.clicked.connect(self._communication_test)
-        #self._web_request.server_response.connect(self._treat_server_response)
         self.finished.connect(self._finish_wizard_execution)
 
     def _initialize_wizard_buttons(self):
@@ -288,7 +287,7 @@ class DCCTWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _finish_wizard_execution(self):
-        self._restart_test_thread()
+        pass
 
     @pyqtSlot(bool)
     def _test_finished(self, result):
