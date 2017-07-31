@@ -21,13 +21,15 @@ class DCCTWindow(QWizard, Ui_Class):
         QWizard.__init__(self, parent)
         self.setupUi(self)
 
-        self._SERIAL_BAUDRATE = 115200
+        self._SERIAL_BAUDRATE = 6000000
 
         self._list_serial_ports()
         self._serial_port_status = False
         self._test_serial_port_status = False
 
         self._test_thread = DCCTTest()
+
+        self._material_dcct = {'14024292':'CONF A', '14024295':'CONF B'}
 
         self._initialize_widgets()
         self._initialize_signals()
@@ -214,11 +216,12 @@ class DCCTWindow(QWizard, Ui_Class):
     @pyqtSlot()
     def _read_serial_number(self):
         data = ReadDataMatrix()
-        if data == None:
-            self.lbReadSerialStatus.setText("<p color:'red'><b>ERRO. Digite Manualmente!</b><p/>")
+        if data[0] in self._material_dcct.keys():
+            self._test_thread.variant = self._material_dcct[data[0]]
+            self._test_thread.serial_number = int(data[1])
+            self.leSerialNumber.setText(data[1])
         else:
-            self._test_thread.serial_number = data
-            self.leSerialNumber.setText(str(data))
+            self.lbReadSerialStatus.setText("<p color:'red'><b>ERRO. Digite Manualmente!</b><p/>")
         print("Read serial number")
 
     @pyqtSlot()

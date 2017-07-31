@@ -23,6 +23,8 @@ class RackWindow(QWizard, Ui_Class):
 
         self._SERIAL_BAUDRATE = 115200
 
+        # self._material_bastidor = {''}
+
         self._list_serial_ports()
         self._serial_port_status = False
         self._test_serial_port_status = False
@@ -214,12 +216,21 @@ class RackWindow(QWizard, Ui_Class):
     *************************************************"""
     @pyqtSlot()
     def _read_serial_number(self):
+        #data = ReadDataMatrix()
+        #if data[0] in self._material_bastidor.keys():
+        #    self._test_thread.variant = self._material_dcct[data[0]]
+        #    self._test_thread.serial_number = int(data[1])
+        #    self.leSerialNumber.setText(data[1])
+        #else:
+        #    self.lbReadSerialStatus.setText("<p color:'red'><b>ERRO. Digite Manualmente!</b><p/>")
+        #print("Read serial number")
+
         data = ReadDataMatrix()
-        if data == None:
-            self.lbReadSerialStatus.setText("<p color:'red'><b>ERRO. Digite Manualmente!</b><p/>")
+        if data is not None:
+            self._test_thread.serial_number = int(data[1])
+            self.leSerialNumber.setText(data[1])
         else:
-            self._test_thread.serial_number = data
-            self.leSerialNumber.setText(str(data))
+            self.lbReadSerialStatus.setText("<p color:'red'><b>ERRO. Digite Manualmente!</b><p/>")
 
     @pyqtSlot()
     def _treat_read_serial_edit(self):
@@ -252,6 +263,8 @@ class RackWindow(QWizard, Ui_Class):
     def _start_test_sequence(self):
         self._test_thread.test_complete.connect(self._test_finished)
         self._test_thread.update_gui.connect(self._update_test_log)
+        if self._test_thread.isRunning():
+            self._test_thread.quit()
         self._test_thread.start()
 
     @pyqtSlot()
