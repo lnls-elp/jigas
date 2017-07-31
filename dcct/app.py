@@ -218,7 +218,6 @@ class DCCTWindow(QWizard, Ui_Class):
         data = ReadDataMatrix()
         if data[0] in self._material_dcct.keys():
             self._test_thread.variant = self._material_dcct[data[0]]
-            print('Variante = ' + self._test_thread.variant)
             self._test_thread.serial_number = int(data[1])
             self.leSerialNumber.setText(data[1])
         else:
