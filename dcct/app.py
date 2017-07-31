@@ -105,6 +105,12 @@ class DCCTWindow(QWizard, Ui_Class):
             except (OSError, serial.SerialException):
                 pass
 
+    def _restart_test_thread(self):
+        self._test_thread.test_complete.disconnect()
+        self._test_thread.update_gui.disconnect()
+        self._test_thread.quit()
+        self._test_thread.wait()
+
     """*************************************************
     ************* Pages Initialization *****************
     *************************************************"""
@@ -149,6 +155,7 @@ class DCCTWindow(QWizard, Ui_Class):
     def _validate_page_start_test(self):
         print('Validate Start Test')
         self._initialize_widgets()
+        self._restart_test_thread()
         while self.currentId() is not self.num_serial_number:
             self.back()
         return False

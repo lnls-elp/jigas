@@ -165,6 +165,5 @@ class RackTest(QThread):
             return False
 
     def run(self):
-        self.update_gui.emit("Start Thread")
         self._test_sequence()
         #pass
