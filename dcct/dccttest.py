@@ -61,7 +61,6 @@ class DCCTTest(QThread):
             return self.FBP.Connect(self._comport, self._baudrate)
 
     def test_communication(self):
-        print(self.FBP.is_open())
         result = (False, False)     # Result for communication test and aux power supply
         self.FBP.Write_sigGen_Aux(1)
 
