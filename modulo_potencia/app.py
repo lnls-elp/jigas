@@ -274,29 +274,29 @@ class PowerModuleWindow(QWizard, Ui_Class):
     def _read_serial_number_0(self):
         data = ReadDataMatrix()
         if data is not None:
-            self._test_thread.serial_mod0 = data
-            self.leSerialNumber0.setText(str(data))
+            self._test_thread.serial_mod0 = int(data[1])
+            self.leSerialNumber0.setText(data[1])
 
     @pyqtSlot()
     def _read_serial_number_1(self):
         data = ReadDataMatrix()
         if data is not None:
-            self._test_thread.serial_mod1 = data
-            self.leSerialNumber1.setText(str(data))
+            self._test_thread.serial_mod1 = int(data[1])
+            self.leSerialNumber1.setText(data[1])
 
     @pyqtSlot()
     def _read_serial_number_2(self):
         data = ReadDataMatrix()
         if data is not None:
-            self._test_thread.serial_mod2 = data
-            self.leSerialNumber2.setText(str(data))
+            self._test_thread.serial_mod2 = int(data[1])
+            self.leSerialNumber2.setText(data[1])
 
     @pyqtSlot()
     def _read_serial_number_3(self):
         data = ReadDataMatrix()
         if data is not None:
-            self._test_thread.serial_mod3 = data
-            self.leSerialNumber3.setText(str(data))
+            self._test_thread.serial_mod3 = int(data[1])
+            self.leSerialNumber3.setText(data[1])
 
     @pyqtSlot()
     def _treat_read_serial_edit_0(self):

@@ -220,12 +220,11 @@ class UDCWindow(QWizard, Ui_Class):
     @pyqtSlot()
     def _read_serial_number(self):
         data = ReadDataMatrix()
-        if data == None:
-            self.lbReadSerialStatus.setText("<p color:'red'><b>ERRO. Digite Manualmente!</b><p/>")
+        if data is not None:
+            self._test_thread.serial_number = int(data[1])
+            self.leSerialNumber.setText(data[1])
         else:
-            self._test_thread.serial_number = data
-            self.leSerialNumber.setText(str(data))
-        print("Read serial number")
+            self.lbReadSerialStatus.setText("<p color:'red'><b>ERRO. Digite Manualmente!</b><p/>")
 
     @pyqtSlot()
     def _treat_read_serial_edit(self):
