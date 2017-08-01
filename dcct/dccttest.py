@@ -62,11 +62,16 @@ class DCCTTest(QThread):
 
     def test_communication(self):
         result = (False, False)     # Result for communication test and aux power supply
-        self.FBP.Write_sigGen_Aux(1)
 
-        if type(self.FBP.Read_vDCMod1()) == float:
-            result = (True,True)
-        else:
+        try:
+            self.FBP.Write_sigGen_Aux(1)
+            test_package = self.FBP.Read_ps_Model()
+
+            if (test_package[0] == 0) and (test_package[1] == 17) and (test_package[2] == 512) and (test_package[3] == 14) and (test_package[4] == 223):
+                result = (True,True)
+            else:
+                result = (False, False)
+        except:
             result = (False, False)
 
         return result

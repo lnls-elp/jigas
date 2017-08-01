@@ -51,11 +51,15 @@ class RackTest(QThread):
 
     def test_communication(self):
         result = False     # Result for communication test
-        self.FBP.Write_sigGen_Aux(0)
 
-        if type(self.FBP.Read_vDCMod1()) == float:
-            result = True
-        else:
+        try:
+            self.FBP.Write_sigGen_Aux(0)
+            test_package = self.FBP.Read_ps_Model()
+            if (test_package[0] == 0) and (test_package[1] == 17) and (test_package[2] == 512) and (test_package[3] == 14) and (test_package[4] == 223):
+                result = True
+            else:
+                result = False
+        except:
             result = False
 
         return result
@@ -91,6 +95,7 @@ class RackTest(QThread):
                 self.update_gui.emit('iout3 = ' + str(list_iout3[i]) + ' A')
 
                 if (abs(round(list_iout0[i]))>=12) or (abs(round(list_iout1[i]))>=12) or (abs(round(list_iout2[i]))>=12) or (abs(round(list_iout3[i]))>=12):
+
                     self.update_gui.emit('ERRO: REPITA O PROCEDIMENTO DE CONEXÕES DO BASTIDOR E INICIE UM NOVO TESTE')
                     test_setup = False
                     break
