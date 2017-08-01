@@ -542,7 +542,7 @@ class SerialDRS(object):
         self.read_var(self.index_to_hex(ListVar.index('ps_Model')))
         reply_msg = self.ser.read(7)
         val = struct.unpack('BBHHB',reply_msg)
-        return val[3]
+        return val
 
     def Read_wfmRef_PtrBufferStart(self):
         self.read_var(self.index_to_hex(ListVar.index('wfmRef_PtrBufferStart')))
@@ -732,7 +732,7 @@ class SerialDRS(object):
 
     def Connect(self,port='COM2',baud=6000000):
         try:
-            SerialDRS.ser = serial.Serial(port,baud,timeout=3) #port format should be 'COM'+number
+            SerialDRS.ser = serial.Serial(port,baud,timeout=1) #port format should be 'COM'+number
             return True
         except:
             return False

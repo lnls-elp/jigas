@@ -51,11 +51,15 @@ class RackTest(QThread):
 
     def test_communication(self):
         result = False     # Result for communication test
-        self.FBP.Write_sigGen_Aux(0)
 
-        if type(self.FBP.Read_vDCMod1()) == float:
-            result = True
-        else:
+        try:
+            self.FBP.Write_sigGen_Aux(0)
+            test_package = self.FBP.Read_ps_Model()
+            if (test_package[0] == 0) and (test_package[1] == 17) and (test_package[2] == 512) and (test_package[3] == 14) and (test_package[4] == 223):
+                result = True
+            else:
+                result = False
+        except:
             result = False
 
         return result
