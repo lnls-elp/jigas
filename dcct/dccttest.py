@@ -66,13 +66,14 @@ class DCCTTest(QThread):
         try:
             self.FBP.Write_sigGen_Aux(1)
             test_package = self.FBP.Read_ps_Model()
+
             if (test_package[0] == 0) and (test_package[1] == 17) and (test_package[2] == 512) and (test_package[3] == 14) and (test_package[4] == 223):
                 result = (True,True)
             else:
                 result = (False, False)
         except:
             result = (False, False)
-            
+
         return result
 
     def _test_sequence(self):

@@ -3,6 +3,8 @@ from pmdata import PowerModule, PowerModuleLog
 from common.elpwebclient import ElpWebClient
 import serial
 import random
+import pyDRS
+import time
 
 class PowerModuleTest(QThread):
     test_complete       = pyqtSignal(list)
@@ -19,6 +21,7 @@ class PowerModuleTest(QThread):
         self._serial_mod2 = mod2
         self._serial_mod3 = mod3
         self._serial_port = serial.Serial()
+        self.FBP = pyDRS.SerialDRS()
 
 
     @property
@@ -75,20 +78,55 @@ class PowerModuleTest(QThread):
         else:
             self._serial_port.baudrate  = self._baudrate
             self._serial_port.port      = self._comport
-            self._serial_port.open()
-            return self._serial_port.is_open
+            #self._serial_port.open()
+            #return self._serial_port.is_open
+            return self.FBP.Connect(self._comport, self._baudrate)
 
     def test_communication(self):
         # Resultado teste de comunicação para os 4 módulos
+        n_mod  = 0
         result = [None for i in range(4)]
-        #TODO: Communication test
-        """
-            Simulação
-        """
-        result = ["OK", "Falha", "OK", "OK"]
-        """
-            Fim da simulação
-        """
+        serial = [self._serial_mod0, self._serial_mod1, self._serial_mod2,
+                    self._serial_mod3]
+
+        for j in range(0, len(serial)):
+            if serial[j] != None:
+                n_mod = n_mod+1
+
+        try:
+            self.FBP.Write_sigGen_Aux(n_mod)
+            test_package = self.FBP.Read_ps_Model()
+
+            if (test_package[0] == 0) and (test_package[1] == 17) and (test_package[2] == 512) and (test_package[3] == 14) and (test_package[4] == 223):
+                for k in range(0, len(serial)):
+                    if serial[k] != None:
+                        if k+1 == 1:
+                            if round(self.FBP.Read_vDCMod1()) == 15: # Para um DCLink de 15V
+                                result[k] = 'OK'
+                            else:
+                                result[k] = 'Falha'
+                        elif k+1 == 2:
+                            if round(self.FBP.Read_vDCMod2()) == 15: # Para um DCLink de 15V
+                                result[k] = 'OK'
+                            else:
+                                result[k] = 'Falha'
+                        elif k+1 == 3:
+                            if round(self.FBP.Read_vDCMod3()) == 15: # Para um DCLink de 15V
+                                result[k] = 'OK'
+                            else:
+                                result[k] = 'Falha'
+                        elif k+1 == 4:
+                            if round(self.FBP.Read_vDCMod4()) == 15: # Para um DCLink de 15V
+                                result[k] = 'OK'
+                            else:
+                                result[k] = 'Falha'
+                    else:
+                        result[k] = 'Sem Fonte'
+            else:
+                result = ['Falha', 'Falha', 'Falha', 'Falha']
+        except:
+            result = ['Falha Comunicação', 'Falha Comunicação', 'Falha Comunicação', 'Falha Comunicação']
+
         return result
 
     def _test_sequence(self):

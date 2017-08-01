@@ -95,6 +95,7 @@ class RackTest(QThread):
                 self.update_gui.emit('iout3 = ' + str(list_iout3[i]) + ' A')
 
                 if (abs(round(list_iout0[i]))>=12) or (abs(round(list_iout1[i]))>=12) or (abs(round(list_iout2[i]))>=12) or (abs(round(list_iout3[i]))>=12):
+
                     self.update_gui.emit('ERRO: REPITA O PROCEDIMENTO DE CONEXÕES DO BASTIDOR E INICIE UM NOVO TESTE')
                     test_setup = False
                     break
