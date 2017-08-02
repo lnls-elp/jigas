@@ -26,27 +26,23 @@ class PowerSupply:
 
 class PowerSupplyLog:
 
-    def __init__(self, id_canal_ps=None, test_result=None, serial_number_ps=None,
-                    result_test_on_off=None, iout_add_20_duty_cycle=None,
-                    iout_less_20_duty_cycle=None, iout0=None, iout1=None,
-                    vout0=None, vout1=None, vdclink0=None, vdclink1=None,
-                    temperatura0=None, temperatura1=None, details=None):
+    def __init__(self):
 
-        self._id_canal_ps               = id_canal_ps
-        self._test_result               = test_result
-        self._serial_number_ps          = serial_number_ps
-        self._result_test_on_off        = result_test_on_off
-        self._iout_add_20_duty_cycle    = iout_add_20_duty_cycle
-        self._iout_less_20_duty_cycle   = iout_less_20_duty_cycle
-        self._iout0                     = iout0
-        self._iout1                     = iout1
-        self._vout0                     = vout0
-        self._vout1                     = vout1
-        self._vdclink0                  = vdclink0
-        self._vdclink1                  = vdclink1
-        self._temperatura0              = temperatura0
-        self._temperatura1              = temperatura1
-        self._details                   = details
+        self._id_canal_ps               = None
+        self._test_result               = None
+        self._serial_number_ps          = None
+        self._result_test_on_off        = None
+        self._iout_add_20_duty_cycle    = None
+        self._iout_less_20_duty_cycle   = None
+        self._iout0                     = None
+        self._iout1                     = None
+        self._vout0                     = None
+        self._vout1                     = None
+        self._vdclink0                  = None
+        self._vdclink1                  = None
+        self._temperatura0              = None
+        self._temperatura1              = None
+        self._details                   = None
 
     @property
     def id_canal_power_supply(self):

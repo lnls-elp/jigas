@@ -18,7 +18,8 @@ class UDCWindow(QWizard, Ui_Class):
 
     # Page numbers
     (num_intro_page, num_serial_number, num_connect_udc,
-    num_visual_test, num_serial_port, num_start_test) = range(6)
+    num_visual_test, num_serial_port, num_hard_verifications,
+    num_start_test) = range(7)
 
     def __init__(self, parent=None):
         QWizard.__init__(self, parent)
@@ -29,6 +30,7 @@ class UDCWindow(QWizard, Ui_Class):
         self._list_serial_ports()
         self._serial_port_status = False
         self._test_serial_port_status = False
+        self._sdcard_insert_status = False
 
         self._test_thread = UDCTest()
 
@@ -52,6 +54,7 @@ class UDCWindow(QWizard, Ui_Class):
         self.rbLedsNok.setChecked(False)
         self.rbBuzzerOk.setChecked(False)
         self.rbBuzzerNok.setChecked(False)
+        self.lbSdCardInsert.setChecked("Clique para detectar")
         self.lbTestStatus.setText("Iniciar...")
         self.lbTestResult.setText("Aguarde...")
         self.lbEeprom.setText("...")
@@ -73,8 +76,10 @@ class UDCWindow(QWizard, Ui_Class):
         self.lbRs4852.setText("...")
         self.lbRs4853.setText("...")
         self.lbAlimPlanoIsolado.setText("...")
-        self.lbExpansorIo.setText("...")
-        self.lbEthernet.setText("...")
+        self.lbExpansorI01.setText("...")
+        self.lbExpansorI02.setText("...")
+        self.lbEthernetInit.setText("...")
+        self.lbEthernetPing.setText("...")
         self.teTestReport.clear()
 
     def _initialize_signals(self):
@@ -84,6 +89,7 @@ class UDCWindow(QWizard, Ui_Class):
         self.pbConnectSerialPort.clicked.connect(self._connect_serial_port)
         self.pbStartTests.clicked.connect(self._start_test_sequence)
         self.pbCommunicationTest.clicked.connect(self._communication_test)
+        self.pbDetectSdCard.clicked.connect(self._sdcard_connection_test)
         #self._web_request.server_response.connect(self._treat_server_response)
         self.finished.connect(self._finish_wizard_execution)
 
@@ -107,6 +113,10 @@ class UDCWindow(QWizard, Ui_Class):
         self.PageTestSerialPort.setButtonText(self.NextButton, "Próximo")
         self.PageTestSerialPort.setButtonText(self.BackButton, "Anterior")
         self.PageTestSerialPort.setButtonText(self.CancelButton, "Cancelar")
+
+        self.PageHardwareVerifications.setButtonText(self.NextButton, "Próximo")
+        self.PageHardwareVerifications.setButtonText(self.BackButton, "Anterior")
+        self.PageHardwareVerifications.setButtonText(self.CancelButton, "Cancelar")
 
         self.PageStartTest.setButtonText(self.NextButton, "Novo Teste")
         self.PageStartTest.setButtonText(self.BackButton, "Anterior")
@@ -189,6 +199,9 @@ class UDCWindow(QWizard, Ui_Class):
     def _initialize_page_test_serial_port(self):
         pass
 
+    def _initialize_page_hardware_verifications(self):
+        pass
+
     def _initialize_page_start_test(self):
         self.teTestReport.clear()
 
@@ -232,6 +245,9 @@ class UDCWindow(QWizard, Ui_Class):
     def _validate_page_test_serial_port(self):
         return self._test_serial_port_status
 
+    def _initialize_page_hardware_verifications(self):
+        return self._sdcard_insert_status
+
     def _validate_page_start_test(self):
         print('Validate Start Test')
         self._initialize_widgets()
@@ -264,6 +280,9 @@ class UDCWindow(QWizard, Ui_Class):
             self._initialize_page_test_serial_port()
             print(self.currentId())
 
+        elif page == self.num_hard_verifications:
+            return self._initialize_page_hardware_verifications()
+
         elif page == self.num_start_test:
             self._initialize_page_start_test()
             print(self.currentId())
@@ -287,6 +306,9 @@ class UDCWindow(QWizard, Ui_Class):
 
         elif current_id == self.num_serial_port:
             return self._validate_page_test_serial_port()
+
+        elif current_id == self.num_hard_verifications:
+            return self._validate_page_hardware_verifications()
 
         elif current_id == self.num_start_test:
             return self._validate_page_start_test()
@@ -340,6 +362,16 @@ class UDCWindow(QWizard, Ui_Class):
             self._test_serial_port_status = True
         else:
             self._test_serial_port_status = False
+
+    @pyqtSlot()
+    def _sdcard_connection_test(self):
+        test = self._test_thread.test_sdcard_connection()
+        if test:
+            self.lbSdCardInsert.setText("SUCESSO!! Cartão Detectado")
+            self._sdcard_insert_status = True
+        else:
+            self.lbSdCardInsert.setText("ERRO!! Cartão não inserido")
+            self._sdcard_insert_status = False
 
     @pyqtSlot()
     def _start_test_sequence(self):
@@ -410,13 +442,15 @@ class UDCWindow(QWizard, Ui_Class):
     def _update_isol_plane_label(self, value):
         self.lbAlimPlanoIsolado.setText(value)
 
-    @pyqtSlot(str)
+    @pyqtSlot(list)
     def _update_io_expander_label(self, value):
-        self.lbExpansorIo.setText(value)
+        self.lbExpansorIO1.setText(value[0])
+        self.lbExpansorIO2.setText(value[1])
 
-    @pyqtSlot(str)
+    @pyqtSlot(list)
     def _update_ethernet_label(self, value):
-        self.lbEthernet.setText(value)
+        self.lbEthernetInit.setText(value[0])
+        self.lbEthernetPing.setText(value[1])
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

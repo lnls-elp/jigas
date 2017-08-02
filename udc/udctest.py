@@ -22,8 +22,8 @@ class UDCTest(QThread):
     sensor_temp_val     = pyqtSignal(str)
     rs485               = pyqtSignal(list)
     isol_plane          = pyqtSignal(str)
-    io_expander         = pyqtSignal(str)
-    ethernet            = pyqtSignal(str)
+    io_expander         = pyqtSignal(list)
+    ethernet            = pyqtSignal(list)
 
     def __init__(self, comport=None, baudrate=None, serial_number=None):
         QThread.__init__(self)
@@ -83,6 +83,18 @@ class UDCTest(QThread):
     def test_communication(self):
         result = False     # Result for communication test and aux power supply
         #TODO: Communication test
+        """
+            Simulação de teste
+        """
+        result = True
+        """
+            Fim da Simulação
+        """
+        return result
+
+    def test_sdcard_connection(self):
+        result = False
+        #TODO: Connection test
         """
             Simulação de teste
         """
@@ -153,13 +165,13 @@ class UDCTest(QThread):
         return result
 
     def _test_io_expander(self):
-        result = self.FAIL
+        result = [self.FAIL for i in range(2)]
         #TODO: Testes
         self.io_expander.emit(result)
         return result
 
     def _test_ethernet(self):
-        result = self.FAIL
+        result = [self.FAIL for i in range(2)]
         #TODO: Testes
         self.ethernet.emit(result)
         return result
@@ -182,7 +194,9 @@ class UDCTest(QThread):
             log = UDCLog()
             log.leds                        = self._led
             log.buzzer                      = self._buzzer
-            log.io_expander                 = self._test_io_expander()
+            test_expander                   = self._test_io_expander()
+            log.io_expander0                = test_expander[0]
+            log.io_expander1                = test_expander[1]
             log.eeprom                      = self._test_eeprom()
             log.flash                       = self._test_flash()
             log.ram                         = self._test_ram()
@@ -190,7 +204,10 @@ class UDCTest(QThread):
             log.rtc_interrupt               = self._test_rtc_interrupt()
             log.temperature_sensor          = self._test_temperature_sensor_value()
             log.control_aliment_isol_plane  = self._test_alim_isol_plane()
-            log.rs485                       = self._test_rs485()
+            test_rs485                      = self._test_rs485()
+            log.rs4850                      = test_rs485[0]
+            log.rs4851                      = test_rs485[1]
+            log.rs4852                      = test_rs485[2]
             log.test_result = "Aprovado"
             log.serial_number_udc = self._serial_number
             log.details = ""

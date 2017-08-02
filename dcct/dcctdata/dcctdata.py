@@ -36,26 +36,23 @@ class DCCT:
 
 class DCCTLog:
 
-    def __init__(self, id_canal_dcct=None, test_result=None, serial_number_dcct=None,
-                    iload0=None, iload1=None, iload2=None, iload3=None, iload4=None,
-                    iload5=None, iload6=None, iload7=None, iload8=None, iload9=None,
-                    iload10=None, details=None):
+    def __init__(self):
 
-        self._id_canal_dcct         = id_canal_dcct
-        self._test_result           = test_result
-        self._serial_number_dcct    = serial_number_dcct
-        self._iload0                = iload0
-        self._iload1                = iload1
-        self._iload2                = iload2
-        self._iload3                = iload3
-        self._iload4                = iload4
-        self._iload5                = iload5
-        self._iload6                = iload6
-        self._iload7                = iload7
-        self._iload8                = iload8
-        self._iload9                = iload9
-        self._iload10               = iload10
-        self._details               = details
+        self._id_canal_dcct         = None
+        self._test_result           = None
+        self._serial_number_dcct    = None
+        self._iload0                = None
+        self._iload1                = None
+        self._iload2                = None
+        self._iload3                = None
+        self._iload4                = None
+        self._iload5                = None
+        self._iload6                = None
+        self._iload7                = None
+        self._iload8                = None
+        self._iload9                = None
+        self._iload10               = None
+        self._details               = None
 
     @property
     def id_canal_dcct(self):
