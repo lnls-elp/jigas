@@ -92,40 +92,21 @@ class PowerModuleTest(QThread):
         for j in range(0, len(serial)):
             if serial[j] != None:
                 n_mod = n_mod+1
-
         try:
             self.FBP.Write_sigGen_Aux(n_mod)
             test_package = self.FBP.Read_ps_Model()
 
-            if (test_package[0] == 0) and (test_package[1] == 17) and (test_package[2] == 512) and (test_package[3] == 14) and (test_package[4] == 223):
-                for k in range(0, len(serial)):
-                    if serial[k] != None:
-                        if k+1 == 1:
-                            if round(self.FBP.Read_vDCMod1()) == 15: # Para um DCLink de 15V
-                                result[k] = 'OK'
-                            else:
-                                result[k] = 'Falha'
-                        elif k+1 == 2:
-                            if round(self.FBP.Read_vDCMod2()) == 15: # Para um DCLink de 15V
-                                result[k] = 'OK'
-                            else:
-                                result[k] = 'Falha'
-                        elif k+1 == 3:
-                            if round(self.FBP.Read_vDCMod3()) == 15: # Para um DCLink de 15V
-                                result[k] = 'OK'
-                            else:
-                                result[k] = 'Falha'
-                        elif k+1 == 4:
-                            if round(self.FBP.Read_vDCMod4()) == 15: # Para um DCLink de 15V
-                                result[k] = 'OK'
-                            else:
-                                result[k] = 'Falha'
-                    else:
-                        result[k] = 'Sem Fonte'
+            if (test_package[0] == 0)   and \
+               (test_package[1] == 17)  and \
+               (test_package[2] == 512) and \
+               (test_package[3] == 14)  and \
+               (test_package[4] == 223):
+               result = ['OK', 'OK', 'OK', 'OK']
+
             else:
                 result = ['Falha', 'Falha', 'Falha', 'Falha']
         except:
-            result = ['Falha Comunicação', 'Falha Comunicação', 'Falha Comunicação', 'Falha Comunicação']
+            result = ['Falha', 'Falha', 'Falha', 'Falha']
 
         return result
 
@@ -135,62 +116,171 @@ class PowerModuleTest(QThread):
         serial = [self._serial_mod0, self._serial_mod1, self._serial_mod2,
                     self._serial_mod3]
 
+        mod_result1      = [[] for j in range(4)] # para medidas de iout e DCLink
+        mod_result2      = [[] for k in range(4)] # para medidas de vout
+        mod_result3      = [[] for l in range(4)] # para medidas de temperatura
+        load_current     = ['turnedOff', 0, 5, 10, -10, -5] # correntes setadas
+        compare_measure  = [[0,  15, 0,  15, 5,  15, 10, 15, -10, 15, -5,  15] \
+                             for m in range(4)] # valores de corrente e tensão de saída
+
+
         if not self._serial_port.is_open:
             self.connection_lost.emit()
             #TODO: Encerra testes
+
+        '''###########################################################'''
+        '''Número de módulos conectados para inicializar o controlador'''
+        '''###########################################################'''
+        n_mod = 0
+        for n in range(0, len(serial)):
+            if serial[n] != None:
+                n_mod = n_mod+1
+        self.FBP.Write_sigGen_Aux(n_mod)
+        '''###########################################################'''
+        '''###########################################################'''
+
+
+        '''###############################################################################'''
+        '''Setando todos os valores de corrente e salvando resultados na matriz mod_result'''
+        '''###############################################################################'''
+
+
+        for set_current in load_current:
+            if set_current == 'turnedOff':
+                self.FBP.TurnOff()
+                self.update_gui.emit('Iniciando medições com módulos desligados')
+                time.sleep(2) # Alterar para 2 min
+            else:
+                self.FBP.TurnOn()
+                self.FBP.ClosedLoop()
+                time.sleep(0.5)
+                self.update_gui.emit('Iniciando medições com módulos ligados a '\
+                                    + str(set_current) + 'A')
+                self.FBP.SetISlowRef(0.25 * set_current)
+                time.sleep(0.5)
+                self.FBP.SetISlowRef(0.5 * set_current)
+                time.sleep(0.5)
+                self.FBP.SetISlowRef(set_current)
+                time.sleep(5) # Alterar para 2 min
+
+            if serial[0] != None:
+                mod_result1[0].append(self.FBP.Read_iMod1())
+                mod_result1[0].append(self.FBP.Read_vDCMod1())
+                mod_result2[0].append(self.FBP.Read_vOutMod1())
+                mod_result3[0].append(self.FBP.Read_temp1())
+
+            if serial[1] != None:
+                mod_result1[1].append(self.FBP.Read_iMod2())
+                mod_result1[1].append(self.FBP.Read_vDCMod2())
+                mod_result2[1].append(self.FBP.Read_vOutMod2())
+                mod_result3[1].append(self.FBP.Read_temp2())
+
+            if serial[2] != None:
+                mod_result1[2].append(self.FBP.Read_iMod3())
+                mod_result1[2].append(self.FBP.Read_vDCMod3())
+                mod_result2[2].append(self.FBP.Read_vOutMod3())
+                mod_result3[2].append(self.FBP.Read_temp3())
+
+            if serial[3] != None:
+                mod_result1[3].append(self.FBP.Read_iMod4())
+                mod_result1[3].append(self.FBP.Read_vDCMod4())
+                mod_result2[3].append(self.FBP.Read_vOutMod4())
+                mod_result3[3].append(self.FBP.Read_temp4())
+
+        self.FBP.TurnOff()
+        '''###############################################################################'''
+        '''###############################################################################'''
 
         for item in serial:
             if item is not None:
                 power_module = PowerModule()
                 power_module.serial_number = item
-                res = self._send_to_server(power_module)
+                #res = self._send_to_server(power_module)
 
-                if res:
-
+                if True:#res:
+                    self.update_gui.emit('Verificando resultados do módulo '\
+                                        + str(serial.index(item)+1) + '...')
                     log = PowerModuleLog()
                     log.serial_number_power_module = item
 
                     # TODO: Faz os testes e seta os atributos de log
+                    for o in range(0, len(mod_result1[serial.index(item)])):
+                        if round(mod_result1[serial.index(item)][o]) == \
+                           compare_measure[serial.index(item)][o]:
+                            test = True
+                            self.update_gui.emit('Teste de corrente e DClink ' + str(test))
+                        else:
+                            test = False
+                            self.update_gui.emit('Teste de corrente e DClink ' + str(test))
+                            #break
+                    print(mod_result2)
+                    if test:
+                        if round(mod_result2[serial.index(item)][0]) == 0     and \
+                           round(mod_result2[serial.index(item)][1]) == 0     and \
+                                 3 < mod_result2[serial.index(item)][2] < 4   and \
+                                 7 < mod_result2[serial.index(item)][3] < 8   and \
+                                 -8 < mod_result2[serial.index(item)][4] < -7 and \
+                                 -4 < mod_result2[serial.index(item)][5] < -3:
+                            test = True
+                            self.update_gui.emit('Teste de tensão ' + str(test))
+                        else:
+                            test = False
+                            self.update_gui.emit('Teste de tensão ' + str(test))
+                            #break
 
-                    """
-                    Simulação de valores
-                    """
-                    log.test_result = "Aprovado"
-                    log.iload0 = random.uniform(1.0, 15.0)
-                    log.iload1 = random.uniform(1.0, 15.0)
-                    log.iload2 = random.uniform(1.0, 15.0)
-                    log.iload3 = random.uniform(1.0, 15.0)
-                    log.iload4 = random.uniform(1.0, 15.0)
-                    log.iload5 = random.uniform(1.0, 15.0)
-                    log.vload0 = random.uniform(1.0, 15.0)
-                    log.vload1 = random.uniform(1.0, 15.0)
-                    log.vload2 = random.uniform(1.0, 15.0)
-                    log.vload3 = random.uniform(1.0, 15.0)
-                    log.vload4 = random.uniform(1.0, 15.0)
-                    log.vload5 = random.uniform(1.0, 15.0)
-                    log.vdclink0 = random.uniform(1.0, 15.0)
-                    log.vdclink1 = random.uniform(1.0, 15.0)
-                    log.vdclink2 = random.uniform(1.0, 15.0)
-                    log.vdclink3 = random.uniform(1.0, 15.0)
-                    log.vdclink4 = random.uniform(1.0, 15.0)
-                    log.vdclink5 = random.uniform(1.0, 15.0)
-                    log.temperatura0 = random.uniform(1.0, 15.0)
-                    log.temperatura1 = random.uniform(1.0, 15.0)
-                    log.temperatura2 = random.uniform(1.0, 15.0)
-                    log.temperatura3 = random.uniform(1.0, 15.0)
-                    log.temperatura4 = random.uniform(1.0, 15.0)
-                    log.temperatura5 = random.uniform(1.0, 15.0)
+                    if test:
+                        for p in range(0, len(mod_result3[serial.index(item)])):
+                            if mod_result3[serial.index(item)][p] < 90:
+                                test = True
+                                self.update_gui.emit('Teste de temperatura ' + str(test))
+                            else:
+                                test = False
+                                self.update_gui.emit('Teste de temperatura ' + str(test))
+                                #break
+
+                    if test:
+                        log.test_result = 'Aprovado'
+                    else:
+                        log.test_result = 'Reprovado'
+
+                    log.iload0 = mod_result1[serial.index(item)][0]
+                    log.iload1 = mod_result1[serial.index(item)][2]
+                    log.iload2 = mod_result1[serial.index(item)][4]
+                    log.iload3 = mod_result1[serial.index(item)][6]
+                    log.iload4 = mod_result1[serial.index(item)][8]
+                    log.iload5 = mod_result1[serial.index(item)][10]
+
+                    log.vload0 = mod_result1[serial.index(item)][1]
+                    log.vload1 = mod_result1[serial.index(item)][3]
+                    log.vload2 = mod_result1[serial.index(item)][5]
+                    log.vload3 = mod_result1[serial.index(item)][7]
+                    log.vload4 = mod_result1[serial.index(item)][9]
+                    log.vload5 = mod_result1[serial.index(item)][11]
+
+                    log.vdclink0 = mod_result2[serial.index(item)][0]
+                    log.vdclink1 = mod_result2[serial.index(item)][1]
+                    log.vdclink2 = mod_result2[serial.index(item)][2]
+                    log.vdclink3 = mod_result2[serial.index(item)][3]
+                    log.vdclink4 = mod_result2[serial.index(item)][4]
+                    log.vdclink5 = mod_result2[serial.index(item)][5]
+
+                    log.temperatura0 = mod_result3[serial.index(item)][0]
+                    log.temperatura1 = mod_result3[serial.index(item)][1]
+                    log.temperatura2 = mod_result3[serial.index(item)][2]
+                    log.temperatura3 = mod_result3[serial.index(item)][3]
+                    log.temperatura4 = mod_result3[serial.index(item)][4]
+                    log.temperatura5 = mod_result3[serial.index(item)][5]
+
                     log.details = ""
 
-                    log_res = self._send_to_server(log)
-                    response[serial.index(item)] = log_res
-                    """
-                    Fim da simulação
-                    """
+                    self.update_gui.emit('Módulo ' + str(serial.index(item)+1)\
+                                        + ' ' + log.test_result)
+                    #log_res = self._send_to_server(log)
+                    #response[serial.index(item)] = log_res
 
-        # Quando o teste terminar emitir o resultado em uma lista de objetos
-        # do tipo PowerModuleLog
-        self.test_complete.emit(response)
+            # Quando o teste terminar emitir o resultado em uma lista de objetos
+            # do tipo PowerModuleLog
+            self.test_complete.emit(response)
 
     def _send_to_server(self, item):
         client = ElpWebClient()
