@@ -6,7 +6,7 @@ import random
 import pyDRS
 import time
 
-class PowerModuleTest(QThread):
+class HRADCTest(QThread):
     test_complete       = pyqtSignal(list)
     update_gui          = pyqtSignal(str)
     connection_lost     = pyqtSignal()
@@ -20,7 +20,7 @@ class PowerModuleTest(QThread):
         self._serial_mod1 = mod1
         self._serial_mod2 = mod2
         self._serial_mod3 = mod3
-        self._serial_port = serial.Serial()
+        #self._serial_port = serial.Serial()
         self.FBP = pyDRS.SerialDRS()
 
 
@@ -76,8 +76,8 @@ class PowerModuleTest(QThread):
         if self._comport is None or self._baudrate is None:
             return False
         else:
-            self._serial_port.baudrate  = self._baudrate
-            self._serial_port.port      = self._comport
+            #self._serial_port.baudrate  = self._baudrate
+            #self._serial_port.port      = self._comport
             #self._serial_port.open()
             #return self._serial_port.is_open
             return self.FBP.Connect(self._comport, self._baudrate)
