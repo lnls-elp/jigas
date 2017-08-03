@@ -26,22 +26,19 @@ class Rack:
 
 class RackLog:
 
-    def __init__(self, test_result=None, serial_number_rack=None, iout0=None,
-                    iout1=None, iout2=None, iout3=None, delta_iout0=None,
-                    delta_iout1=None, delta_iout2=None, delta_iout3=None,
-                    details=None):
+    def __init__(self):
 
-        self._test_result   = test_result
-        self._serial_number_rack = serial_number_rack
-        self._iout0            = iout0
-        self._iout1            = iout1
-        self._iout2            = iout2
-        self._iout3            = iout3
-        self._delta_iout0      = delta_iout0
-        self._delta_iout1      = delta_iout1
-        self._delta_iout2      = delta_iout2
-        self._delta_iout3      = delta_iout3
-        self._details          = details
+        self._test_result           = None
+        self._serial_number_rack    = None
+        self._iout0                 = None
+        self._iout1                 = None
+        self._iout2                 = None
+        self._iout3                 = None
+        self._delta_iout0           = None
+        self._delta_iout1           = None
+        self._delta_iout2           = None
+        self._delta_iout3           = None
+        self._details               = None
 
     @property
     def test_result(self):
