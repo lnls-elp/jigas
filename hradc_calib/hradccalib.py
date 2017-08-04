@@ -1,14 +1,14 @@
 from PyQt5.QtCore import pyqtSlot, QThread, pyqtSignal
-from common.hradcdata import HRADC, HRADCLog
+from common.hradcdata import HRADC, HRADCLogCalib
 from common.elpwebclient import ElpWebClient
 from common.pydrs import SerialDRS
 import serial
 import random
 import time
 
-class HRADCTest(QThread):
+class HRADCCalib(QThread):
 
-    test_complete       = pyqtSignal(bool)
+    calib_complete      = pyqtSignal(bool)
     update_gui          = pyqtSignal(str)
     connection_lost     = pyqtSignal()
 
@@ -49,13 +49,6 @@ class HRADCTest(QThread):
     def serial_number(self, value):
         self._serial_number = value
 
-    @property
-    def led(self):
-        return self._led
-
-    @led.setter
-    def led(self, value):
-        self._led = value
 
     def open_serial_port(self):
         if self._comport is None or self._baudrate is None:
@@ -71,24 +64,24 @@ class HRADCTest(QThread):
 
         return result
 
-    def _test_sequence(self):
+    def _calib_sequence(self):
 
         hradc = HRADC()
         hradc.serial_number = self._serial_number
+        print(hradc.data)
         res = self._send_to_server(hradc)
 
         if res:
-            log = HRADCLog()
+            log = HRADCLogCalib()
             log.serial_number_hradc = self._serial_number
+            log.temperature_hradc = 10.0
 
+            print(log.data)
             # TODO: Faz os testes e seta os atributos de log
 
             """
             Simulação de valores
             """
-            log.test_result = "Aprovado"
-            log.device      = self.device['HRADC']
-            log.details = ""
 
             log_res = self._send_to_server(log)
 
@@ -98,7 +91,7 @@ class HRADCTest(QThread):
 
             # Quando o teste terminar emitir o resultado em uma lista de objetos
             # do tipo PowerModuleLog
-            self.test_complete.emit(log_res)
+            self.calib_complete.emit(log_res)
 
     def _send_to_server(self, item):
         client = ElpWebClient()
@@ -118,5 +111,5 @@ class HRADCTest(QThread):
             return False
 
     def run(self):
-        self._test_sequence()
+        self._calib_sequence()
         #pass

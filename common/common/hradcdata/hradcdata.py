@@ -251,7 +251,7 @@ class HRADCLog:
     def method(self):
         return "/AddLogHradc"
 
-class HRADCCalib:
+class HRADCLogCalib:
 
     def __init__(self):
 
