@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QWizard, QApplication, QWizardPage
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from common.dmreader import ReadDataMatrix
 from PyQt5.uic import loadUiType
-from hradctest import HRADCTest
+from hradccalib import HRADCCalib
 import serial
 import glob
 import sys
@@ -15,7 +15,7 @@ class HRADCWindow(QWizard, Ui_Class):
 
     # Page numbers
     (num_intro_page, num_serial_number, num_connect_hradc,
-    num_serial_port, num_load_firmware, num_start_test) = range(6)
+    num_serial_port, num_start_test) = range(5)
 
     def __init__(self, parent=None):
         QWizard.__init__(self, parent)
@@ -27,7 +27,7 @@ class HRADCWindow(QWizard, Ui_Class):
         self._serial_port_status = False
         self._test_serial_port_status = False
 
-        self._test_thread = HRADCTest()
+        self._test_thread = HRADCCalib()
 
         self._initialize_widgets()
         self._initialize_signals()
@@ -45,10 +45,7 @@ class HRADCWindow(QWizard, Ui_Class):
         self.lbReadSerialStatus.clear()
         self.cbEnableSerialNumberEdit.setChecked(False)
         self.lbStatusComunicacao.setText("...")
-        self.rbLedsOk.setChecked(False)
-        self.rbLedsOk.setChecked(False)
-        self.teFirmwareLog.clear()
-        self.lbTestStatus.setText("Clique para Iniciar Testes")
+        self.lbTestStatus.setText("Clique para Iniciar Calibração")
         self.lbTestResult.setText("Aguarde...")
         self.teTestReport.clear()
 
@@ -57,8 +54,7 @@ class HRADCWindow(QWizard, Ui_Class):
         self.pbReadSerialNumber.clicked.connect(self._read_serial_number)
         self.cbEnableSerialNumberEdit.stateChanged.connect(self._treat_read_serial_edit)
         self.pbConnectSerialPort.clicked.connect(self._connect_serial_port)
-        self.pbLoadFirmware.clicked.connect(self._load_firmware)
-        self.pbStartTests.clicked.connect(self._start_test_sequence)
+        self.pbStartCalib.clicked.connect(self._start_calib_sequence)
         self.pbCommunicationTest.clicked.connect(self._communication_test)
         self.finished.connect(self._finish_wizard_execution)
 
@@ -78,10 +74,6 @@ class HRADCWindow(QWizard, Ui_Class):
         self.PageTestSerialPort.setButtonText(self.NextButton, "Próximo")
         self.PageTestSerialPort.setButtonText(self.BackButton, "Anterior")
         self.PageTestSerialPort.setButtonText(self.CancelButton, "Cancelar")
-
-        self.PageLoadFirmware.setButtonText(self.NextButton, "Próximo")
-        self.PageLoadFirmware.setButtonText(self.BackButton, "Anterior")
-        self.PageLoadFirmware.setButtonText(self.CancelButton, "Cancelar")
 
         self.PageStartTest.setButtonText(self.NextButton, "Novo Teste")
         self.PageStartTest.setButtonText(self.BackButton, "Anterior")
@@ -113,7 +105,7 @@ class HRADCWindow(QWizard, Ui_Class):
         self._test_serial_port_status = False
 
     def _restart_test_thread(self):
-        self._test_thread.test_complete.disconnect()
+        self._test_thread.calib_complete.disconnect()
         self._test_thread.update_gui.disconnect()
         self._test_thread.quit()
         self._test_thread.wait()
@@ -131,9 +123,6 @@ class HRADCWindow(QWizard, Ui_Class):
         pass
 
     def _initialize_page_test_serial_port(self):
-        pass
-
-    def _initialize_page_load_firmware(self):
         pass
 
     def _initialize_page_start_test(self):
@@ -162,9 +151,6 @@ class HRADCWindow(QWizard, Ui_Class):
     def _validate_page_test_serial_port(self):
         return self._test_serial_port_status
 
-    def _validate_page_load_firmware(self):
-        return True
-
     def _validate_page_start_test(self):
         self._initialize_widgets()
         self._restart_variables()
@@ -189,9 +175,6 @@ class HRADCWindow(QWizard, Ui_Class):
         elif page == self.num_serial_port:
             self._initialize_page_test_serial_port()
 
-        elif page == self.num_load_firmware:
-            self._initialize_page_load_firmware()
-
         elif page == self.num_start_test:
             self._initialize_page_start_test()
 
@@ -211,9 +194,6 @@ class HRADCWindow(QWizard, Ui_Class):
 
         elif current_id == self.num_serial_port:
             return self._validate_page_test_serial_port()
-
-        elif current_id == self.num_load_firmware:
-            return self._validate_page_load_firmware()
 
         elif current_id == self.num_start_test:
             return self._validate_page_start_test()
@@ -266,8 +246,8 @@ class HRADCWindow(QWizard, Ui_Class):
 
 
     @pyqtSlot()
-    def _start_test_sequence(self):
-        self._test_thread.test_complete.connect(self._test_finished)
+    def _start_calib_sequence(self):
+        self._test_thread.calib_complete.connect(self._calib_finished)
         self._test_thread.update_gui.connect(self._update_test_log)
         self._test_thread.start()
 
@@ -275,17 +255,12 @@ class HRADCWindow(QWizard, Ui_Class):
     def _finish_wizard_execution(self):
         pass
 
-
-    @pyqtSlot()
-    def _load_firmware(self):
-        pass
-
     @pyqtSlot(bool)
-    def _test_finished(self, result):
+    def _calib_finished(self, result):
         if result:
-            self.lbTestResult.setText("Aprovado")
+            self.lbTestResult.setText("Sucesso")
         else:
-            self.lbTestResult.setText("Reprovado")
+            self.lbTestResult.setText("Erro")
 
     @pyqtSlot(str)
     def _update_test_log(self, value):

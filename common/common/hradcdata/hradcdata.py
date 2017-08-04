@@ -116,8 +116,6 @@ class HRADC:
 
 class HRADCLog:
 
-    device = {'HRADC':1, 'DM':2}
-
     def __init__(self):
 
         self._test_result           = None
@@ -232,7 +230,16 @@ class HRADCLog:
     def _get_hradc_log_data(self):
         data = {}
         data['resultado_teste']     = self._test_result
-        data['numero_serie_hradc']   = self._serial_number_power_module
+        data['numero_serie_hradc']  = self._serial_number_hradc
+        data['id_medida']           = self._device
+        data['gnd']                 = self._gnd
+        data['vref_p']              = self._vref_p
+        data['vref_n']              = self._vref_n
+        data['temperature']         = self._temperature
+        data['vin_p']               = self._vin_p
+        data['vin_n']               = self._vin_n
+        data['lin_p']               = self._lin_p
+        data['lin_n']               = self._lin_n
         data['details']             = self._details
         return data
 
@@ -244,7 +251,7 @@ class HRADCLog:
     def method(self):
         return "/AddLogHradc"
 
-class HRADCCalib:
+class HRADCLogCalib:
 
     def __init__(self):
 
