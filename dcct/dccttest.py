@@ -1,9 +1,9 @@
 from PyQt5.QtCore import pyqtSlot, QThread, pyqtSignal
 from common.elpwebclient import ElpWebClient
 from dcctdata import DCCT, DCCTLog
+from common.pydrs import SerialDRS
 import serial
 import random
-import pyDRS
 import time
 
 class DCCTTest(QThread):
@@ -17,7 +17,7 @@ class DCCTTest(QThread):
         self._baudarate = baudrate
         self._serial_number = serial_number
         self._variant = variant
-        self.FBP = pyDRS.SerialDRS()
+        self.FBP = SerialDRS()
 
         self._load_current = [0, 2, 4, 6, 8, 10, -10, -8, -6, -4, -2]
 

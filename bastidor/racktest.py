@@ -1,9 +1,9 @@
 from PyQt5.QtCore import pyqtSlot, QThread, pyqtSignal
 from common.elpwebclient import ElpWebClient
 from rackdata import Rack, RackLog
+from common.pydrs import SerialDRS
 import serial
 import random
-import pyDRS
 import time
 
 class RackTest(QThread):
@@ -17,7 +17,7 @@ class RackTest(QThread):
         self._baudarate = baudrate
         self._serial_number = serial_number
         #self._serial_port = serial.Serial()
-        self.FBP = pyDRS.SerialDRS()
+        self.FBP = SerialDRS()
 
     @property
     def serial_number(self):
