@@ -1,21 +1,28 @@
 from PyQt5.QtCore import pyqtSlot, QThread, pyqtSignal
-from pmdata import PowerModule, PowerModuleLog
+from common.hradcdata import HRADC, HRADCLog
 from common.elpwebclient import ElpWebClient
+from common.pydrs import SerialDRS
 import serial
 import random
-import pyDRS
 import time
 
 class HRADCTest(QThread):
-    test_complete       = pyqtSignal(list)
+
+    test_complete       = pyqtSignal(bool)
     update_gui          = pyqtSignal(str)
     connection_lost     = pyqtSignal()
 
-    def __init__(self, comport=None, baudrate=None):
+    device = {'HRADC':1, 'DM':2}
+
+    def __init__(self):
         QThread.__init__(self)
-        self._comport = comport
-        self._baudarate = baudrate
-        self.FBP = pyDRS.SerialDRS()
+        self._comport = None
+        self._baudarate = None
+        self._serial_number = None
+
+        self._led = None
+
+        self.FBP = SerialDRS()
 
 
     @property
@@ -34,6 +41,22 @@ class HRADCTest(QThread):
     def baudrate(self, value):
         self._baudrate = value
 
+    @property
+    def serial_number(self):
+        return self._serial_number
+
+    @serial_number.setter
+    def serial_number(self, value):
+        self._serial_number = value
+
+    @property
+    def led(self):
+        return self._led
+
+    @led.setter
+    def led(self, value):
+        self._led = value
+
     def open_serial_port(self):
         if self._comport is None or self._baudrate is None:
             return False
@@ -41,120 +64,49 @@ class HRADCTest(QThread):
             return self.FBP.Connect(self._comport, self._baudrate)
 
     def test_communication(self):
-        # Resultado teste de comunicação para os 4 módulos
-        n_mod  = 0
-        result = [None for i in range(4)]
-        serial = [self._serial_mod0, self._serial_mod1, self._serial_mod2,
-                    self._serial_mod3]
 
-        for j in range(0, len(serial)):
-            if serial[j] != None:
-                n_mod = n_mod+1
+        result = True
 
-        try:
-            self.FBP.Write_sigGen_Aux(n_mod)
-            test_package = self.FBP.Read_ps_Model()
-
-            if (test_package[0] == 0) and (test_package[1] == 17) and (test_package[2] == 512) and (test_package[3] == 14) and (test_package[4] == 223):
-                for k in range(0, len(serial)):
-                    if serial[k] != None:
-                        if k+1 == 1:
-                            if round(self.FBP.Read_vDCMod1()) == 15: # Para um DCLink de 15V
-                                result[k] = 'OK'
-                            else:
-                                result[k] = 'Falha'
-                        elif k+1 == 2:
-                            if round(self.FBP.Read_vDCMod2()) == 15: # Para um DCLink de 15V
-                                result[k] = 'OK'
-                            else:
-                                result[k] = 'Falha'
-                        elif k+1 == 3:
-                            if round(self.FBP.Read_vDCMod3()) == 15: # Para um DCLink de 15V
-                                result[k] = 'OK'
-                            else:
-                                result[k] = 'Falha'
-                        elif k+1 == 4:
-                            if round(self.FBP.Read_vDCMod4()) == 15: # Para um DCLink de 15V
-                                result[k] = 'OK'
-                            else:
-                                result[k] = 'Falha'
-                    else:
-                        result[k] = 'Sem Fonte'
-            else:
-                result = ['Falha', 'Falha', 'Falha', 'Falha']
-        except:
-            result = ['Falha Comunicação', 'Falha Comunicação', 'Falha Comunicação', 'Falha Comunicação']
+        #TODO: Communication test
 
         return result
 
     def _test_sequence(self):
-        response = [None for i in range(4)]
 
-        serial = [self._serial_mod0, self._serial_mod1, self._serial_mod2,
-                    self._serial_mod3]
+        hradc = HRADC()
+        hradc.serial_number = self._serial_number
+        res = self._send_to_server(hradc)
 
-        if not self._serial_port.is_open:
-            self.connection_lost.emit()
-            #TODO: Encerra testes
+        if res:
+            log = HRADCLog()
+            log.serial_number_hradc = self._serial_number
 
-        for item in serial:
-            if item is not None:
-                power_module = PowerModule()
-                power_module.serial_number = item
-                res = self._send_to_server(power_module)
+            # TODO: Faz os testes e seta os atributos de log
 
-                if res:
+            """
+            Simulação de valores
+            """
+            log.test_result = "Aprovado"
+            log.device      = self.device['HRADC']
+            log.details = ""
 
-                    log = PowerModuleLog()
-                    log.serial_number_power_module = item
+            log_res = self._send_to_server(log)
 
-                    # TODO: Faz os testes e seta os atributos de log
+            """
+            Fim da simulação
+            """
 
-                    """
-                    Simulação de valores
-                    """
-                    log.test_result = "Aprovado"
-                    log.iload0 = random.uniform(1.0, 15.0)
-                    log.iload1 = random.uniform(1.0, 15.0)
-                    log.iload2 = random.uniform(1.0, 15.0)
-                    log.iload3 = random.uniform(1.0, 15.0)
-                    log.iload4 = random.uniform(1.0, 15.0)
-                    log.iload5 = random.uniform(1.0, 15.0)
-                    log.vload0 = random.uniform(1.0, 15.0)
-                    log.vload1 = random.uniform(1.0, 15.0)
-                    log.vload2 = random.uniform(1.0, 15.0)
-                    log.vload3 = random.uniform(1.0, 15.0)
-                    log.vload4 = random.uniform(1.0, 15.0)
-                    log.vload5 = random.uniform(1.0, 15.0)
-                    log.vdclink0 = random.uniform(1.0, 15.0)
-                    log.vdclink1 = random.uniform(1.0, 15.0)
-                    log.vdclink2 = random.uniform(1.0, 15.0)
-                    log.vdclink3 = random.uniform(1.0, 15.0)
-                    log.vdclink4 = random.uniform(1.0, 15.0)
-                    log.vdclink5 = random.uniform(1.0, 15.0)
-                    log.temperatura0 = random.uniform(1.0, 15.0)
-                    log.temperatura1 = random.uniform(1.0, 15.0)
-                    log.temperatura2 = random.uniform(1.0, 15.0)
-                    log.temperatura3 = random.uniform(1.0, 15.0)
-                    log.temperatura4 = random.uniform(1.0, 15.0)
-                    log.temperatura5 = random.uniform(1.0, 15.0)
-                    log.details = ""
-
-                    log_res = self._send_to_server(log)
-                    response[serial.index(item)] = log_res
-                    """
-                    Fim da simulação
-                    """
-
-        # Quando o teste terminar emitir o resultado em uma lista de objetos
-        # do tipo PowerModuleLog
-        self.test_complete.emit(response)
+            # Quando o teste terminar emitir o resultado em uma lista de objetos
+            # do tipo PowerModuleLog
+            self.test_complete.emit(log_res)
 
     def _send_to_server(self, item):
         client = ElpWebClient()
         client_data = item.data
         client_method = item.method
+        print(client_data)
         client_response = client.do_request(client_method, client_data)
+        print(client_response)
         server_status = self._parse_response(client_response)
         return server_status
 
