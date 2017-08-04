@@ -1,9 +1,9 @@
 from PyQt5.QtCore import pyqtSlot, QThread, pyqtSignal
 from pmdata import PowerModule, PowerModuleLog
 from common.elpwebclient import ElpWebClient
+from common.pydrs import SerialDRS
 import serial
 import random
-import pyDRS
 import time
 
 class PowerModuleTest(QThread):
@@ -21,7 +21,7 @@ class PowerModuleTest(QThread):
         self._serial_mod2 = mod2
         self._serial_mod3 = mod3
         self._serial_port = serial.Serial()
-        self.FBP = pyDRS.SerialDRS()
+        self.FBP = SerialDRS()
 
 
     @property
