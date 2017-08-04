@@ -28,21 +28,30 @@ class PowerSupplyLog:
 
     def __init__(self):
 
+        self._id_tipo_teste             = 1 # Normal test. 2 - Burn-In test
         self._id_canal_ps               = None
         self._test_result               = None
         self._serial_number_ps          = None
         self._result_test_on_off        = None
-        self._iout_add_20_duty_cycle    = None
-        self._iout_less_20_duty_cycle   = None
-        self._iout0                     = None
-        self._iout1                     = None
-        self._vout0                     = None
-        self._vout1                     = None
-        self._vdclink0                  = None
-        self._vdclink1                  = None
-        self._temperatura0              = None
-        self._temperatura1              = None
-        self._details                   = None
+        self._iout_add_20_duty_cycle    = 0.0
+        self._iout_less_20_duty_cycle   = 0.0
+        self._iout0                     = 0.0
+        self._iout1                     = 0.0
+        self._vout0                     = 0.0
+        self._vout1                     = 0.0
+        self._vdclink0                  = 0.0
+        self._vdclink1                  = 0.0
+        self._temperatura0              = 0.0
+        self._temperatura1              = 0.0
+        self._details                   = ""
+
+    @property
+    def test_type(self):
+        return self._id_tipo_teste
+
+    @test_type.setter
+    def test_type(self, value):
+        self._id_tipo_teste = value
 
     @property
     def id_canal_power_supply(self):
@@ -166,6 +175,7 @@ class PowerSupplyLog:
 
     def _get_ps_log_data(self):
         data = {}
+        data['id_tipo_teste_fonte']         = self._id_tipo_teste
         data['id_canal_fonte']              = self._id_canal_ps
         data['resultado_teste']             = self._test_result
         data['numero_serie_fonte']          = self._serial_number_ps

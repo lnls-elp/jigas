@@ -4,10 +4,12 @@ from common.elpwebclient import ElpWebClient
 import serial
 import random
 
-class PowerSupplyTest(QThread):
+class BurnInTest(QThread):
     test_complete       = pyqtSignal(bool)
     update_gui          = pyqtSignal(str)
     connection_lost     = pyqtSignal()
+
+    test = {'Normal':1, 'Burn-In': 2}
 
     def __init__(self, comport=None, baudrate=None, serial_number=None, variant=None):
         QThread.__init__(self)
@@ -78,6 +80,7 @@ class PowerSupplyTest(QThread):
             Simulação de valores
             """
             log = PowerSupplyLog()
+            log.test_type = self.test['Burn-In']
             log.id_canal_power_supply = 1
             log.test_result = "Aprovado"
             log.result_test_on_off = "Aprovado"
