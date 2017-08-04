@@ -17,7 +17,6 @@ class DCCTTest(QThread):
         self._baudarate = baudrate
         self._serial_number = serial_number
         self._variant = variant
-        #self._serial_port = serial.Serial()
         self.FBP = pyDRS.SerialDRS()
 
         self._load_current = [0, 2, 4, 6, 8, 10, -10, -8, -6, -4, -2]
@@ -92,8 +91,6 @@ class DCCTTest(QThread):
         if res:
             #TODO: Sequencia de Testes
 
-            #self.FBP = pyDRS.SerialDRS()
-            #self.FBP.Connect(self._comport, self._baudarate)
             self.FBP.Write_sigGen_Aux(1) # Usando 1 modulo de potência
             self.FBP.TurnOn()
             self.update_gui.emit('Fonte ligada')

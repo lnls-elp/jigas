@@ -11,16 +11,10 @@ class HRADCTest(QThread):
     update_gui          = pyqtSignal(str)
     connection_lost     = pyqtSignal()
 
-    def __init__(self, comport=None, baudrate=None,
-                    mod0=None, mod1=None, mod2=None, mod3=None):
+    def __init__(self, comport=None, baudrate=None):
         QThread.__init__(self)
         self._comport = comport
         self._baudarate = baudrate
-        self._serial_mod0 = mod0
-        self._serial_mod1 = mod1
-        self._serial_mod2 = mod2
-        self._serial_mod3 = mod3
-        #self._serial_port = serial.Serial()
         self.FBP = pyDRS.SerialDRS()
 
 
@@ -40,46 +34,10 @@ class HRADCTest(QThread):
     def baudrate(self, value):
         self._baudrate = value
 
-    @property
-    def serial_mod0(self):
-        return self._serial_mod0
-
-    @serial_mod0.setter
-    def serial_mod0(self, value):
-        self._serial_mod0 = value
-
-    @property
-    def serial_mod1(self):
-        return self._serial_mod1
-
-    @serial_mod1.setter
-    def serial_mod1(self, value):
-        self._serial_mod1 = value
-
-    @property
-    def serial_mod2(self):
-        return self._serial_mod2
-
-    @serial_mod2.setter
-    def serial_mod2(self, value):
-        self._serial_mod2 = value
-
-    @property
-    def serial_mod3(self):
-        return self._serial_mod3
-
-    @serial_mod3.setter
-    def serial_mod3(self, value):
-        self._serial_mod3 = value
-
     def open_serial_port(self):
         if self._comport is None or self._baudrate is None:
             return False
         else:
-            #self._serial_port.baudrate  = self._baudrate
-            #self._serial_port.port      = self._comport
-            #self._serial_port.open()
-            #return self._serial_port.is_open
             return self.FBP.Connect(self._comport, self._baudrate)
 
     def test_communication(self):
