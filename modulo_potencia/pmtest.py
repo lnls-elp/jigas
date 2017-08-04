@@ -193,11 +193,12 @@ class PowerModuleTest(QThread):
 
         for item in serial:
             if item is not None:
+
                 power_module = PowerModule()
                 power_module.serial_number = item
-                #res = self._send_to_server(power_module)
+                res = self._send_to_server(power_module)
 
-                if True:#res:
+                if res:
                     self.update_gui.emit('Verificando resultados do módulo '\
                                         + str(serial.index(item)+1) + '...')
                     log = PowerModuleLog()
@@ -275,8 +276,8 @@ class PowerModuleTest(QThread):
 
                     self.update_gui.emit('Módulo ' + str(serial.index(item)+1)\
                                         + ' ' + log.test_result)
-                    #log_res = self._send_to_server(log)
-                    #response[serial.index(item)] = log_res
+                    log_res = self._send_to_server(log)
+                    response[serial.index(item)] = log_res
 
             # Quando o teste terminar emitir o resultado em uma lista de objetos
             # do tipo PowerModuleLog
