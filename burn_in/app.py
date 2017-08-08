@@ -14,8 +14,8 @@ Ui_Class, base = loadUiType(UI_PATH)
 class PowerSupplyWindow(QWizard, Ui_Class):
 
     # Page numbers
-    (num_intro_page, num_serial_number, num_connect_ps,
-    num_serial_port, num_start_test)     = range(5)
+    (num_intro_page, num_serial_number, num_address_instr,
+    num_addressing, num_power_fbp, num_start_test) = range(6)
 
     def __init__(self, parent=None):
         QWizard.__init__(self, parent)
@@ -26,6 +26,8 @@ class PowerSupplyWindow(QWizard, Ui_Class):
         self._list_serial_ports()
         self._serial_port_status = False
         self._test_serial_port_status = False
+
+        self._serial_number = []
 
         self._test_thread = BurnInTest()
 
@@ -40,24 +42,55 @@ class PowerSupplyWindow(QWizard, Ui_Class):
         """ Initial widgets configuration """
         self.leBaudrate.setText(str(self._SERIAL_BAUDRATE))
         self.leBaudrate.setReadOnly(True)
-        self.leSerialNumber.setReadOnly(True)
-        self.leSerialNumber.clear()
-        self.lbReadSerialStatus.clear()
-        self.cbEnableSerialNumberEdit.setChecked(False)
-        self.lbStatusComunicacao.setText("...")
-        self.lbStatusAuxSupply.setText("...")
+        self.leSerialNumber1.clear()
+        self.leSerialNumber2.clear()
+        self.leSerialNumber3.clear()
+        self.leSerialNumber4.clear()
+        self.leSerialNumber5.clear()
+        self.leSerialNumber6.clear()
+        self.leSerialNumber7.clear()
+        self.leSerialNumber8.clear()
+        self.leSerialNumber9.clear()
+        self.leSerialNumber10.clear()
+        self.cbDisableFbpSlot1.setChecked(False)
+        self.cbDisableFbpSlot2.setChecked(False)
+        self.cbDisableFbpSlot3.setChecked(False)
+        self.cbDisableFbpSlot4.setChecked(False)
+        self.cbDisableFbpSlot5.setChecked(False)
+        self.cbDisableFbpSlot6.setChecked(False)
+        self.cbDisableFbpSlot7.setChecked(False)
+        self.cbDisableFbpSlot8.setChecked(False)
+        self.cbDisableFbpSlot9.setChecked(False)
+        self.cbDisableFbpSlot10.setChecked(False)
         self.lbTestStatus.setText("Clique para Iniciar Testes")
         self.lbTestResult.setText("Aguarde...")
         self.teTestReport.clear()
 
     def _initialize_signals(self):
         """ Configure basic signals """
-        self.pbReadSerialNumber.clicked.connect(self._read_serial_number)
-        self.cbEnableSerialNumberEdit.stateChanged.connect(self._treat_read_serial_edit)
         self.pbConnectSerialPort.clicked.connect(self._connect_serial_port)
+        self.pbReadSerialNumber1.clicked.connect(self._read_serial_number_1)
+        self.pbReadSerialNumber2.clicked.connect(self._read_serial_number_2)
+        self.pbReadSerialNumber3.clicked.connect(self._read_serial_number_3)
+        self.pbReadSerialNumber4.clicked.connect(self._read_serial_number_4)
+        self.pbReadSerialNumber5.clicked.connect(self._read_serial_number_5)
+        self.pbReadSerialNumber6.clicked.connect(self._read_serial_number_6)
+        self.pbReadSerialNumber7.clicked.connect(self._read_serial_number_7)
+        self.pbReadSerialNumber8.clicked.connect(self._read_serial_number_8)
+        self.pbReadSerialNumber9.clicked.connect(self._read_serial_number_9)
+        self.pbReadSerialNumber10.clicked.connect(self._read_serial_number_10)
+        self.cbDisableFbpSlot1.stateChanged.connect(self._disbl_read_serial_slot_1)
+        self.cbDisableFbpSlot2.stateChanged.connect(self._disbl_read_serial_slot_2)
+        self.cbDisableFbpSlot3.stateChanged.connect(self._disbl_read_serial_slot_3)
+        self.cbDisableFbpSlot4.stateChanged.connect(self._disbl_read_serial_slot_4)
+        self.cbDisableFbpSlot5.stateChanged.connect(self._disbl_read_serial_slot_5)
+        self.cbDisableFbpSlot6.stateChanged.connect(self._disbl_read_serial_slot_6)
+        self.cbDisableFbpSlot7.stateChanged.connect(self._disbl_read_serial_slot_7)
+        self.cbDisableFbpSlot8.stateChanged.connect(self._disbl_read_serial_slot_8)
+        self.cbDisableFbpSlot9.stateChanged.connect(self._disbl_read_serial_slot_9)
+        self.cbDisableFbpSlot10.stateChanged.connect(self._disbl_read_serial_slot_10)
+        self.pbSetAddress.clicked.connect(self._set_address)
         self.pbStartTests.clicked.connect(self._start_test_sequence)
-        self.pbCommunicationTest.clicked.connect(self._communication_test)
-        #self._web_request.server_response.connect(self._treat_server_response)
         self.finished.connect(self._finish_wizard_execution)
 
     def _initialize_wizard_buttons(self):
@@ -69,13 +102,17 @@ class PowerSupplyWindow(QWizard, Ui_Class):
         self.PageSerialNumber.setButtonText(self.BackButton, "Anterior")
         self.PageSerialNumber.setButtonText(self.CancelButton, "Cancelar")
 
-        self.PageConnectPowerSupply.setButtonText(self.NextButton, "Próximo")
-        self.PageConnectPowerSupply.setButtonText(self.BackButton, "Anterior")
-        self.PageConnectPowerSupply.setButtonText(self.CancelButton, "Cancelar")
+        self.PageAddressingInstructions.setButtonText(self.NextButton, "Próximo")
+        self.PageAddressingInstructions.setButtonText(self.BackButton, "Anterior")
+        self.PageAddressingInstructions.setButtonText(self.CancelButton, "Cancelar")
 
-        self.PageTestSerialPort.setButtonText(self.NextButton, "Próximo")
-        self.PageTestSerialPort.setButtonText(self.BackButton, "Anterior")
-        self.PageTestSerialPort.setButtonText(self.CancelButton, "Cancelar")
+        self.PageAddressing.setButtonText(self.NextButton, "Próximo")
+        self.PageAddressing.setButtonText(self.BackButton, "Anterior")
+        self.PageAddressing.setButtonText(self.CancelButton, "Cancelar")
+
+        self.PagePowerFBP.setButtonText(self.NextButton, "Próximo")
+        self.PagePowerFBP.setButtonText(self.BackButton, "Anterior")
+        self.PagePowerFBP.setButtonText(self.CancelButton, "Cancelar")
 
         self.PageStartTest.setButtonText(self.NextButton, "Novo Teste")
         self.PageStartTest.setButtonText(self.BackButton, "Anterior")
@@ -118,10 +155,13 @@ class PowerSupplyWindow(QWizard, Ui_Class):
     def _initialize_page_serial_number(self):
         pass
 
-    def _initialize_page_connect_power_supply(self):
+    def _initialize_page_addressing_instructions(self):
         pass
 
-    def _initialize_page_test_serial_port(self):
+    def _initialize_page_addressing(self):
+        pass
+
+    def _initialize_page_power_fbp(self):
         pass
 
     def _initialize_page_start_test(self):
@@ -136,24 +176,121 @@ class PowerSupplyWindow(QWizard, Ui_Class):
         return False
 
     def _validate_page_serial_number(self):
-        serial = self.leSerialNumber.text()
-        try:
-            self._test_thread.serial_number = int(serial)
-            return True
-        except ValueError:
-            pass
-        return False
+        serial = None
 
-    def _validate_page_connect_power_supply(self):
+        try:
+            serial = int(self.leSerialNumber1.text())
+            if serial not in self._serial_number:
+                self._serial_number.append(serial)
+        except ValueError:
+            if not self.cbDisableFbpSlot1.isChecked():
+                return False
+
+        try:
+            serial = int(self.leSerialNumber2.text())
+            if serial not in self._serial_number:
+                self._serial_number.append(serial)
+        except ValueError:
+            if not self.cbDisableFbpSlot2.isChecked():
+                return False
+
+        try:
+            serial = int(self.leSerialNumber3.text())
+            if serial not in self._serial_number:
+                self._serial_number.append(serial)
+        except ValueError:
+            if not self.cbDisableFbpSlot3.isChecked():
+                return False
+
+        try:
+            serial = int(self.leSerialNumber4.text())
+            if serial not in self._serial_number:
+                self._serial_number.append(serial)
+        except ValueError:
+            if not self.cbDisableFbpSlot4.isChecked():
+                return False
+
+        try:
+            serial = int(self.leSerialNumber5.text())
+            if serial not in self._serial_number:
+                self._serial_number.append(serial)
+        except ValueError:
+            if not self.cbDisableFbpSlot5.isChecked():
+                return False
+
+        try:
+            serial = int(self.leSerialNumber6.text())
+            if serial not in self._serial_number:
+                self._serial_number.append(serial)
+        except ValueError:
+            if not self.cbDisableFbpSlot6.isChecked():
+                return False
+
+        try:
+            serial = int(self.leSerialNumber7.text())
+            if serial not in self._serial_number:
+                self._serial_number.append(serial)
+        except ValueError:
+            if not self.cbDisableFbpSlot7.isChecked():
+                return False
+
+        try:
+            serial = int(self.leSerialNumber8.text())
+            if serial not in self._serial_number:
+                self._serial_number.append(serial)
+        except ValueError:
+            if not self.cbDisableFbpSlot8.isChecked():
+                return False
+
+        try:
+            serial = int(self.leSerialNumber9.text())
+            if serial not in self._serial_number:
+                self._serial_number.append(serial)
+        except ValueError:
+            if not self.cbDisableFbpSlot9.isChecked():
+                return False
+
+        try:
+            serial = int(self.leSerialNumber10.text())
+            if serial not in self._serial_number:
+                self._serial_number.append(serial)
+        except ValueError:
+            if not self.cbDisableFbpSlot10.isChecked():
+                return False
+
+
+        if self.cbDisableFbpSlot1.isChecked() and \
+            self.cbDisableFbpSlot2.isChecked() and \
+            self.cbDisableFbpSlot3.isChecked() and \
+            self.cbDisableFbpSlot4.isChecked() and \
+            self.cbDisableFbpSlot5.isChecked() and \
+            self.cbDisableFbpSlot6.isChecked() and \
+            self.cbDisableFbpSlot7.isChecked() and \
+            self.cbDisableFbpSlot8.isChecked() and \
+            self.cbDisableFbpSlot9.isChecked() and \
+            self.cbDisableFbpSlot10.isChecked():
+            return False
+
+        self._test_thread.serial_number = self._serial_number[:]
+
         return True
 
-    def _validate_page_test_serial_port(self):
-        return self._test_serial_port_status
+
+    def _validate_page_addressing_instructions(self):
+        return True
+
+    def _validate_page_addressing(self):
+        return True
+
+    def _validate_page_power_fbp(self):
+        return True
+
 
     def _validate_page_start_test(self):
         print('Validate Start Test')
         self._initialize_widgets()
         self._restart_test_thread()
+        del self._serial_number[:]
         while self.currentId() is not self.num_serial_number:
             self.back()
         return False
@@ -171,12 +308,16 @@ class PowerSupplyWindow(QWizard, Ui_Class):
             self._initialize_page_serial_number()
             print(self.currentId())
 
-        elif page == self.num_connect_ps:
-            self._initialize_page_connect_power_supply()
+        elif page == self.num_address_instr:
+            self._initialize_page_addressing_instructions()
             print(self.currentId())
 
-        elif page == self.num_serial_port:
-            self._initialize_page_test_serial_port()
+        elif page == self.num_addressing:
+            self._initialize_page_addressing()
+            print(self.currentId())
+
+        elif page == self.num_power_fbp:
+            self._initialize_page_power_fbp()
             print(self.currentId())
 
         elif page == self.num_start_test:
@@ -192,19 +333,18 @@ class PowerSupplyWindow(QWizard, Ui_Class):
             return self._validate_intro_page()
 
         elif current_id == self.num_serial_number:
-            print("Valida 1")
             return self._validate_page_serial_number()
 
-        elif current_id == self.num_connect_ps:
-            print("Valida 2")
-            return self._validate_page_connect_power_supply()
+        elif current_id == self.num_address_instr:
+            return self._validate_page_addressing_instructions()
 
-        elif current_id == self.num_serial_port:
-            print("Valida 3")
-            return self._validate_page_test_serial_port()
+        elif current_id == self.num_addressing:
+            return self._validate_page_addressing()
+
+        elif current_id == self.num_power_fbp:
+            return self._validate_page_power_fbp()
 
         elif current_id == self.num_start_test:
-            print("Valida 4")
             return self._validate_page_start_test()
 
         else:
@@ -219,20 +359,145 @@ class PowerSupplyWindow(QWizard, Ui_Class):
     ******************* PyQt Slots *********************
     *************************************************"""
     @pyqtSlot()
-    def _read_serial_number(self):
-        data = ReadDataMatrix()
-        if data is not None:
-            self._test_thread.serial_number = int(data[1])
-            self.leSerialNumber.setText(data[1])
-        else:
-            self.lbReadSerialStatus.setText("<p color:'red'><b>ERRO. Digite Manualmente!</b><p/>")
+    def _read_serial_number_1(self):
+        pass
 
     @pyqtSlot()
-    def _treat_read_serial_edit(self):
-        if self.cbEnableSerialNumberEdit.isChecked():
-            self.leSerialNumber.setReadOnly(False)
+    def _read_serial_number_2(self):
+        pass
+
+    @pyqtSlot()
+    def _read_serial_number_3(self):
+        pass
+
+    @pyqtSlot()
+    def _read_serial_number_4(self):
+        pass
+
+    @pyqtSlot()
+    def _read_serial_number_5(self):
+        pass
+
+    @pyqtSlot()
+    def _read_serial_number_6(self):
+        pass
+
+    @pyqtSlot()
+    def _read_serial_number_7(self):
+        pass
+
+    @pyqtSlot()
+    def _read_serial_number_8(self):
+        pass
+
+    @pyqtSlot()
+    def _read_serial_number_9(self):
+        pass
+
+    @pyqtSlot()
+    def _read_serial_number_10(self):
+        pass
+
+    @pyqtSlot()
+    def _disbl_read_serial_slot_1(self):
+        if self.cbDisableFbpSlot1.isChecked():
+            self.leSerialNumber1.clear()
+            self.leSerialNumber1.setEnabled(False)
+            self.pbReadSerialNumber1.setEnabled(False)
         else:
-            self.leSerialNumber.setReadOnly(True)
+            self.leSerialNumber1.setEnabled(True)
+            self.pbReadSerialNumber1.setEnabled(True)
+
+    @pyqtSlot()
+    def _disbl_read_serial_slot_2(self):
+        if self.cbDisableFbpSlot2.isChecked():
+            self.leSerialNumber2.clear()
+            self.leSerialNumber2.setEnabled(False)
+            self.pbReadSerialNumber2.setEnabled(False)
+        else:
+            self.leSerialNumber2.setEnabled(True)
+            self.pbReadSerialNumber2.setEnabled(True)
+
+    @pyqtSlot()
+    def _disbl_read_serial_slot_3(self):
+        if self.cbDisableFbpSlot3.isChecked():
+            self.leSerialNumber3.clear()
+            self.leSerialNumber3.setEnabled(False)
+            self.pbReadSerialNumber3.setEnabled(False)
+        else:
+            self.leSerialNumber3.setEnabled(True)
+            self.pbReadSerialNumber3.setEnabled(True)
+
+    @pyqtSlot()
+    def _disbl_read_serial_slot_4(self):
+        if self.cbDisableFbpSlot4.isChecked():
+            self.leSerialNumber4.clear()
+            self.leSerialNumber4.setEnabled(False)
+            self.pbReadSerialNumber4.setEnabled(False)
+        else:
+            self.leSerialNumber4.setEnabled(True)
+            self.pbReadSerialNumber4.setEnabled(True)
+
+    @pyqtSlot()
+    def _disbl_read_serial_slot_5(self):
+        if self.cbDisableFbpSlot5.isChecked():
+            self.leSerialNumber5.clear()
+            self.leSerialNumber5.setEnabled(False)
+            self.pbReadSerialNumber5.setEnabled(False)
+        else:
+            self.leSerialNumber5.setEnabled(True)
+            self.pbReadSerialNumber5.setEnabled(True)
+
+    @pyqtSlot()
+    def _disbl_read_serial_slot_6(self):
+        if self.cbDisableFbpSlot6.isChecked():
+            self.leSerialNumber6.clear()
+            self.leSerialNumber6.setEnabled(False)
+            self.pbReadSerialNumber6.setEnabled(False)
+        else:
+            self.leSerialNumber6.setEnabled(True)
+            self.pbReadSerialNumber6.setEnabled(True)
+
+    @pyqtSlot()
+    def _disbl_read_serial_slot_7(self):
+        if self.cbDisableFbpSlot7.isChecked():
+            self.leSerialNumber7.clear()
+            self.leSerialNumber7.setEnabled(False)
+            self.pbReadSerialNumber7.setEnabled(False)
+        else:
+            self.leSerialNumber7.setEnabled(True)
+            self.pbReadSerialNumber7.setEnabled(True)
+
+    @pyqtSlot()
+    def _disbl_read_serial_slot_8(self):
+        if self.cbDisableFbpSlot8.isChecked():
+            self.leSerialNumber8.clear()
+            self.leSerialNumber8.setEnabled(False)
+            self.pbReadSerialNumber8.setEnabled(False)
+        else:
+            self.leSerialNumber8.setEnabled(True)
+            self.pbReadSerialNumber8.setEnabled(True)
+
+    @pyqtSlot()
+    def _disbl_read_serial_slot_9(self):
+        if self.cbDisableFbpSlot9.isChecked():
+            self.leSerialNumber9.clear()
+            self.leSerialNumber9.setEnabled(False)
+            self.pbReadSerialNumber9.setEnabled(False)
+        else:
+            self.leSerialNumber9.setEnabled(True)
+            self.pbReadSerialNumber9.setEnabled(True)
+
+    @pyqtSlot()
+    def _disbl_read_serial_slot_10(self):
+        if self.cbDisableFbpSlot10.isChecked():
+            self.leSerialNumber10.clear()
+            self.leSerialNumber10.setEnabled(False)
+            self.pbReadSerialNumber10.setEnabled(False)
+        else:
+            self.leSerialNumber10.setEnabled(True)
+            self.pbReadSerialNumber10.setEnabled(True)
+
 
     @pyqtSlot()
     def _connect_serial_port(self):
@@ -245,22 +510,8 @@ class PowerSupplyWindow(QWizard, Ui_Class):
             self.pbConnectSerialPort.setEnabled(False)
 
     @pyqtSlot()
-    def _communication_test(self):
-        result = self._test_thread.test_communication()
-        if result[0]:
-            self.lbStatusComunicacao.setText("<p color:'green'>OK</p>")
-        else:
-            self.lbStatusComunicacao.setText("<p color:'red'>Falha</p>")
-
-        if result[1]:
-            self.lbStatusAuxSupply.setText("<p color:'green'>OK</p>")
-        else:
-            self.lbStatusAuxSupply.setText("<p color:'red'>Falha</p>")
-
-        if result[0] and result[1]:
-            self._test_serial_port_status = True
-        else:
-            self._test_serial_port_status = False
+    def _set_address(self):
+        pass
 
     @pyqtSlot()
     def _start_test_sequence(self):
