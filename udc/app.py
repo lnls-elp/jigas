@@ -316,11 +316,6 @@ class UDCWindow(QWizard, Ui_Class):
         else:
             return True
 
-    def next(self):
-        if self.currentId() == self.num_start_test:
-            while self.currentId() != self.num_serial_number:
-                self.back()
-
     """*************************************************
     ******************* PyQt Slots *********************
     *************************************************"""
