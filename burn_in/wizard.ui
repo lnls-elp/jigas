@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Teste de Fonte Completa</string>
+   <string>Teste de Burn-In</string>
   </property>
   <property name="wizardStyle">
    <enum>QWizard::ClassicStyle</enum>
@@ -33,7 +33,7 @@
      </font>
     </property>
     <property name="text">
-     <string>1. Certifique-se de que  a jiga de testes esteja desligada e sem o DCCT</string>
+     <string>1. Certifique-se de que  todas as fontes estão desligadas.</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_3">
@@ -217,7 +217,7 @@
      <pixmap>images/sirius_logo.jpeg</pixmap>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>60</x>
@@ -1212,7 +1212,7 @@
      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;Atenção: &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>50</x>
@@ -1381,7 +1381,7 @@
      <string>Endereço Atribuido</string>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -1453,7 +1453,7 @@ p, li { white-space: pre-wrap; }
      <pixmap>images/sirius_logo.jpeg</pixmap>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>0</x>

@@ -496,7 +496,7 @@
     <property name="geometry">
      <rect>
       <x>350</x>
-      <y>180</y>
+      <y>160</y>
       <width>332</width>
       <height>228</height>
      </rect>
@@ -610,7 +610,7 @@
     <property name="geometry">
      <rect>
       <x>100</x>
-      <y>250</y>
+      <y>230</y>
       <width>100</width>
       <height>75</height>
      </rect>
@@ -652,6 +652,19 @@
       </widget>
      </item>
     </layout>
+   </widget>
+   <widget class="QCheckBox" name="cbEndTests">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>400</y>
+      <width>351</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Encerrar testes. (Selecione se desejar testar menos que 4 HRADCs)</string>
+    </property>
    </widget>
   </widget>
   <widget class="QWizardPage" name="PageStartTest">
