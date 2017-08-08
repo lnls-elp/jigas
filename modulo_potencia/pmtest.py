@@ -116,13 +116,12 @@ class PowerModuleTest(QThread):
         serial = [self._serial_mod0, self._serial_mod1, self._serial_mod2,
                     self._serial_mod3]
 
-        mod_result1      = [[] for j in range(4)] # para medidas de iout e DCLink
+        mod_result1      = [[] for j in range(4)] # para medidas de iout
         mod_result2      = [[] for k in range(4)] # para medidas de vout
         mod_result3      = [[] for l in range(4)] # para medidas de temperatura
+        mod_result4      = [[] for m in range(4)] # para medidas de dclink
         load_current     = ['turnedOff', 0, 5, 10, -10, -5] # correntes setadas
-        compare_measure  = [[0,  15, 0,  15, 5,  15, 10, 15, -10, 15, -5,  15] \
-                             for m in range(4)] # valores de corrente e tensão de saída
-
+        compare_current  = [0, 0, 5, 10, -10, -5] # para comparar medidas de correntes
 
         if not self._serial_port.is_open:
             self.connection_lost.emit()
@@ -132,8 +131,8 @@ class PowerModuleTest(QThread):
         '''Número de módulos conectados para inicializar o controlador'''
         '''###########################################################'''
         n_mod = 0
-        for n in range(0, len(serial)):
-            if serial[n] != None:
+        for o in range(0, len(serial)):
+            if serial[o] != None:
                 n_mod = n_mod+1
         self.FBP.Write_sigGen_Aux(n_mod)
         '''###########################################################'''
@@ -143,7 +142,6 @@ class PowerModuleTest(QThread):
         '''###############################################################################'''
         '''Setando todos os valores de corrente e salvando resultados na matriz mod_result'''
         '''###############################################################################'''
-
 
         for set_current in load_current:
             if set_current == 'turnedOff':
@@ -165,27 +163,27 @@ class PowerModuleTest(QThread):
 
             if serial[0] != None:
                 mod_result1[0].append(self.FBP.Read_iMod1())
-                mod_result1[0].append(self.FBP.Read_vDCMod1())
                 mod_result2[0].append(self.FBP.Read_vOutMod1())
                 mod_result3[0].append(self.FBP.Read_temp1())
+                mod_result4[0].append(self.FBP.Read_vDCMod1())
 
             if serial[1] != None:
                 mod_result1[1].append(self.FBP.Read_iMod2())
-                mod_result1[1].append(self.FBP.Read_vDCMod2())
                 mod_result2[1].append(self.FBP.Read_vOutMod2())
                 mod_result3[1].append(self.FBP.Read_temp2())
+                mod_result4[1].append(self.FBP.Read_vDCMod2())
 
             if serial[2] != None:
                 mod_result1[2].append(self.FBP.Read_iMod3())
-                mod_result1[2].append(self.FBP.Read_vDCMod3())
                 mod_result2[2].append(self.FBP.Read_vOutMod3())
                 mod_result3[2].append(self.FBP.Read_temp3())
+                mod_result4[2].append(self.FBP.Read_vDCMod3())
 
             if serial[3] != None:
                 mod_result1[3].append(self.FBP.Read_iMod4())
-                mod_result1[3].append(self.FBP.Read_vDCMod4())
                 mod_result2[3].append(self.FBP.Read_vOutMod4())
                 mod_result3[3].append(self.FBP.Read_temp4())
+                mod_result4[3].append(self.FBP.Read_vDCMod4())
 
         self.FBP.TurnOff()
         '''###############################################################################'''
@@ -193,69 +191,87 @@ class PowerModuleTest(QThread):
 
         for item in serial:
             if item is not None:
+
                 power_module = PowerModule()
                 power_module.serial_number = item
-                #res = self._send_to_server(power_module)
+                res = self._send_to_server(power_module)
 
-                if True:#res:
+                test = [True for p in range(4)]
+
+                if res:
+                    self.update_gui.emit('')
                     self.update_gui.emit('Verificando resultados do módulo '\
                                         + str(serial.index(item)+1) + '...')
                     log = PowerModuleLog()
                     log.serial_number_power_module = item
 
                     # TODO: Faz os testes e seta os atributos de log
-                    for o in range(0, len(mod_result1[serial.index(item)])):
-                        if round(mod_result1[serial.index(item)][o]) == \
-                           compare_measure[serial.index(item)][o]:
-                            test = True
-                            self.update_gui.emit('Teste de corrente e DClink ' + str(test))
+                    for q in range(0, len(mod_result1[serial.index(item)])):
+                        if round(mod_result1[serial.index(item)][q]) == \
+                           compare_current[q]:
+                            if test[0]:
+                                test[0] = True
                         else:
-                            test = False
-                            self.update_gui.emit('Teste de corrente e DClink ' + str(test))
-                            #break
-                    print(mod_result2)
-                    if test:
-                        if round(mod_result2[serial.index(item)][0]) == 0     and \
-                           round(mod_result2[serial.index(item)][1]) == 0     and \
-                                 3 < mod_result2[serial.index(item)][2] < 4   and \
-                                 7 < mod_result2[serial.index(item)][3] < 8   and \
-                                 -8 < mod_result2[serial.index(item)][4] < -7 and \
-                                 -4 < mod_result2[serial.index(item)][5] < -3:
-                            test = True
-                            self.update_gui.emit('Teste de tensão ' + str(test))
-                        else:
-                            test = False
-                            self.update_gui.emit('Teste de tensão ' + str(test))
-                            #break
+                            test[0] = False
+                    if test[0]:
+                        self.update_gui.emit('      Aprovado no teste de corrente de saída')
+                    else:
+                        self.update_gui.emit('      Reprovado no teste de corrente de saída')
 
-                    if test:
-                        for p in range(0, len(mod_result3[serial.index(item)])):
-                            if mod_result3[serial.index(item)][p] < 90:
-                                test = True
-                                self.update_gui.emit('Teste de temperatura ' + str(test))
+                    if round(mod_result2[serial.index(item)][0]) == 0     and \
+                       round(mod_result2[serial.index(item)][1]) == 0     and \
+                             3 < mod_result2[serial.index(item)][2] < 4   and \
+                             7 < mod_result2[serial.index(item)][3] < 8   and \
+                             -8 < mod_result2[serial.index(item)][4] < -7 and \
+                             -4 < mod_result2[serial.index(item)][5] < -3:
+                        test[1] = True
+                    else:
+                        test[1] = False
+                    if test[1]:
+                        self.update_gui.emit('      Aprovado no teste de tensão de saída')
+                    else:
+                        self.update_gui.emit('      Reprovado no teste de tensão de saída')
+
+                    for r in range(0, len(mod_result3[serial.index(item)])):
+                        if mod_result3[serial.index(item)][r] < 90:
+                            if test[2]:
+                                test[2] = True
+                        else:
+                            test[2] = False
+                    if test[2]:
+                        self.update_gui.emit('      Aprovado no teste de leitura da temperatura')
+                    else:
+                        self.update_gui.emit('      Reprovado no teste de leitura da temperatura')
+
+                    for s in range(0, len(mod_result4[serial.index(item)])):
+                        if round(mod_result4[serial.index(item)][s]) == 15:
+                            if test[3]:
+                                test[3] = True
                             else:
-                                test = False
-                                self.update_gui.emit('Teste de temperatura ' + str(test))
-                                #break
+                                test[3] = False
+                    if test[3]:
+                        self.update_gui.emit('      Aprovado no teste de leitura da tensão de entrada')
+                    else:
+                        self.update_gui.emit('      Reprovado no teste de leitura da tensão de entrada')
 
-                    if test:
+                    if test == [True for t in range(4)]:
                         log.test_result = 'Aprovado'
                     else:
                         log.test_result = 'Reprovado'
 
                     log.iload0 = mod_result1[serial.index(item)][0]
-                    log.iload1 = mod_result1[serial.index(item)][2]
-                    log.iload2 = mod_result1[serial.index(item)][4]
-                    log.iload3 = mod_result1[serial.index(item)][6]
-                    log.iload4 = mod_result1[serial.index(item)][8]
-                    log.iload5 = mod_result1[serial.index(item)][10]
+                    log.iload1 = mod_result1[serial.index(item)][1]
+                    log.iload2 = mod_result1[serial.index(item)][2]
+                    log.iload3 = mod_result1[serial.index(item)][3]
+                    log.iload4 = mod_result1[serial.index(item)][4]
+                    log.iload5 = mod_result1[serial.index(item)][5]
 
-                    log.vload0 = mod_result1[serial.index(item)][1]
-                    log.vload1 = mod_result1[serial.index(item)][3]
-                    log.vload2 = mod_result1[serial.index(item)][5]
-                    log.vload3 = mod_result1[serial.index(item)][7]
-                    log.vload4 = mod_result1[serial.index(item)][9]
-                    log.vload5 = mod_result1[serial.index(item)][11]
+                    log.vload0 = mod_result1[serial.index(item)][0]
+                    log.vload1 = mod_result1[serial.index(item)][1]
+                    log.vload2 = mod_result1[serial.index(item)][2]
+                    log.vload3 = mod_result1[serial.index(item)][3]
+                    log.vload4 = mod_result1[serial.index(item)][4]
+                    log.vload5 = mod_result1[serial.index(item)][5]
 
                     log.vdclink0 = mod_result2[serial.index(item)][0]
                     log.vdclink1 = mod_result2[serial.index(item)][1]
@@ -275,8 +291,8 @@ class PowerModuleTest(QThread):
 
                     self.update_gui.emit('Módulo ' + str(serial.index(item)+1)\
                                         + ' ' + log.test_result)
-                    #log_res = self._send_to_server(log)
-                    #response[serial.index(item)] = log_res
+                    log_res = self._send_to_server(log)
+                    response[serial.index(item)] = log_res
 
             # Quando o teste terminar emitir o resultado em uma lista de objetos
             # do tipo PowerModuleLog
