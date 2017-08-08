@@ -244,28 +244,20 @@ class PowerModuleWindow(QWizard, Ui_Class):
             return self._validate_intro_page()
 
         elif current_id == self.num_serial_number:
-            print("Valida 1")
             return self._validate_page_serial_number()
 
         elif current_id == self.num_connect_module:
-            print("Valida 2")
             return self._validate_page_connect_module()
 
         elif current_id == self.num_serial_port:
-            print("Valida 3")
             return self._validate_page_test_serial_port()
 
         elif current_id == self.num_start_test:
-            print("Valida 4")
             return self._validate_page_start_test()
 
         else:
             return True
 
-    def next(self):
-        if self.currentId() == self.num_start_test:
-            while self.currentId() != self.num_serial_number:
-                self.back()
 
     """*************************************************
     ******************* PyQt Slots *********************

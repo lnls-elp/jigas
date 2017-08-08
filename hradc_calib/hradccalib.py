@@ -18,7 +18,10 @@ class HRADCCalib(QThread):
         QThread.__init__(self)
         self._comport = None
         self._baudarate = None
-        self._serial_number = None
+        self._serial_mod0 = None
+        self._serial_mod1 = None
+        self._serial_mod2 = None
+        self._serial_mod3 = None
 
         self._led = None
 
@@ -42,12 +45,36 @@ class HRADCCalib(QThread):
         self._baudrate = value
 
     @property
-    def serial_number(self):
-        return self._serial_number
+    def serial_mod0(self):
+        return self._serial_mod0
 
-    @serial_number.setter
-    def serial_number(self, value):
-        self._serial_number = value
+    @serial_mod0.setter
+    def serial_mod0(self, value):
+        self._serial_mod0 = value
+
+    @property
+    def serial_mod1(self):
+        return self._serial_mod1
+
+    @serial_mod1.setter
+    def serial_mod1(self, value):
+        self._serial_mod1 = value
+
+    @property
+    def serial_mod2(self):
+        return self._serial_mod2
+
+    @serial_mod2.setter
+    def serial_mod2(self, value):
+        self._serial_mod2 = value
+
+    @property
+    def serial_mod3(self):
+        return self._serial_mod3
+
+    @serial_mod3.setter
+    def serial_mod3(self, value):
+        self._serial_mod3 = value
 
 
     def open_serial_port(self):
@@ -67,13 +94,13 @@ class HRADCCalib(QThread):
     def _calib_sequence(self):
 
         hradc = HRADC()
-        hradc.serial_number = self._serial_number
+        hradc.serial_number = 123
         print(hradc.data)
         res = self._send_to_server(hradc)
 
         if res:
             log = HRADCLogCalib()
-            log.serial_number_hradc = self._serial_number
+            log.serial_number_hradc = 123
             log.temperature_hradc = 10.0
 
             print(log.data)

@@ -40,10 +40,22 @@ class HRADCWindow(QWizard, Ui_Class):
         """ Initial widgets configuration """
         self.leBaudrate.setText(str(self._SERIAL_BAUDRATE))
         self.leBaudrate.setReadOnly(True)
-        self.leSerialNumber.setReadOnly(True)
-        self.leSerialNumber.clear()
-        self.lbReadSerialStatus.clear()
-        self.cbEnableSerialNumberEdit.setChecked(False)
+        self.leSerialNumber0.setReadOnly(True)
+        self.leSerialNumber0.clear()
+        self.leSerialNumber1.setReadOnly(True)
+        self.leSerialNumber1.clear()
+        self.leSerialNumber2.setReadOnly(True)
+        self.leSerialNumber2.clear()
+        self.leSerialNumber3.setReadOnly(True)
+        self.leSerialNumber3.clear()
+        self.cbEnableSerialNumberEdit0.setChecked(False)
+        self.cbEnableSerialNumberEdit1.setChecked(False)
+        self.cbEnableSerialNumberEdit2.setChecked(False)
+        self.cbEnableSerialNumberEdit3.setChecked(False)
+        self.cbDisableModuleReadSerial0.setChecked(False)
+        self.cbDisableModuleReadSerial1.setChecked(False)
+        self.cbDisableModuleReadSerial2.setChecked(False)
+        self.cbDisableModuleReadSerial3.setChecked(False)
         self.lbStatusComunicacao.setText("...")
         self.lbTestStatus.setText("Clique para Iniciar Calibração")
         self.lbTestResult.setText("Aguarde...")
@@ -51,9 +63,19 @@ class HRADCWindow(QWizard, Ui_Class):
 
     def _initialize_signals(self):
         """ Configure basic signals """
-        self.pbReadSerialNumber.clicked.connect(self._read_serial_number)
-        self.cbEnableSerialNumberEdit.stateChanged.connect(self._treat_read_serial_edit)
         self.pbConnectSerialPort.clicked.connect(self._connect_serial_port)
+        self.pbReadSerialNumber0.clicked.connect(self._read_serial_number_0)
+        self.pbReadSerialNumber1.clicked.connect(self._read_serial_number_1)
+        self.pbReadSerialNumber2.clicked.connect(self._read_serial_number_2)
+        self.pbReadSerialNumber3.clicked.connect(self._read_serial_number_3)
+        self.cbEnableSerialNumberEdit0.stateChanged.connect(self._treat_read_serial_edit_0)
+        self.cbEnableSerialNumberEdit1.stateChanged.connect(self._treat_read_serial_edit_1)
+        self.cbEnableSerialNumberEdit2.stateChanged.connect(self._treat_read_serial_edit_2)
+        self.cbEnableSerialNumberEdit3.stateChanged.connect(self._treat_read_serial_edit_3)
+        self.cbDisableModuleReadSerial0.stateChanged.connect(self._disbl_read_serial_edit_0)
+        self.cbDisableModuleReadSerial1.stateChanged.connect(self._disbl_read_serial_edit_1)
+        self.cbDisableModuleReadSerial2.stateChanged.connect(self._disbl_read_serial_edit_2)
+        self.cbDisableModuleReadSerial3.stateChanged.connect(self._disbl_read_serial_edit_3)
         self.pbStartCalib.clicked.connect(self._start_calib_sequence)
         self.pbCommunicationTest.clicked.connect(self._communication_test)
         self.finished.connect(self._finish_wizard_execution)
@@ -137,13 +159,41 @@ class HRADCWindow(QWizard, Ui_Class):
         return False
 
     def _validate_page_serial_number(self):
-        serial = self.leSerialNumber.text()
         try:
-            self._test_thread.serial_number = int(serial)
-            return True
+            self._test_thread.serial_mod0 = int(self.leSerialNumber0.text())
         except ValueError:
-            pass
-        return False
+            self._test_thread.serial_mod0 = None
+            if not self.cbDisableModuleReadSerial0.isChecked():
+                return False
+
+        try:
+            self._test_thread.serial_mod1 = int(self.leSerialNumber1.text())
+        except ValueError:
+            self._test_thread.serial_mod1 = None
+            if not self.cbDisableModuleReadSerial1.isChecked():
+                return False
+
+        try:
+            self._test_thread.serial_mod2 = int(self.leSerialNumber2.text())
+        except ValueError:
+            self._test_thread.serial_mod2 = None
+            if not self.cbDisableModuleReadSerial2.isChecked():
+                return False
+
+        try:
+            self._test_thread.serial_mod3 = int(self.leSerialNumber3.text())
+        except ValueError:
+            self._test_thread.serial_mod3 = None
+            if not self.cbDisableModuleReadSerial3.isChecked():
+                return False
+
+        if self.cbDisableModuleReadSerial0.isChecked() and \
+            self.cbDisableModuleReadSerial1.isChecked() and \
+            self.cbDisableModuleReadSerial2.isChecked() and \
+            self.cbDisableModuleReadSerial3.isChecked():
+            return False
+
+        return True
 
     def _validate_page_connect_hradc(self):
         return True
@@ -201,29 +251,113 @@ class HRADCWindow(QWizard, Ui_Class):
         else:
             return True
 
-    def next(self):
-        if self.currentId() == self.num_start_test:
-            while self.currentId() != self.num_serial_number:
-                self.back()
 
     """*************************************************
     ******************* PyQt Slots *********************
     *************************************************"""
     @pyqtSlot()
-    def _read_serial_number(self):
+    def _read_serial_number_0(self):
         data = ReadDataMatrix()
         if data is not None:
-            self._test_thread.serial_number = int(data[1])
-            self.leSerialNumber.setText(data[1])
-        else:
-            self.lbReadSerialStatus.setText("<p color:'red'><b>ERRO. Digite Manualmente!</b><p/>")
+            self._test_thread.serial_mod0 = int(data[1])
+            self.leSerialNumber0.setText(data[1])
 
     @pyqtSlot()
-    def _treat_read_serial_edit(self):
-        if self.cbEnableSerialNumberEdit.isChecked():
-            self.leSerialNumber.setReadOnly(False)
+    def _read_serial_number_1(self):
+        data = ReadDataMatrix()
+        if data is not None:
+            self._test_thread.serial_mod1 = int(data[1])
+            self.leSerialNumber1.setText(data[1])
+
+    @pyqtSlot()
+    def _read_serial_number_2(self):
+        data = ReadDataMatrix()
+        if data is not None:
+            self._test_thread.serial_mod2 = int(data[1])
+            self.leSerialNumber2.setText(data[1])
+
+    @pyqtSlot()
+    def _read_serial_number_3(self):
+        data = ReadDataMatrix()
+        if data is not None:
+            self._test_thread.serial_mod3 = int(data[1])
+            self.leSerialNumber3.setText(data[1])
+
+    @pyqtSlot()
+    def _treat_read_serial_edit_0(self):
+        if self.cbEnableSerialNumberEdit0.isChecked():
+            self.leSerialNumber0.setReadOnly(False)
         else:
-            self.leSerialNumber.setReadOnly(True)
+            self.leSerialNumber0.setReadOnly(True)
+
+    @pyqtSlot()
+    def _treat_read_serial_edit_1(self):
+        if self.cbEnableSerialNumberEdit1.isChecked():
+            self.leSerialNumber1.setReadOnly(False)
+        else:
+            self.leSerialNumber1.setReadOnly(True)
+
+    @pyqtSlot()
+    def _treat_read_serial_edit_2(self):
+        if self.cbEnableSerialNumberEdit2.isChecked():
+            self.leSerialNumber2.setReadOnly(False)
+        else:
+            self.leSerialNumber2.setReadOnly(True)
+
+    @pyqtSlot()
+    def _treat_read_serial_edit_3(self):
+        if self.cbEnableSerialNumberEdit3.isChecked():
+            self.leSerialNumber3.setReadOnly(False)
+        else:
+            self.leSerialNumber3.setReadOnly(True)
+
+    @pyqtSlot()
+    def _disbl_read_serial_edit_0(self):
+        if self.cbDisableModuleReadSerial0.isChecked():
+            self.leSerialNumber0.clear()
+            self.leSerialNumber0.setEnabled(False)
+            self.pbReadSerialNumber0.setEnabled(False)
+            self.cbEnableSerialNumberEdit0.setEnabled(False)
+        else:
+            self.leSerialNumber0.setEnabled(True)
+            self.pbReadSerialNumber0.setEnabled(True)
+            self.cbEnableSerialNumberEdit0.setEnabled(True)
+
+    @pyqtSlot()
+    def _disbl_read_serial_edit_1(self):
+        if self.cbDisableModuleReadSerial1.isChecked():
+            self.leSerialNumber1.clear()
+            self.leSerialNumber1.setEnabled(False)
+            self.pbReadSerialNumber1.setEnabled(False)
+            self.cbEnableSerialNumberEdit1.setEnabled(False)
+        else:
+            self.leSerialNumber1.setEnabled(True)
+            self.pbReadSerialNumber1.setEnabled(True)
+            self.cbEnableSerialNumberEdit1.setEnabled(True)
+
+    @pyqtSlot()
+    def _disbl_read_serial_edit_2(self):
+        if self.cbDisableModuleReadSerial2.isChecked():
+            self.leSerialNumber2.clear()
+            self.leSerialNumber2.setEnabled(False)
+            self.pbReadSerialNumber2.setEnabled(False)
+            self.cbEnableSerialNumberEdit2.setEnabled(False)
+        else:
+            self.leSerialNumber2.setEnabled(True)
+            self.pbReadSerialNumber2.setEnabled(True)
+            self.cbEnableSerialNumberEdit2.setEnabled(True)
+
+    @pyqtSlot()
+    def _disbl_read_serial_edit_3(self):
+        if self.cbDisableModuleReadSerial3.isChecked():
+            self.leSerialNumber3.clear()
+            self.leSerialNumber3.setEnabled(False)
+            self.pbReadSerialNumber3.setEnabled(False)
+            self.cbEnableSerialNumberEdit3.setEnabled(False)
+        else:
+            self.leSerialNumber3.setEnabled(True)
+            self.pbReadSerialNumber3.setEnabled(True)
+            self.cbEnableSerialNumberEdit3.setEnabled(True)
 
     @pyqtSlot()
     def _connect_serial_port(self):
