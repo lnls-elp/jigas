@@ -267,7 +267,6 @@ class HRADCWindow(QWizard, Ui_Class):
     """*************************************************
     ******************* PyQt Slots *********************
     *************************************************"""
-
     @pyqtSlot()
     def _treat_dmcode0(self):
         code = self.leDmCode0.text()
@@ -337,10 +336,12 @@ class HRADCWindow(QWizard, Ui_Class):
             self.leSerialNumber0.setEnabled(False)
             self.leMaterialCode0.setEnabled(False)
             self.leMaterialName0.setEnabled(False)
+            self.leDmCode0.setEnabled(False)
         else:
             self.leSerialNumber0.setEnabled(True)
             self.leMaterialCode0.setEnabled(True)
             self.leMaterialName0.setEnabled(True)
+            self.leDmCode0.setEnabled(True)
 
     @pyqtSlot()
     def _disbl_read_serial_edit_1(self):
@@ -349,10 +350,12 @@ class HRADCWindow(QWizard, Ui_Class):
             self.leSerialNumber1.setEnabled(False)
             self.leMaterialCode1.setEnabled(False)
             self.leMaterialName1.setEnabled(False)
+            self.leDmCode1.setEnabled(False)
         else:
             self.leSerialNumber1.setEnabled(True)
             self.leMaterialCode1.setEnabled(True)
             self.leMaterialName1.setEnabled(True)
+            self.leDmCode1.setEnabled(True)
 
     @pyqtSlot()
     def _disbl_read_serial_edit_2(self):
@@ -361,22 +364,27 @@ class HRADCWindow(QWizard, Ui_Class):
             self.leSerialNumber2.setEnabled(False)
             self.leMaterialCode2.setEnabled(False)
             self.leMaterialName2.setEnabled(False)
+            self.leDmCode2.setEnabled(False)
         else:
             self.leSerialNumber2.setEnabled(True)
             self.leMaterialCode2.setEnabled(True)
             self.leMaterialName2.setEnabled(True)
+            self.leDmCode2.setEnabled(True)
 
     @pyqtSlot()
     def _disbl_read_serial_edit_3(self):
         if self.cbDisableModuleReadSerial3.isChecked():
             self.leSerialNumber3.clear()
-            self.leSerialNumber3.setEnabled(False)s
+            self.leSerialNumber3.setEnabled(False)
             self.leMaterialCode3.setEnabled(False)
             self.leMaterialName3.setEnabled(False)
+            self.leDmCode3.setEnabled(False)
+
         else:
             self.leSerialNumber3.setEnabled(True)
             self.leMaterialCode3.setEnabled(True)
             self.leMaterialName3.setEnabled(True)
+            self.leDmCode3.setEnabled(True)
 
     @pyqtSlot()
     def _connect_serial_port(self):

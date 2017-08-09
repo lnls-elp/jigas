@@ -42,16 +42,57 @@ class PowerSupplyWindow(QWizard, Ui_Class):
         """ Initial widgets configuration """
         self.leBaudrate.setText(str(self._SERIAL_BAUDRATE))
         self.leBaudrate.setReadOnly(True)
+        self.leDmCode0.clear()
+        self.leDmCode1.clear()
+        self.leDmCode2.clear()
+        self.leDmCode3.clear()
+        self.leDmCode4.clear()
+        self.leDmCode5.clear()
+        self.leDmCode6.clear()
+        self.leDmCode7.clear()
+        self.leDmCode8.clear()
+        self.leDmCode9.clear()
+        self.leSerialNumber0.setReadOnly(True)
+        self.leSerialNumber0.clear()
+        self.leSerialNumber1.setReadOnly(True)
         self.leSerialNumber1.clear()
+        self.leSerialNumber2.setReadOnly(True)
         self.leSerialNumber2.clear()
+        self.leSerialNumber3.setReadOnly(True)
         self.leSerialNumber3.clear()
+        self.leSerialNumber4.setReadOnly(True)
         self.leSerialNumber4.clear()
+        self.leSerialNumber5.setReadOnly(True)
         self.leSerialNumber5.clear()
+        self.leSerialNumber6.setReadOnly(True)
         self.leSerialNumber6.clear()
+        self.leSerialNumber7.setReadOnly(True)
         self.leSerialNumber7.clear()
+        self.leSerialNumber8.setReadOnly(True)
         self.leSerialNumber8.clear()
+        self.leSerialNumber9.setReadOnly(True)
         self.leSerialNumber9.clear()
-        self.leSerialNumber10.clear()
+        self.leMaterialCode0.setReadOnly(True)
+        self.leMaterialCode0.clear()
+        self.leMaterialCode1.setReadOnly(True)
+        self.leMaterialCode1.clear()
+        self.leMaterialCode2.setReadOnly(True)
+        self.leMaterialCode2.clear()
+        self.leMaterialCode3.setReadOnly(True)
+        self.leMaterialCode3.clear()
+        self.leMaterialCode4.setReadOnly(True)
+        self.leMaterialCode4.clear()
+        self.leMaterialCode5.setReadOnly(True)
+        self.leMaterialCode5.clear()
+        self.leMaterialCode6.setReadOnly(True)
+        self.leMaterialCode6.clear()
+        self.leMaterialCode7.setReadOnly(True)
+        self.leMaterialCode7.clear()
+        self.leMaterialCode8.setReadOnly(True)
+        self.leMaterialCode8.clear()
+        self.leMaterialCode9.setReadOnly(True)
+        self.leMaterialCode9.clear()
+        self.cbDisableFbpSlot0.setChecked(False)
         self.cbDisableFbpSlot1.setChecked(False)
         self.cbDisableFbpSlot2.setChecked(False)
         self.cbDisableFbpSlot3.setChecked(False)
@@ -61,7 +102,6 @@ class PowerSupplyWindow(QWizard, Ui_Class):
         self.cbDisableFbpSlot7.setChecked(False)
         self.cbDisableFbpSlot8.setChecked(False)
         self.cbDisableFbpSlot9.setChecked(False)
-        self.cbDisableFbpSlot10.setChecked(False)
         self.lbTestStatus.setText("Clique para Iniciar Testes")
         self.lbTestResult.setText("Aguarde...")
         self.teTestReport.clear()
@@ -69,26 +109,26 @@ class PowerSupplyWindow(QWizard, Ui_Class):
     def _initialize_signals(self):
         """ Configure basic signals """
         self.pbConnectSerialPort.clicked.connect(self._connect_serial_port)
-        self.pbReadSerialNumber1.clicked.connect(self._read_serial_number_1)
-        self.pbReadSerialNumber2.clicked.connect(self._read_serial_number_2)
-        self.pbReadSerialNumber3.clicked.connect(self._read_serial_number_3)
-        self.pbReadSerialNumber4.clicked.connect(self._read_serial_number_4)
-        self.pbReadSerialNumber5.clicked.connect(self._read_serial_number_5)
-        self.pbReadSerialNumber6.clicked.connect(self._read_serial_number_6)
-        self.pbReadSerialNumber7.clicked.connect(self._read_serial_number_7)
-        self.pbReadSerialNumber8.clicked.connect(self._read_serial_number_8)
-        self.pbReadSerialNumber9.clicked.connect(self._read_serial_number_9)
-        self.pbReadSerialNumber10.clicked.connect(self._read_serial_number_10)
-        self.cbDisableFbpSlot1.stateChanged.connect(self._disbl_read_serial_slot_1)
-        self.cbDisableFbpSlot2.stateChanged.connect(self._disbl_read_serial_slot_2)
-        self.cbDisableFbpSlot3.stateChanged.connect(self._disbl_read_serial_slot_3)
-        self.cbDisableFbpSlot4.stateChanged.connect(self._disbl_read_serial_slot_4)
-        self.cbDisableFbpSlot5.stateChanged.connect(self._disbl_read_serial_slot_5)
-        self.cbDisableFbpSlot6.stateChanged.connect(self._disbl_read_serial_slot_6)
-        self.cbDisableFbpSlot7.stateChanged.connect(self._disbl_read_serial_slot_7)
-        self.cbDisableFbpSlot8.stateChanged.connect(self._disbl_read_serial_slot_8)
-        self.cbDisableFbpSlot9.stateChanged.connect(self._disbl_read_serial_slot_9)
-        self.cbDisableFbpSlot10.stateChanged.connect(self._disbl_read_serial_slot_10)
+        self.cbDisableFbpSlot0.stateChanged.connect(self._disbl_read_serial_edit_0)
+        self.cbDisableFbpSlot1.stateChanged.connect(self._disbl_read_serial_edit_1)
+        self.cbDisableFbpSlot2.stateChanged.connect(self._disbl_read_serial_edit_2)
+        self.cbDisableFbpSlot3.stateChanged.connect(self._disbl_read_serial_edit_3)
+        self.cbDisableFbpSlot4.stateChanged.connect(self._disbl_read_serial_edit_4)
+        self.cbDisableFbpSlot5.stateChanged.connect(self._disbl_read_serial_edit_5)
+        self.cbDisableFbpSlot6.stateChanged.connect(self._disbl_read_serial_edit_6)
+        self.cbDisableFbpSlot7.stateChanged.connect(self._disbl_read_serial_edit_7)
+        self.cbDisableFbpSlot8.stateChanged.connect(self._disbl_read_serial_edit_8)
+        self.cbDisableFbpSlot9.stateChanged.connect(self._disbl_read_serial_edit_9)
+        self.leDmCode0.editingFinished.connect(self._treat_dmcode0)
+        self.leDmCode1.editingFinished.connect(self._treat_dmcode1)
+        self.leDmCode2.editingFinished.connect(self._treat_dmcode2)
+        self.leDmCode3.editingFinished.connect(self._treat_dmcode3)
+        self.leDmCode4.editingFinished.connect(self._treat_dmcode4)
+        self.leDmCode5.editingFinished.connect(self._treat_dmcode5)
+        self.leDmCode6.editingFinished.connect(self._treat_dmcode6)
+        self.leDmCode7.editingFinished.connect(self._treat_dmcode7)
+        self.leDmCode8.editingFinished.connect(self._treat_dmcode8)
+        self.leDmCode9.editingFinished.connect(self._treat_dmcode9)
         self.pbSetAddress.clicked.connect(self._set_address)
         self.pbStartTests.clicked.connect(self._start_test_sequence)
         self.finished.connect(self._finish_wizard_execution)
@@ -179,6 +219,14 @@ class PowerSupplyWindow(QWizard, Ui_Class):
         serial = None
 
         try:
+            serial = int(self.leSerialNumber0.text())
+            if serial not in self._serial_number:
+                self._serial_number.append(serial)
+        except ValueError:
+            if not self.cbDisableFbpSlot0.isChecked():
+                return False
+
+        try:
             serial = int(self.leSerialNumber1.text())
             if serial not in self._serial_number:
                 self._serial_number.append(serial)
@@ -250,15 +298,6 @@ class PowerSupplyWindow(QWizard, Ui_Class):
             if not self.cbDisableFbpSlot9.isChecked():
                 return False
 
-        try:
-            serial = int(self.leSerialNumber10.text())
-            if serial not in self._serial_number:
-                self._serial_number.append(serial)
-        except ValueError:
-            if not self.cbDisableFbpSlot10.isChecked():
-                return False
-
-
         if self.cbDisableFbpSlot1.isChecked() and \
             self.cbDisableFbpSlot2.isChecked() and \
             self.cbDisableFbpSlot3.isChecked() and \
@@ -268,7 +307,7 @@ class PowerSupplyWindow(QWizard, Ui_Class):
             self.cbDisableFbpSlot7.isChecked() and \
             self.cbDisableFbpSlot8.isChecked() and \
             self.cbDisableFbpSlot9.isChecked() and \
-            self.cbDisableFbpSlot10.isChecked():
+            self.cbDisableFbpSlot0.isChecked():
             return False
 
         self._test_thread.serial_number = self._serial_number[:]
@@ -354,175 +393,257 @@ class PowerSupplyWindow(QWizard, Ui_Class):
     ******************* PyQt Slots *********************
     *************************************************"""
     @pyqtSlot()
-    def _read_serial_number_1(self):
-        scanner = Scanner()
-        data = scanner.read()
+    def _treat_dmcode0(self):
+        code = self.leDmCode0.text()
+        scan = Scanner()
+        data = scan.parse_code(code)
+        if data is not None:
+            self.leSerialNumber0.setText(data['serial'])
+            self.leMaterialCode0.setText(data['material'])
+        else:
+            self.leDmCode0.setText("Codigo Invalido!")
+            self.leSerialNumber0.clear()
+            self.leMaterialCode0.clear()
+
+
+    @pyqtSlot()
+    def _treat_dmcode1(self):
+        code = self.leDmCode1.text()
+        scan = Scanner()
+        data = scan.parse_code(code)
         if data is not None:
             self.leSerialNumber1.setText(data['serial'])
-
+            self.leMaterialCode1.setText(data['material'])
+        else:
+            self.leDmCode0.setText("Codigo Invalido!")
+            self.leSerialNumber1.clear()
+            self.leMaterialCode1.clear()
 
     @pyqtSlot()
-    def _read_serial_number_2(self):
-        scanner = Scanner()
-        data = scanner.read()
+    def _treat_dmcode2(self):
+        code = self.leDmCode2.text()
+        scan = Scanner()
+        data = scan.parse_code(code)
         if data is not None:
             self.leSerialNumber2.setText(data['serial'])
+            self.leMaterialCode2.setText(data['material'])
+        else:
+            self.leDmCode0.setText("Codigo Invalido!")
+            self.leSerialNumber2.clear()
+            self.leMaterialCode2.clear()
 
     @pyqtSlot()
-    def _read_serial_number_3(self):
-        scanner = Scanner()
-        data = scanner.read()
+    def _treat_dmcode3(self):
+        code = self.leDmCode3.text()
+        scan = Scanner()
+        data = scan.parse_code(code)
         if data is not None:
             self.leSerialNumber3.setText(data['serial'])
+            self.leMaterialCode3.setText(data['material'])
+        else:
+            self.leDmCode0.setText("Codigo Invalido!")
+            self.leSerialNumber3.clear()
+            self.leMaterialCode3.clear()
 
     @pyqtSlot()
-    def _read_serial_number_4(self):
-        scanner = Scanner()
-        data = scanner.read()
+    def _treat_dmcode4(self):
+        code = self.leDmCode4.text()
+        scan = Scanner()
+        data = scan.parse_code(code)
         if data is not None:
             self.leSerialNumber4.setText(data['serial'])
+            self.leMaterialCode4.setText(data['material'])
+        else:
+            self.leDmCode0.setText("Codigo Invalido!")
+            self.leSerialNumber4.clear()
+            self.leMaterialCode4.clear()
+
 
     @pyqtSlot()
-    def _read_serial_number_5(self):
-        scanner = Scanner()
-        data = scanner.read()
+    def _treat_dmcode5(self):
+        code = self.leDmCode5.text()
+        scan = Scanner()
+        data = scan.parse_code(code)
         if data is not None:
             self.leSerialNumber5.setText(data['serial'])
+            self.leMaterialCode5.setText(data['material'])
+        else:
+            self.leDmCode0.setText("Codigo Invalido!")
+            self.leSerialNumber5.clear()
+            self.leMaterialCode5.clear()
 
     @pyqtSlot()
-    def _read_serial_number_6(self):
-        scanner = Scanner()
-        data = scanner.read()
+    def _treat_dmcode6(self):
+        code = self.leDmCode6.text()
+        scan = Scanner()
+        data = scan.parse_code(code)
         if data is not None:
             self.leSerialNumber6.setText(data['serial'])
+            self.leMaterialCode6.setText(data['material'])
+        else:
+            self.leDmCode0.setText("Codigo Invalido!")
+            self.leSerialNumber6.clear()
+            self.leMaterialCode6.clear()
 
     @pyqtSlot()
-    def _read_serial_number_7(self):
-        scanner = Scanner()
-        data = scanner.read()
+    def _treat_dmcode7(self):
+        code = self.leDmCode7.text()
+        scan = Scanner()
+        data = scan.parse_code(code)
         if data is not None:
             self.leSerialNumber7.setText(data['serial'])
+            self.leMaterialCode7.setText(data['material'])
+        else:
+            self.leDmCode0.setText("Codigo Invalido!")
+            self.leSerialNumber7.clear()
+            self.leMaterialCode7.clear()
 
     @pyqtSlot()
-    def _read_serial_number_8(self):
-        scanner = Scanner()
-        data = scanner.read()
+    def _treat_dmcode8(self):
+        code = self.leDmCode8.text()
+        scan = Scanner()
+        data = scan.parse_code(code)
         if data is not None:
             self.leSerialNumber8.setText(data['serial'])
+            self.leMaterialCode8.setText(data['material'])
+        else:
+            self.leDmCode0.setText("Codigo Invalido!")
+            self.leSerialNumber8.clear()
+            self.leMaterialCode8.clear()
 
     @pyqtSlot()
-    def _read_serial_number_9(self):
-        scanner = Scanner()
-        data = scanner.read()
+    def _treat_dmcode9(self):
+        code = self.leDmCode9.text()
+        scan = Scanner()
+        data = scan.parse_code(code)
         if data is not None:
             self.leSerialNumber9.setText(data['serial'])
+            self.leMaterialCode9.setText(data['material'])
+        else:
+            self.leDmCode0.setText("Codigo Invalido!")
+            self.leSerialNumber9.clear()
+            self.leMaterialCode9.clear()
 
     @pyqtSlot()
-    def _read_serial_number_10(self):
-        scanner = Scanner()
-        data = scanner.read()
-        if data is not None:
-            self.leSerialNumber10.setText(data['serial'])
+    def _disbl_read_serial_edit_0(self):
+        if self.cbDisableModuleReadSerial0.isChecked():
+            self.leSerialNumber0.clear()
+            self.leSerialNumber0.setEnabled(False)
+            self.leMaterialCode0.setEnabled(False)
+            self.leDmCode0.setEnabled(False)
+        else:
+            self.leSerialNumber0.setEnabled(True)
+            self.leMaterialCode0.setEnabled(True)
+            self.leDmCode0.setEnabled(True)
 
     @pyqtSlot()
-    def _disbl_read_serial_slot_1(self):
-        if self.cbDisableFbpSlot1.isChecked():
+    def _disbl_read_serial_edit_1(self):
+        if self.cbDisableModuleReadSerial1.isChecked():
             self.leSerialNumber1.clear()
             self.leSerialNumber1.setEnabled(False)
-            self.pbReadSerialNumber1.setEnabled(False)
+            self.leMaterialCode1.setEnabled(False)
+            self.leDmCode1.setEnabled(False)
         else:
             self.leSerialNumber1.setEnabled(True)
-            self.pbReadSerialNumber1.setEnabled(True)
+            self.leMaterialCode1.setEnabled(True)
+            self.leDmCode1.setEnabled(True)
 
     @pyqtSlot()
-    def _disbl_read_serial_slot_2(self):
-        if self.cbDisableFbpSlot2.isChecked():
+    def _disbl_read_serial_edit_2(self):
+        if self.cbDisableModuleReadSerial2.isChecked():
             self.leSerialNumber2.clear()
             self.leSerialNumber2.setEnabled(False)
-            self.pbReadSerialNumber2.setEnabled(False)
+            self.leMaterialCode2.setEnabled(False)
+            self.leDmCode2.setEnabled(False)
         else:
             self.leSerialNumber2.setEnabled(True)
-            self.pbReadSerialNumber2.setEnabled(True)
+            self.leMaterialCode2.setEnabled(True)
+            self.leDmCode2.setEnabled(True)
 
     @pyqtSlot()
-    def _disbl_read_serial_slot_3(self):
-        if self.cbDisableFbpSlot3.isChecked():
+    def _disbl_read_serial_edit_3(self):
+        if self.cbDisableModuleReadSerial3.isChecked():
             self.leSerialNumber3.clear()
             self.leSerialNumber3.setEnabled(False)
-            self.pbReadSerialNumber3.setEnabled(False)
+            self.leMaterialCode3.setEnabled(False)
+            self.leDmCode3.setEnabled(False)
         else:
             self.leSerialNumber3.setEnabled(True)
-            self.pbReadSerialNumber3.setEnabled(True)
+            self.leMaterialCode3.setEnabled(True)
+            self.leDmCode3.setEnabled(True)
+
 
     @pyqtSlot()
-    def _disbl_read_serial_slot_4(self):
-        if self.cbDisableFbpSlot4.isChecked():
+    def _disbl_read_serial_edit_4(self):
+        if self.cbDisableModuleReadSerial4.isChecked():
             self.leSerialNumber4.clear()
             self.leSerialNumber4.setEnabled(False)
-            self.pbReadSerialNumber4.setEnabled(False)
+            self.leMaterialCode4.setEnabled(False)
+            self.leDmCode4.setEnabled(False)
         else:
             self.leSerialNumber4.setEnabled(True)
-            self.pbReadSerialNumber4.setEnabled(True)
+            self.leMaterialCode4.setEnabled(True)
+            self.leDmCode4.setEnabled(True)
 
     @pyqtSlot()
-    def _disbl_read_serial_slot_5(self):
-        if self.cbDisableFbpSlot5.isChecked():
+    def _disbl_read_serial_edit_5(self):
+        if self.cbDisableModuleReadSerial5.isChecked():
             self.leSerialNumber5.clear()
             self.leSerialNumber5.setEnabled(False)
-            self.pbReadSerialNumber5.setEnabled(False)
+            self.leMaterialCode5.setEnabled(False)
+            self.leDmCode5.setEnabled(False)
         else:
             self.leSerialNumber5.setEnabled(True)
-            self.pbReadSerialNumber5.setEnabled(True)
+            self.leMaterialCode5.setEnabled(True)
+            self.leDmCode5.setEnabled(True)
 
     @pyqtSlot()
-    def _disbl_read_serial_slot_6(self):
-        if self.cbDisableFbpSlot6.isChecked():
+    def _disbl_read_serial_edit_6(self):
+        if self.cbDisableModuleReadSerial6.isChecked():
             self.leSerialNumber6.clear()
             self.leSerialNumber6.setEnabled(False)
-            self.pbReadSerialNumber6.setEnabled(False)
+            self.leMaterialCode6.setEnabled(False)
+            self.leDmCode6.setEnabled(False)
         else:
             self.leSerialNumber6.setEnabled(True)
-            self.pbReadSerialNumber6.setEnabled(True)
+            self.leMaterialCode6.setEnabled(True)
+            self.leDmCode6.setEnabled(True)
 
     @pyqtSlot()
-    def _disbl_read_serial_slot_7(self):
-        if self.cbDisableFbpSlot7.isChecked():
+    def _disbl_read_serial_edit_7(self):
+        if self.cbDisableModuleReadSerial7.isChecked():
             self.leSerialNumber7.clear()
             self.leSerialNumber7.setEnabled(False)
-            self.pbReadSerialNumber7.setEnabled(False)
+            self.leMaterialCode7.setEnabled(False)
+            self.leDmCode7.setEnabled(False)
         else:
             self.leSerialNumber7.setEnabled(True)
-            self.pbReadSerialNumber7.setEnabled(True)
+            self.leMaterialCode7.setEnabled(True)
+            self.leDmCode7.setEnabled(True)
 
     @pyqtSlot()
-    def _disbl_read_serial_slot_8(self):
-        if self.cbDisableFbpSlot8.isChecked():
+    def _disbl_read_serial_edit_8(self):
+        if self.cbDisableModuleReadSerial8.isChecked():
             self.leSerialNumber8.clear()
             self.leSerialNumber8.setEnabled(False)
-            self.pbReadSerialNumber8.setEnabled(False)
+            self.leMaterialCode8.setEnabled(False)
+            self.leDmCode8.setEnabled(False)
         else:
             self.leSerialNumber8.setEnabled(True)
-            self.pbReadSerialNumber8.setEnabled(True)
+            self.leMaterialCode8.setEnabled(True)
+            self.leDmCode8.setEnabled(True)
 
     @pyqtSlot()
-    def _disbl_read_serial_slot_9(self):
-        if self.cbDisableFbpSlot9.isChecked():
+    def _disbl_read_serial_edit_9(self):
+        if self.cbDisableModuleReadSerial9.isChecked():
             self.leSerialNumber9.clear()
             self.leSerialNumber9.setEnabled(False)
-            self.pbReadSerialNumber9.setEnabled(False)
+            self.leMaterialCode9.setEnabled(False)
+            self.leDmCode9.setEnabled(False)
         else:
             self.leSerialNumber9.setEnabled(True)
-            self.pbReadSerialNumber9.setEnabled(True)
-
-    @pyqtSlot()
-    def _disbl_read_serial_slot_10(self):
-        if self.cbDisableFbpSlot10.isChecked():
-            self.leSerialNumber10.clear()
-            self.leSerialNumber10.setEnabled(False)
-            self.pbReadSerialNumber10.setEnabled(False)
-        else:
-            self.leSerialNumber10.setEnabled(True)
-            self.pbReadSerialNumber10.setEnabled(True)
+            self.leMaterialCode9.setEnabled(True)
+            self.leDmCode9.setEnabled(True)
 
 
     @pyqtSlot()

@@ -198,7 +198,7 @@
      <pixmap>images/sirius_logo.jpeg</pixmap>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>90</x>
@@ -241,7 +241,7 @@
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_29">
-          <item>
+          <item alignment="Qt::AlignVCenter">
            <widget class="QLabel" name="label_48">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Código:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -283,7 +283,7 @@
          <layout class="QHBoxLayout" name="horizontalLayout_30">
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_31">
-            <item>
+            <item alignment="Qt::AlignVCenter">
              <widget class="QLabel" name="label_49">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Serial:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -329,7 +329,7 @@
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_32">
-            <item>
+            <item alignment="Qt::AlignVCenter">
              <widget class="QLabel" name="label_50">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Material:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -417,7 +417,7 @@
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_21">
-          <item>
+          <item alignment="Qt::AlignVCenter">
            <widget class="QLabel" name="label_41">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Código:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -459,7 +459,7 @@
          <layout class="QHBoxLayout" name="horizontalLayout_22">
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_23">
-            <item>
+            <item alignment="Qt::AlignVCenter">
              <widget class="QLabel" name="label_42">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Serial:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -505,7 +505,7 @@
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_24">
-            <item>
+            <item alignment="Qt::AlignVCenter">
              <widget class="QLabel" name="label_43">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Material:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -593,7 +593,7 @@
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_25">
-          <item>
+          <item alignment="Qt::AlignVCenter">
            <widget class="QLabel" name="label_45">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Código:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -635,7 +635,7 @@
          <layout class="QHBoxLayout" name="horizontalLayout_26">
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_27">
-            <item>
+            <item alignment="Qt::AlignVCenter">
              <widget class="QLabel" name="label_46">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Serial:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -681,7 +681,7 @@
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_28">
-            <item>
+            <item alignment="Qt::AlignVCenter">
              <widget class="QLabel" name="label_47">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Material:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -769,7 +769,7 @@
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_33">
-          <item>
+          <item alignment="Qt::AlignVCenter">
            <widget class="QLabel" name="label_52">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Código:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -811,7 +811,7 @@
          <layout class="QHBoxLayout" name="horizontalLayout_34">
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_35">
-            <item>
+            <item alignment="Qt::AlignVCenter">
              <widget class="QLabel" name="label_53">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Serial:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -857,7 +857,7 @@
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_36">
-            <item>
+            <item alignment="Qt::AlignVCenter">
              <widget class="QLabel" name="label_54">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Material:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>

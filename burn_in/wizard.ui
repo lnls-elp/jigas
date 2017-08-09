@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>716</width>
-    <height>491</height>
+    <width>972</width>
+    <height>559</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>972</width>
+    <height>559</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Teste de Burn-In</string>
@@ -217,28 +223,28 @@
      <pixmap>images/sirius_logo.jpeg</pixmap>
     </property>
    </widget>
-   <widget class="QWidget" name="layoutWidget">
+   <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>70</y>
-      <width>548</width>
-      <height>352</height>
+      <x>20</x>
+      <y>40</y>
+      <width>904</width>
+      <height>437</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="2">
-      <widget class="QGroupBox" name="groupBox_42">
+      <widget class="QGroupBox" name="groupBox_82">
        <property name="minimumSize">
         <size>
-         <width>178</width>
-         <height>83</height>
+         <width>221</width>
+         <height>141</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>178</width>
-         <height>83</height>
+         <width>221</width>
+         <height>141</height>
         </size>
        </property>
        <property name="font">
@@ -250,89 +256,134 @@
        <property name="title">
         <string>FBP1</string>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_51">
-        <item>
-         <widget class="QCheckBox" name="cbDisableFbpSlot1">
-          <property name="font">
-           <font>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Posição Não Utilizada</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_53">
-          <item>
-           <widget class="QLineEdit" name="leSerialNumber1">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>110</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>110</width>
-              <height>25</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pbReadSerialNumber1">
-            <property name="minimumSize">
-             <size>
-              <width>40</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>40</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="sizeIncrement">
-             <size>
-              <width>90</width>
-              <height>70</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Ler</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
+       <widget class="QCheckBox" name="cbDisableFbpSlot0">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>23</y>
+          <width>142</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Posição Não Utilizada</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="leDmCode0">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>11</x>
+          <y>47</y>
+          <width>201</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32465</width>
+          <height>34565</height>
+         </size>
+        </property>
+       </widget>
+       <widget class="QWidget" name="layoutWidget_30">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>80</y>
+          <width>201</width>
+          <height>48</height>
+         </rect>
+        </property>
+        <layout class="QFormLayout" name="formLayout_28">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_107">
+           <property name="minimumSize">
+            <size>
+             <width>47</width>
+             <height>13</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Serial:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="leSerialNumber0">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32465</width>
+             <height>34565</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_108">
+           <property name="text">
+            <string>Material:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="leMaterialCode0">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32465</width>
+             <height>34565</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QGroupBox" name="groupBox_33">
+     <item row="0" column="3">
+      <widget class="QGroupBox" name="groupBox_81">
        <property name="minimumSize">
         <size>
-         <width>178</width>
-         <height>83</height>
+         <width>221</width>
+         <height>141</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>178</width>
-         <height>83</height>
+         <width>221</width>
+         <height>141</height>
         </size>
        </property>
        <property name="font">
@@ -344,89 +395,134 @@
        <property name="title">
         <string>FBP2</string>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="QCheckBox" name="cbDisableFbpSlot2">
-          <property name="font">
-           <font>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Posição Não Utilizada</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout">
-          <item>
-           <widget class="QLineEdit" name="leSerialNumber2">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>110</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>110</width>
-              <height>25</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pbReadSerialNumber2">
-            <property name="minimumSize">
-             <size>
-              <width>40</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>40</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="sizeIncrement">
-             <size>
-              <width>90</width>
-              <height>70</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Ler</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
+       <widget class="QCheckBox" name="cbDisableFbpSlot1">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>23</y>
+          <width>142</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Posição Não Utilizada</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="leDmCode1">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>11</x>
+          <y>47</y>
+          <width>201</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32465</width>
+          <height>34565</height>
+         </size>
+        </property>
+       </widget>
+       <widget class="QWidget" name="layoutWidget_29">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>80</y>
+          <width>201</width>
+          <height>48</height>
+         </rect>
+        </property>
+        <layout class="QFormLayout" name="formLayout_27">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_105">
+           <property name="minimumSize">
+            <size>
+             <width>47</width>
+             <height>13</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Serial:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="leSerialNumber1">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32465</width>
+             <height>34565</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_106">
+           <property name="text">
+            <string>Material:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="leMaterialCode1">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32465</width>
+             <height>34565</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </item>
-     <item row="1" column="1">
-      <widget class="QGroupBox" name="groupBox_37">
+     <item row="1" column="0">
+      <widget class="QGroupBox" name="groupBox_77">
        <property name="minimumSize">
         <size>
-         <width>178</width>
-         <height>83</height>
+         <width>221</width>
+         <height>141</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>178</width>
-         <height>83</height>
+         <width>221</width>
+         <height>141</height>
         </size>
        </property>
        <property name="font">
@@ -438,89 +534,134 @@
        <property name="title">
         <string>FBP3</string>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_46">
-        <item>
-         <widget class="QCheckBox" name="cbDisableFbpSlot3">
-          <property name="font">
-           <font>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Posição Não Utilizada</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_48">
-          <item>
-           <widget class="QLineEdit" name="leSerialNumber3">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>110</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>110</width>
-              <height>25</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pbReadSerialNumber3">
-            <property name="minimumSize">
-             <size>
-              <width>40</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>40</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="sizeIncrement">
-             <size>
-              <width>90</width>
-              <height>70</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Ler</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
+       <widget class="QCheckBox" name="cbDisableFbpSlot2">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>23</y>
+          <width>142</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Posição Não Utilizada</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="leDmCode2">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>11</x>
+          <y>47</y>
+          <width>201</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32465</width>
+          <height>34565</height>
+         </size>
+        </property>
+       </widget>
+       <widget class="QWidget" name="layoutWidget_25">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>80</y>
+          <width>201</width>
+          <height>48</height>
+         </rect>
+        </property>
+        <layout class="QFormLayout" name="formLayout_23">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_97">
+           <property name="minimumSize">
+            <size>
+             <width>47</width>
+             <height>13</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Serial:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="leSerialNumber2">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32465</width>
+             <height>34565</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_98">
+           <property name="text">
+            <string>Material:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="leMaterialCode2">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32465</width>
+             <height>34565</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </item>
-     <item row="1" column="2">
-      <widget class="QGroupBox" name="groupBox_41">
+     <item row="1" column="1">
+      <widget class="QGroupBox" name="groupBox_78">
        <property name="minimumSize">
         <size>
-         <width>178</width>
-         <height>83</height>
+         <width>221</width>
+         <height>141</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>178</width>
-         <height>83</height>
+         <width>221</width>
+         <height>141</height>
         </size>
        </property>
        <property name="font">
@@ -532,89 +673,134 @@
        <property name="title">
         <string>FBP4</string>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_50">
-        <item>
-         <widget class="QCheckBox" name="cbDisableFbpSlot4">
-          <property name="font">
-           <font>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Posição Não Utilizada</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_52">
-          <item>
-           <widget class="QLineEdit" name="leSerialNumber4">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>110</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>110</width>
-              <height>25</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pbReadSerialNumber4">
-            <property name="minimumSize">
-             <size>
-              <width>40</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>40</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="sizeIncrement">
-             <size>
-              <width>90</width>
-              <height>70</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Ler</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
+       <widget class="QCheckBox" name="cbDisableFbpSlot3">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>23</y>
+          <width>142</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Posição Não Utilizada</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="leDmCode3">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>11</x>
+          <y>47</y>
+          <width>201</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32465</width>
+          <height>34565</height>
+         </size>
+        </property>
+       </widget>
+       <widget class="QWidget" name="layoutWidget_26">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>80</y>
+          <width>201</width>
+          <height>48</height>
+         </rect>
+        </property>
+        <layout class="QFormLayout" name="formLayout_24">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_99">
+           <property name="minimumSize">
+            <size>
+             <width>47</width>
+             <height>13</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Serial:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="leSerialNumber3">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32465</width>
+             <height>34565</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_100">
+           <property name="text">
+            <string>Material:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="leMaterialCode3">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32465</width>
+             <height>34565</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </item>
-     <item row="2" column="0">
-      <widget class="QGroupBox" name="groupBox_34">
+     <item row="1" column="2">
+      <widget class="QGroupBox" name="groupBox_80">
        <property name="minimumSize">
         <size>
-         <width>178</width>
-         <height>83</height>
+         <width>221</width>
+         <height>141</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>178</width>
-         <height>83</height>
+         <width>221</width>
+         <height>141</height>
         </size>
        </property>
        <property name="font">
@@ -626,89 +812,134 @@
        <property name="title">
         <string>FBP5</string>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_3">
-        <item>
-         <widget class="QCheckBox" name="cbDisableFbpSlot5">
-          <property name="font">
-           <font>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Posição Não Utilizada</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_6">
-          <item>
-           <widget class="QLineEdit" name="leSerialNumber5">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>110</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>110</width>
-              <height>25</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pbReadSerialNumber5">
-            <property name="minimumSize">
-             <size>
-              <width>40</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>40</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="sizeIncrement">
-             <size>
-              <width>90</width>
-              <height>70</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Ler</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
+       <widget class="QCheckBox" name="cbDisableFbpSlot4">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>23</y>
+          <width>142</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Posição Não Utilizada</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="leDmCode4">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>11</x>
+          <y>47</y>
+          <width>201</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32465</width>
+          <height>34565</height>
+         </size>
+        </property>
+       </widget>
+       <widget class="QWidget" name="layoutWidget_28">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>80</y>
+          <width>201</width>
+          <height>48</height>
+         </rect>
+        </property>
+        <layout class="QFormLayout" name="formLayout_26">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_103">
+           <property name="minimumSize">
+            <size>
+             <width>47</width>
+             <height>13</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Serial:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="leSerialNumber4">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32465</width>
+             <height>34565</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_104">
+           <property name="text">
+            <string>Material:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="leMaterialCode4">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32465</width>
+             <height>34565</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </item>
-     <item row="2" column="1">
-      <widget class="QGroupBox" name="groupBox_38">
+     <item row="1" column="3">
+      <widget class="QGroupBox" name="groupBox_79">
        <property name="minimumSize">
         <size>
-         <width>178</width>
-         <height>83</height>
+         <width>221</width>
+         <height>141</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>178</width>
-         <height>83</height>
+         <width>221</width>
+         <height>141</height>
         </size>
        </property>
        <property name="font">
@@ -720,89 +951,134 @@
        <property name="title">
         <string>FBP6</string>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_47">
-        <item>
-         <widget class="QCheckBox" name="cbDisableFbpSlot6">
-          <property name="font">
-           <font>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Posição Não Utilizada</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_49">
-          <item>
-           <widget class="QLineEdit" name="leSerialNumber6">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>110</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>110</width>
-              <height>25</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pbReadSerialNumber6">
-            <property name="minimumSize">
-             <size>
-              <width>40</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>40</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="sizeIncrement">
-             <size>
-              <width>90</width>
-              <height>70</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Ler</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
+       <widget class="QCheckBox" name="cbDisableFbpSlot5">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>23</y>
+          <width>142</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Posição Não Utilizada</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="leDmCode5">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>11</x>
+          <y>47</y>
+          <width>201</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32465</width>
+          <height>34565</height>
+         </size>
+        </property>
+       </widget>
+       <widget class="QWidget" name="layoutWidget_27">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>80</y>
+          <width>201</width>
+          <height>48</height>
+         </rect>
+        </property>
+        <layout class="QFormLayout" name="formLayout_25">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_101">
+           <property name="minimumSize">
+            <size>
+             <width>47</width>
+             <height>13</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Serial:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="leSerialNumber5">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32465</width>
+             <height>34565</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_102">
+           <property name="text">
+            <string>Material:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="leMaterialCode5">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32465</width>
+             <height>34565</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </item>
-     <item row="2" column="2">
-      <widget class="QGroupBox" name="groupBox_40">
+     <item row="2" column="0">
+      <widget class="QGroupBox" name="groupBox_73">
        <property name="minimumSize">
         <size>
-         <width>178</width>
-         <height>83</height>
+         <width>221</width>
+         <height>141</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>178</width>
-         <height>83</height>
+         <width>221</width>
+         <height>141</height>
         </size>
        </property>
        <property name="font">
@@ -814,89 +1090,134 @@
        <property name="title">
         <string>FBP7</string>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_49">
-        <item>
-         <widget class="QCheckBox" name="cbDisableFbpSlot7">
-          <property name="font">
-           <font>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Posição Não Utilizada</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_51">
-          <item>
-           <widget class="QLineEdit" name="leSerialNumber7">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>110</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>110</width>
-              <height>25</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pbReadSerialNumber7">
-            <property name="minimumSize">
-             <size>
-              <width>40</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>40</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="sizeIncrement">
-             <size>
-              <width>90</width>
-              <height>70</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Ler</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
+       <widget class="QCheckBox" name="cbDisableFbpSlot6">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>23</y>
+          <width>142</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Posição Não Utilizada</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="leDmCode6">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>11</x>
+          <y>47</y>
+          <width>201</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32465</width>
+          <height>34565</height>
+         </size>
+        </property>
+       </widget>
+       <widget class="QWidget" name="layoutWidget_21">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>80</y>
+          <width>201</width>
+          <height>48</height>
+         </rect>
+        </property>
+        <layout class="QFormLayout" name="formLayout_19">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_89">
+           <property name="minimumSize">
+            <size>
+             <width>47</width>
+             <height>13</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Serial:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="leSerialNumber6">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32465</width>
+             <height>34565</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_90">
+           <property name="text">
+            <string>Material:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="leMaterialCode6">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32465</width>
+             <height>34565</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </item>
-     <item row="3" column="0">
-      <widget class="QGroupBox" name="groupBox_35">
+     <item row="2" column="1">
+      <widget class="QGroupBox" name="groupBox_74">
        <property name="minimumSize">
         <size>
-         <width>178</width>
-         <height>83</height>
+         <width>221</width>
+         <height>141</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>178</width>
-         <height>83</height>
+         <width>221</width>
+         <height>141</height>
         </size>
        </property>
        <property name="font">
@@ -908,89 +1229,134 @@
        <property name="title">
         <string>FBP8</string>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_4">
-        <item>
-         <widget class="QCheckBox" name="cbDisableFbpSlot8">
-          <property name="font">
-           <font>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Posição Não Utilizada</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_7">
-          <item>
-           <widget class="QLineEdit" name="leSerialNumber8">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>110</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>110</width>
-              <height>25</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pbReadSerialNumber8">
-            <property name="minimumSize">
-             <size>
-              <width>40</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>40</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="sizeIncrement">
-             <size>
-              <width>90</width>
-              <height>70</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Ler</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
+       <widget class="QCheckBox" name="cbDisableFbpSlot7">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>23</y>
+          <width>142</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Posição Não Utilizada</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="leDmCode7">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>11</x>
+          <y>47</y>
+          <width>201</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32465</width>
+          <height>34565</height>
+         </size>
+        </property>
+       </widget>
+       <widget class="QWidget" name="layoutWidget_22">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>80</y>
+          <width>201</width>
+          <height>48</height>
+         </rect>
+        </property>
+        <layout class="QFormLayout" name="formLayout_20">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_91">
+           <property name="minimumSize">
+            <size>
+             <width>47</width>
+             <height>13</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Serial:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="leSerialNumber7">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32465</width>
+             <height>34565</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_92">
+           <property name="text">
+            <string>Material:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="leMaterialCode7">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32465</width>
+             <height>34565</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </item>
-     <item row="3" column="1">
-      <widget class="QGroupBox" name="groupBox_36">
+     <item row="2" column="2">
+      <widget class="QGroupBox" name="groupBox_75">
        <property name="minimumSize">
         <size>
-         <width>178</width>
-         <height>83</height>
+         <width>221</width>
+         <height>141</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>178</width>
-         <height>83</height>
+         <width>221</width>
+         <height>141</height>
         </size>
        </property>
        <property name="font">
@@ -1002,89 +1368,134 @@
        <property name="title">
         <string>FBP9</string>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_5">
-        <item>
-         <widget class="QCheckBox" name="cbDisableFbpSlot9">
-          <property name="font">
-           <font>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Posição Não Utilizada</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_17">
-          <item>
-           <widget class="QLineEdit" name="leSerialNumber9">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>110</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>110</width>
-              <height>25</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pbReadSerialNumber9">
-            <property name="minimumSize">
-             <size>
-              <width>40</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>40</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="sizeIncrement">
-             <size>
-              <width>90</width>
-              <height>70</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Ler</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
+       <widget class="QCheckBox" name="cbDisableFbpSlot8">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>23</y>
+          <width>142</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Posição Não Utilizada</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="leDmCode8">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>11</x>
+          <y>47</y>
+          <width>201</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32465</width>
+          <height>34565</height>
+         </size>
+        </property>
+       </widget>
+       <widget class="QWidget" name="layoutWidget_23">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>80</y>
+          <width>201</width>
+          <height>48</height>
+         </rect>
+        </property>
+        <layout class="QFormLayout" name="formLayout_21">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_93">
+           <property name="minimumSize">
+            <size>
+             <width>47</width>
+             <height>13</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Serial:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="leSerialNumber8">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32465</width>
+             <height>34565</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_94">
+           <property name="text">
+            <string>Material:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="leMaterialCode8">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32465</width>
+             <height>34565</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </item>
-     <item row="3" column="2">
-      <widget class="QGroupBox" name="groupBox_39">
+     <item row="2" column="3">
+      <widget class="QGroupBox" name="groupBox_76">
        <property name="minimumSize">
         <size>
-         <width>178</width>
-         <height>83</height>
+         <width>221</width>
+         <height>141</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>178</width>
-         <height>83</height>
+         <width>221</width>
+         <height>141</height>
         </size>
        </property>
        <property name="font">
@@ -1096,75 +1507,120 @@
        <property name="title">
         <string>FBP10</string>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_48">
-        <item>
-         <widget class="QCheckBox" name="cbDisableFbpSlot10">
-          <property name="font">
-           <font>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Posição Não Utilizada</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_50">
-          <item>
-           <widget class="QLineEdit" name="leSerialNumber10">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>110</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>110</width>
-              <height>25</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pbReadSerialNumber10">
-            <property name="minimumSize">
-             <size>
-              <width>40</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>40</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="sizeIncrement">
-             <size>
-              <width>90</width>
-              <height>70</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Ler</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
+       <widget class="QCheckBox" name="cbDisableFbpSlot9">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>23</y>
+          <width>142</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Posição Não Utilizada</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="leDmCode9">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>11</x>
+          <y>47</y>
+          <width>201</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32465</width>
+          <height>34565</height>
+         </size>
+        </property>
+       </widget>
+       <widget class="QWidget" name="layoutWidget_24">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>80</y>
+          <width>201</width>
+          <height>48</height>
+         </rect>
+        </property>
+        <layout class="QFormLayout" name="formLayout_22">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_95">
+           <property name="minimumSize">
+            <size>
+             <width>47</width>
+             <height>13</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Serial:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="leSerialNumber9">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32465</width>
+             <height>34565</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_96">
+           <property name="text">
+            <string>Material:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="leMaterialCode9">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32465</width>
+             <height>34565</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </item>
     </layout>
@@ -1322,8 +1778,8 @@
    <widget class="QFrame" name="frame">
     <property name="geometry">
      <rect>
-      <x>430</x>
-      <y>240</y>
+      <x>690</x>
+      <y>230</y>
       <width>70</width>
       <height>70</height>
      </rect>
@@ -1365,8 +1821,8 @@
    <widget class="QLabel" name="label_26">
     <property name="geometry">
      <rect>
-      <x>410</x>
-      <y>210</y>
+      <x>670</x>
+      <y>200</y>
       <width>107</width>
       <height>16</height>
      </rect>
@@ -1386,7 +1842,7 @@
      <rect>
       <x>10</x>
       <y>160</y>
-      <width>323</width>
+      <width>483</width>
       <height>232</height>
      </rect>
     </property>
@@ -1408,13 +1864,13 @@
       <widget class="QTextEdit" name="teAddressingLog">
        <property name="minimumSize">
         <size>
-         <width>240</width>
+         <width>400</width>
          <height>230</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>240</width>
+         <width>400</width>
          <height>230</height>
         </size>
        </property>
@@ -1456,8 +1912,8 @@ p, li { white-space: pre-wrap; }
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>80</y>
+      <x>400</x>
+      <y>200</y>
       <width>165</width>
       <height>91</height>
      </rect>
