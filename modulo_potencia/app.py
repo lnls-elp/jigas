@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 from PyQt5.QtWidgets import QWizard, QApplication, QWizardPage, QMessageBox
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
-from common.dmreader import ReadDataMatrix
+from common.dmscanner import Scanner
 from pmtest import PowerModuleTest
 from PyQt5.uic import loadUiType
 import serial
@@ -263,31 +263,31 @@ class PowerModuleWindow(QWizard, Ui_Class):
     *************************************************"""
     @pyqtSlot()
     def _read_serial_number_0(self):
-        data = ReadDataMatrix()
+        scanner = Scanner()
+        data = scanner.read()
         if data is not None:
-            self._test_thread.serial_mod0 = int(data[1])
-            self.leSerialNumber0.setText(data[1])
+            self.leSerialNumber0.setText(data['serial'])
 
     @pyqtSlot()
     def _read_serial_number_1(self):
-        data = ReadDataMatrix()
+        scanner = Scanner()
+        data = scanner.read()
         if data is not None:
-            self._test_thread.serial_mod1 = int(data[1])
-            self.leSerialNumber1.setText(data[1])
+            self.leSerialNumber1.setText(data['serial'])
 
     @pyqtSlot()
     def _read_serial_number_2(self):
-        data = ReadDataMatrix()
+        scanner = Scanner()
+        data = scanner.read()
         if data is not None:
-            self._test_thread.serial_mod2 = int(data[1])
-            self.leSerialNumber2.setText(data[1])
+            self.leSerialNumber2.setText(data['serial'])
 
     @pyqtSlot()
     def _read_serial_number_3(self):
-        data = ReadDataMatrix()
+        scanner = Scanner()
+        data = scanner.read()
         if data is not None:
-            self._test_thread.serial_mod3 = int(data[1])
-            self.leSerialNumber3.setText(data[1])
+            self.leSerialNumber3.setText(data['serial'])
 
     @pyqtSlot()
     def _treat_read_serial_edit_0(self):

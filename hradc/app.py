@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 from PyQt5.QtWidgets import QWizard, QApplication, QWizardPage
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
-from common.dmreader import ReadDataMatrix
+from common.dmscanner import Scanner
 from PyQt5.uic import loadUiType
 from hradctest import HRADCTest
 import serial
@@ -271,8 +271,12 @@ class HRADCWindow(QWizard, Ui_Class):
     *************************************************"""
     @pyqtSlot()
     def _read_serial_number(self):
-        # Read Serial Number and write in leSerialNumber
-        pass
+        scanner = Scanner()
+        data = scanner.read()
+        if data is not None:
+            self.leSerialNumber.setText(data['serial'])
+        else:
+            self.lbReadSerialStatus.setText("<p color:'red'><b>ERRO. Digite Manualmente!</b><p/>")
 
     @pyqtSlot()
     def _treat_read_serial_edit(self):

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 from PyQt5.QtWidgets import QWizard, QApplication, QWizardPage
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
-from common.dmreader import ReadDataMatrix
+from common.dmscanner import Scanner
 from pstest import PowerSupplyTest
 from PyQt5.uic import loadUiType
 import serial
@@ -215,10 +215,10 @@ class PowerSupplyWindow(QWizard, Ui_Class):
     *************************************************"""
     @pyqtSlot()
     def _read_serial_number(self):
-        data = ReadDataMatrix()
+        scanner = Scanner()
+        data = scanner.read()
         if data is not None:
-            self._test_thread.serial_number = int(data[1])
-            self.leSerialNumber.setText(data[1])
+            self.leSerialNumber.setText(data['serial'])
         else:
             self.lbReadSerialStatus.setText("<p color:'red'><b>ERRO. Digite Manualmente!</b><p/>")
 

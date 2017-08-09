@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 from PyQt5.QtWidgets import QWizard, QApplication, QWizardPage
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
-from common.dmreader import ReadDataMatrix
+from common.dmscanner import Scanner
 from PyQt5.uic import loadUiType
 from dccttest import DCCTTest
 import serial
@@ -228,14 +228,12 @@ class DCCTWindow(QWizard, Ui_Class):
     *************************************************"""
     @pyqtSlot()
     def _read_serial_number(self):
-        data = ReadDataMatrix()
-        if data[0] in self._material_dcct.keys():
-            self._test_thread.variant = self._material_dcct[data[0]]
-            self._test_thread.serial_number = int(data[1])
-            self.leSerialNumber.setText(data[1])
+        scanner = Scanner()
+        data = scanner.read()
+        if data is not None:
+            self.leSerialNumber.setText(data['serial'])
         else:
             self.lbReadSerialStatus.setText("<p color:'red'><b>ERRO. Digite Manualmente!</b><p/>")
-        print("Read serial number")
 
     @pyqtSlot()
     def _treat_read_serial_edit(self):

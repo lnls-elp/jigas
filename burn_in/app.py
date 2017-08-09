@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 from PyQt5.QtWidgets import QWizard, QApplication, QWizardPage
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
-from common.dmreader import ReadDataMatrix
+from common.dmscanner import Scanner
 from burnintest import BurnInTest
 from PyQt5.uic import loadUiType
 import serial
@@ -355,43 +355,74 @@ class PowerSupplyWindow(QWizard, Ui_Class):
     *************************************************"""
     @pyqtSlot()
     def _read_serial_number_1(self):
-        pass
+        scanner = Scanner()
+        data = scanner.read()
+        if data is not None:
+            self.leSerialNumber1.setText(data['serial'])
+
 
     @pyqtSlot()
     def _read_serial_number_2(self):
-        pass
+        scanner = Scanner()
+        data = scanner.read()
+        if data is not None:
+            self.leSerialNumber2.setText(data['serial'])
 
     @pyqtSlot()
     def _read_serial_number_3(self):
-        pass
+        scanner = Scanner()
+        data = scanner.read()
+        if data is not None:
+            self.leSerialNumber3.setText(data['serial'])
 
     @pyqtSlot()
     def _read_serial_number_4(self):
-        pass
+        scanner = Scanner()
+        data = scanner.read()
+        if data is not None:
+            self.leSerialNumber4.setText(data['serial'])
 
     @pyqtSlot()
     def _read_serial_number_5(self):
-        pass
+        scanner = Scanner()
+        data = scanner.read()
+        if data is not None:
+            self.leSerialNumber5.setText(data['serial'])
 
     @pyqtSlot()
     def _read_serial_number_6(self):
-        pass
+        scanner = Scanner()
+        data = scanner.read()
+        if data is not None:
+            self.leSerialNumber6.setText(data['serial'])
 
     @pyqtSlot()
     def _read_serial_number_7(self):
-        pass
+        scanner = Scanner()
+        data = scanner.read()
+        if data is not None:
+            self.leSerialNumber7.setText(data['serial'])
 
     @pyqtSlot()
     def _read_serial_number_8(self):
-        pass
+        scanner = Scanner()
+        data = scanner.read()
+        if data is not None:
+            self.leSerialNumber8.setText(data['serial'])
 
     @pyqtSlot()
     def _read_serial_number_9(self):
-        pass
+        scanner = Scanner()
+        data = scanner.read()
+        if data is not None:
+            self.leSerialNumber9.setText(data['serial'])
 
     @pyqtSlot()
     def _read_serial_number_10(self):
-        pass
+        scanner = Scanner()
+        data = scanner.read()
+        if data is not None:
+            self.leSerialNumber10.setText(data['serial'])
 
     @pyqtSlot()
     def _disbl_read_serial_slot_1(self):
