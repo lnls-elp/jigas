@@ -45,16 +45,17 @@ class UDCWindow(QWizard, Ui_Class):
         """ Initial widgets configuration """
         self.leBaudrate.setText(str(self._SERIAL_BAUDRATE))
         self.leBaudrate.setReadOnly(True)
+        self.leDmCode.clear()
         self.leSerialNumber.setReadOnly(True)
         self.leSerialNumber.clear()
-        self.lbReadSerialStatus.clear()
-        self.cbEnableSerialNumberEdit.setChecked(False)
+        self.leMaterialCode.setReadOnly(True)
+        self.leMaterialCode.clear()
         self.lbStatusComunicacao.setText("...")
         self.rbLedsOk.setChecked(False)
         self.rbLedsNok.setChecked(False)
         self.rbBuzzerOk.setChecked(False)
         self.rbBuzzerNok.setChecked(False)
-        self.lbSdCardInsert.setChecked("Clique para detectar")
+        self.lbSdCardInsert.setText("Clique para detectar")
         self.lbTestStatus.setText("Iniciar...")
         self.lbTestResult.setText("Aguarde...")
         self.lbEeprom.setText("...")
@@ -76,21 +77,19 @@ class UDCWindow(QWizard, Ui_Class):
         self.lbRs4852.setText("...")
         self.lbRs4853.setText("...")
         self.lbAlimPlanoIsolado.setText("...")
-        self.lbExpansorI01.setText("...")
-        self.lbExpansorI02.setText("...")
+        self.lbExpansorIO1.setText("...")
+        self.lbExpansorIO2.setText("...")
         self.lbEthernetInit.setText("...")
         self.lbEthernetPing.setText("...")
         self.teTestReport.clear()
 
     def _initialize_signals(self):
         """ Configure basic signals """
-        self.pbReadSerialNumber.clicked.connect(self._read_serial_number)
-        self.cbEnableSerialNumberEdit.stateChanged.connect(self._treat_read_serial_edit)
+        self.leDmCode.editingFinished.connect(self._treat_dmcode)
         self.pbConnectSerialPort.clicked.connect(self._connect_serial_port)
         self.pbStartTests.clicked.connect(self._start_test_sequence)
         self.pbCommunicationTest.clicked.connect(self._communication_test)
         self.pbDetectSdCard.clicked.connect(self._sdcard_connection_test)
-        #self._web_request.server_response.connect(self._treat_server_response)
         self.finished.connect(self._finish_wizard_execution)
 
     def _initialize_wizard_buttons(self):
@@ -213,6 +212,9 @@ class UDCWindow(QWizard, Ui_Class):
         return True
 
     def _validate_page_serial_number(self):
+        if self.leDmCode.hasFocus():
+            return False
+
         serial = self.leSerialNumber.text()
         try:
             self._test_thread.serial_number = int(serial)
@@ -263,22 +265,18 @@ class UDCWindow(QWizard, Ui_Class):
     def initializePage(self, page):
         if page == self.num_intro_page:
             self._initialize_intro_page()
-            print(self.currentId())
 
         elif page == self.num_serial_number:
             self._initialize_page_serial_number()
-            print(self.currentId())
 
         elif page == self.num_connect_udc:
             self._initialize_page_connect_udc()
-            print(self.currentId())
 
         elif page == self.num_visual_test:
             self._initialize_page_visual_test()
 
         elif page == self.num_serial_port:
             self._initialize_page_test_serial_port()
-            print(self.currentId())
 
         elif page == self.num_hard_verifications:
             return self._initialize_page_hardware_verifications()
@@ -320,20 +318,19 @@ class UDCWindow(QWizard, Ui_Class):
     ******************* PyQt Slots *********************
     *************************************************"""
     @pyqtSlot()
-    def _read_serial_number(self):
-        scanner = Scanner()
-        data = scanner.read()
+    def _treat_dmcode(self):
+        code = self.leDmCode.text()
+        scan = Scanner()
+        data = scan.parse_code(code)
         if data is not None:
             self.leSerialNumber.setText(data['serial'])
+            self.leMaterialCode.setText(data['material'])
+            self.leMaterialName.setText(scan.get_material_name(data['material']))
         else:
-            self.lbReadSerialStatus.setText("<p color:'red'><b>ERRO. Digite Manualmente!</b><p/>")
-
-    @pyqtSlot()
-    def _treat_read_serial_edit(self):
-        if self.cbEnableSerialNumberEdit.isChecked():
-            self.leSerialNumber.setReadOnly(False)
-        else:
-            self.leSerialNumber.setReadOnly(True)
+            self.leDmCode.setText("Codigo Invalido!")
+            self.leSerialNumber.clear()
+            self.leMaterialCode.clear()
+            self.leMaterialName.clear()
 
     @pyqtSlot()
     def _connect_serial_port(self):
