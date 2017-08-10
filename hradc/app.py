@@ -92,6 +92,10 @@ class HRADCWindow(QWizard, Ui_Class):
         self.PageStartTest.setButtonText(self.BackButton, "Anterior")
         self.PageStartTest.setButtonText(self.CancelButton, "Cancelar")
 
+        self.button(self.NextButton).clearFocus()
+        self.button(self.BackButton).clearFocus()
+        self.button(self.CancelButton).clearFocus()
+
     """*************************************************
     ************* System Initialization ****************
     *************************************************"""
@@ -153,12 +157,16 @@ class HRADCWindow(QWizard, Ui_Class):
         return False
 
     def _validate_page_serial_number(self):
+        if self.leDmCode.hasFocus():
+            return False
+
         serial = self.leSerialNumber.text()
         try:
             self._serial_number.append(int(serial))
             return True
         except ValueError:
             pass
+
         return False
 
     def _validate_page_connect_hradc(self):
@@ -265,7 +273,6 @@ class HRADCWindow(QWizard, Ui_Class):
         else:
             return True
 
-
     """*************************************************
     ******************* PyQt Slots *********************
     *************************************************"""
@@ -279,7 +286,7 @@ class HRADCWindow(QWizard, Ui_Class):
             self.leMaterialCode.setText(data['material'])
             self.leMaterialName.setText(scan.get_material_name(data['material']))
         else:
-            self.leDmCode0.setText("Codigo Invalido!")
+            self.leDmCode.setText("Codigo Invalido!")
             self.leSerialNumber.clear()
             self.leMaterialCode.clear()
             self.leMaterialName.clear()
