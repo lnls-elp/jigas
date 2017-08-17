@@ -104,9 +104,6 @@ class SerialDRS(object):
         send_msg = self.checksum(self.SlaveAdd+self.ComReadVar+var_id)
         self.ser.write(send_msg.encode('ISO-8859-1'))
 
-    def is_open(self):
-        return self.ser.is_open
-
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     ======================================================================
                 Métodos de Chamada de Entidades Funções BSMP
@@ -114,30 +111,34 @@ class SerialDRS(object):
     ======================================================================
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-    def TurnOn(self):
-        payload_size = self.size_to_hex(1) #Payload: ID
-        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('TurnOn'))
+    def TurnOn(self,ps_modules):
+        payload_size = self.size_to_hex(1+2) #Payload: ID + ps_modules
+        hex_modules  = self.double_to_hex(ps_modules)
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('TurnOn'))+hex_modules
         send_msg     = self.checksum(self.SlaveAdd+send_packet)
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
 
-    def TurnOff(self):
-        payload_size = self.size_to_hex(1) #Payload: ID
-        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('TurnOff'))
+    def TurnOff(self,ps_modules):
+        payload_size = self.size_to_hex(1+2) #Payload: ID + ps_modules
+        hex_modules  = self.double_to_hex(ps_modules)
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('TurnOff'))+hex_modules
         send_msg     = self.checksum(self.SlaveAdd+send_packet)
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
 
-    def OpenLoop(self):
-        payload_size = self.size_to_hex(1) #Payload: ID
-        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('OpenLoop'))
+    def OpenLoop(self,ps_modules):
+        payload_size = self.size_to_hex(1+2) #Payload: ID + ps_modules
+        hex_modules  = self.double_to_hex(ps_modules)
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('OpenLoop'))+hex_modules
         send_msg     = self.checksum(self.SlaveAdd+send_packet)
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
 
-    def ClosedLoop(self):
-        payload_size = self.size_to_hex(1) #Payload: ID
-        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('ClosedLoop'))
+    def ClosedLoop(self,ps_modules):
+        payload_size = self.size_to_hex(1+2) #Payload: ID + ps_modules
+        hex_modules  = self.double_to_hex(ps_modules)
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('ClosedLoop'))+hex_modules
         send_msg     = self.checksum(self.SlaveAdd+send_packet)
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
@@ -704,10 +705,10 @@ class SerialDRS(object):
         payload_size = self.size_to_hex(1+2) #Payload: ID+Block_index
         send_packet  = self.ComRequestCurve+payload_size+self.index_to_hex(ListCurv.index('samplesBuffer_blocks'))+block_hex
         send_msg     = self.checksum(self.SlaveAdd+send_packet)
-        t0 = time.time()
+        #t0 = time.time()
         self.ser.write(send_msg.encode('ISO-8859-1'))
         recv_msg = self.ser.read(1+1+2+1+2+1024+1) #Address+Command+Size+ID+Block_idx+data+checksum
-        print(time.time()-t0)
+        #print(time.time()-t0)
         val = []
         for k in range(7,len(recv_msg)-1,4):
             val.extend(struct.unpack('f',recv_msg[k:k+4]))
@@ -715,12 +716,12 @@ class SerialDRS(object):
 
     def Recv_samplesBuffer_allblocks(self):
         buff = []
-        self.DisableSamplesBuffer()
+        #self.DisableSamplesBuffer()
         for i in range(0,16):
             #t0 = time.time()
             buff.extend(self.Recv_samplesBuffer_blocks(i))
             #print(time.time()-t0)
-        self.EnableSamplesBuffer()
+        #self.EnableSamplesBuffer()
         return buff
 
 
