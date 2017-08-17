@@ -176,25 +176,6 @@
    </widget>
   </widget>
   <widget class="QWizardPage" name="PageSerialNumber">
-   <widget class="QLabel" name="label_2">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>90</y>
-      <width>401</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <weight>75</weight>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>3. Leia o número de série do UDC utilizando a câmera</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="label_10">
     <property name="geometry">
      <rect>
@@ -217,95 +198,187 @@
      <pixmap>images/sirius_logo.jpeg</pixmap>
     </property>
    </widget>
-   <widget class="QWidget" name="layoutWidget">
+   <widget class="QFrame" name="frame">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>120</y>
-      <width>212</width>
-      <height>93</height>
+      <x>70</x>
+      <y>190</y>
+      <width>551</width>
+      <height>82</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="verticalLayout_3">
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout">
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <layout class="QGridLayout" name="gridLayout_6">
+     <item row="0" column="0" colspan="2">
+      <layout class="QHBoxLayout" name="horizontalLayout_12">
        <item>
-        <widget class="QPushButton" name="pbReadSerialNumber">
-         <property name="minimumSize">
-          <size>
-           <width>90</width>
-           <height>70</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>90</width>
-           <height>70</height>
-          </size>
-         </property>
-         <property name="sizeIncrement">
-          <size>
-           <width>90</width>
-           <height>70</height>
-          </size>
+        <widget class="QLabel" name="label_24">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
          </property>
          <property name="text">
-          <string>Ler Serial</string>
+          <string>Código:</string>
          </property>
         </widget>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout">
-         <item>
-          <widget class="QLineEdit" name="leSerialNumber">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>110</width>
-             <height>25</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>110</width>
-             <height>25</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="cbEnableSerialNumberEdit">
-           <property name="text">
-            <string>Digitar</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QLineEdit" name="leDmCode">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>25</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>6865</width>
+           <height>386356</height>
+          </size>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>
-     <item>
-      <widget class="QLabel" name="lbReadSerialStatus">
-       <property name="minimumSize">
-        <size>
-         <width>210</width>
-         <height>10</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>210</width>
-         <height>20</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>ERRO. Digite Manualmente</string>
-       </property>
-      </widget>
+     <item row="1" column="0">
+      <layout class="QHBoxLayout" name="horizontalLayout_14">
+       <item alignment="Qt::AlignLeft">
+        <widget class="QLabel" name="label_30">
+         <property name="minimumSize">
+          <size>
+           <width>41</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>41</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Serial:</string>
+         </property>
+        </widget>
+       </item>
+       <item alignment="Qt::AlignLeft">
+        <widget class="QLineEdit" name="leSerialNumber">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>110</width>
+           <height>25</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>110</width>
+           <height>25</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="1" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item alignment="Qt::AlignRight">
+        <widget class="QLabel" name="label_34">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Material:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="leMaterialCode">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>110</width>
+           <height>25</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>110</width>
+           <height>25</height>
+          </size>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="leMaterialName">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>110</width>
+           <height>25</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>110</width>
+           <height>25</height>
+          </size>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>100</y>
+      <width>401</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>3. Leia o número de série do UDC utilizando o scanner</string>
+    </property>
    </widget>
   </widget>
   <widget class="QWizardPage" name="PageConnectUDC">
@@ -733,7 +806,7 @@
      <string>10.1 Cartão SD - Cerifique-se de  que o cartão foi inserido</string>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>130</x>
@@ -807,7 +880,7 @@
      <pixmap>images/sirius_logo.jpeg</pixmap>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -1535,7 +1608,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>90</x>

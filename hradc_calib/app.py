@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 from PyQt5.QtWidgets import QWizard, QApplication, QWizardPage
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
-from common.dmreader import ReadDataMatrix
+from common.dmscanner import Scanner
 from PyQt5.uic import loadUiType
 from hradccalib import HRADCCalib
 import serial
@@ -40,10 +40,38 @@ class HRADCWindow(QWizard, Ui_Class):
         """ Initial widgets configuration """
         self.leBaudrate.setText(str(self._SERIAL_BAUDRATE))
         self.leBaudrate.setReadOnly(True)
-        self.leSerialNumber.setReadOnly(True)
-        self.leSerialNumber.clear()
-        self.lbReadSerialStatus.clear()
-        self.cbEnableSerialNumberEdit.setChecked(False)
+        self.leDmCode0.clear()
+        self.leDmCode1.clear()
+        self.leDmCode2.clear()
+        self.leDmCode3.clear()
+        self.leSerialNumber0.setReadOnly(True)
+        self.leSerialNumber0.clear()
+        self.leSerialNumber1.setReadOnly(True)
+        self.leSerialNumber1.clear()
+        self.leSerialNumber2.setReadOnly(True)
+        self.leSerialNumber2.clear()
+        self.leSerialNumber3.setReadOnly(True)
+        self.leSerialNumber3.clear()
+        self.leMaterialCode0.setReadOnly(True)
+        self.leMaterialCode0.clear()
+        self.leMaterialCode1.setReadOnly(True)
+        self.leMaterialCode1.clear()
+        self.leMaterialCode2.setReadOnly(True)
+        self.leMaterialCode2.clear()
+        self.leMaterialCode3.setReadOnly(True)
+        self.leMaterialCode3.clear()
+        self.leMaterialName0.setReadOnly(True)
+        self.leMaterialName0.clear()
+        self.leMaterialName1.setReadOnly(True)
+        self.leMaterialName1.clear()
+        self.leMaterialName2.setReadOnly(True)
+        self.leMaterialName2.clear()
+        self.leMaterialName3.setReadOnly(True)
+        self.leMaterialName3.clear()
+        self.cbDisableModuleReadSerial0.setChecked(False)
+        self.cbDisableModuleReadSerial1.setChecked(False)
+        self.cbDisableModuleReadSerial2.setChecked(False)
+        self.cbDisableModuleReadSerial3.setChecked(False)
         self.lbStatusComunicacao.setText("...")
         self.lbTestStatus.setText("Clique para Iniciar Calibração")
         self.lbTestResult.setText("Aguarde...")
@@ -51,9 +79,15 @@ class HRADCWindow(QWizard, Ui_Class):
 
     def _initialize_signals(self):
         """ Configure basic signals """
-        self.pbReadSerialNumber.clicked.connect(self._read_serial_number)
-        self.cbEnableSerialNumberEdit.stateChanged.connect(self._treat_read_serial_edit)
         self.pbConnectSerialPort.clicked.connect(self._connect_serial_port)
+        self.cbDisableModuleReadSerial0.stateChanged.connect(self._disbl_read_serial_edit_0)
+        self.cbDisableModuleReadSerial1.stateChanged.connect(self._disbl_read_serial_edit_1)
+        self.cbDisableModuleReadSerial2.stateChanged.connect(self._disbl_read_serial_edit_2)
+        self.cbDisableModuleReadSerial3.stateChanged.connect(self._disbl_read_serial_edit_3)
+        self.leDmCode0.editingFinished.connect(self._treat_dmcode0)
+        self.leDmCode1.editingFinished.connect(self._treat_dmcode1)
+        self.leDmCode2.editingFinished.connect(self._treat_dmcode2)
+        self.leDmCode3.editingFinished.connect(self._treat_dmcode3)
         self.pbStartCalib.clicked.connect(self._start_calib_sequence)
         self.pbCommunicationTest.clicked.connect(self._communication_test)
         self.finished.connect(self._finish_wizard_execution)
@@ -137,13 +171,41 @@ class HRADCWindow(QWizard, Ui_Class):
         return False
 
     def _validate_page_serial_number(self):
-        serial = self.leSerialNumber.text()
         try:
-            self._test_thread.serial_number = int(serial)
-            return True
+            self._test_thread.serial_mod0 = int(self.leSerialNumber0.text())
         except ValueError:
-            pass
-        return False
+            self._test_thread.serial_mod0 = None
+            if not self.cbDisableModuleReadSerial0.isChecked():
+                return False
+
+        try:
+            self._test_thread.serial_mod1 = int(self.leSerialNumber1.text())
+        except ValueError:
+            self._test_thread.serial_mod1 = None
+            if not self.cbDisableModuleReadSerial1.isChecked():
+                return False
+
+        try:
+            self._test_thread.serial_mod2 = int(self.leSerialNumber2.text())
+        except ValueError:
+            self._test_thread.serial_mod2 = None
+            if not self.cbDisableModuleReadSerial2.isChecked():
+                return False
+
+        try:
+            self._test_thread.serial_mod3 = int(self.leSerialNumber3.text())
+        except ValueError:
+            self._test_thread.serial_mod3 = None
+            if not self.cbDisableModuleReadSerial3.isChecked():
+                return False
+
+        if self.cbDisableModuleReadSerial0.isChecked() and \
+            self.cbDisableModuleReadSerial1.isChecked() and \
+            self.cbDisableModuleReadSerial2.isChecked() and \
+            self.cbDisableModuleReadSerial3.isChecked():
+            return False
+
+        return True
 
     def _validate_page_connect_hradc(self):
         return True
@@ -201,29 +263,128 @@ class HRADCWindow(QWizard, Ui_Class):
         else:
             return True
 
-    def next(self):
-        if self.currentId() == self.num_start_test:
-            while self.currentId() != self.num_serial_number:
-                self.back()
 
     """*************************************************
     ******************* PyQt Slots *********************
     *************************************************"""
     @pyqtSlot()
-    def _read_serial_number(self):
-        data = ReadDataMatrix()
+    def _treat_dmcode0(self):
+        code = self.leDmCode0.text()
+        scan = Scanner()
+        data = scan.parse_code(code)
         if data is not None:
-            self._test_thread.serial_number = int(data[1])
-            self.leSerialNumber.setText(data[1])
+            self.leSerialNumber0.setText(data['serial'])
+            self.leMaterialCode0.setText(data['material'])
+            self.leMaterialName0.setText(scan.get_material_name(data['material']))
         else:
-            self.lbReadSerialStatus.setText("<p color:'red'><b>ERRO. Digite Manualmente!</b><p/>")
+            self.leDmCode0.setText("Codigo Invalido!")
+            self.leSerialNumber0.clear()
+            self.leMaterialCode0.clear()
+            self.leMaterialName0.clear()
+
 
     @pyqtSlot()
-    def _treat_read_serial_edit(self):
-        if self.cbEnableSerialNumberEdit.isChecked():
-            self.leSerialNumber.setReadOnly(False)
+    def _treat_dmcode1(self):
+        code = self.leDmCode1.text()
+        scan = Scanner()
+        data = scan.parse_code(code)
+        if data is not None:
+            self.leSerialNumber1.setText(data['serial'])
+            self.leMaterialCode1.setText(data['material'])
+            self.leMaterialName1.setText(scan.get_material_name(data['material']))
         else:
-            self.leSerialNumber.setReadOnly(True)
+            self.leDmCode0.setText("Codigo Invalido!")
+            self.leSerialNumber1.clear()
+            self.leMaterialCode1.clear()
+            self.leMaterialName1.clear()
+
+    @pyqtSlot()
+    def _treat_dmcode2(self):
+        code = self.leDmCode2.text()
+        scan = Scanner()
+        data = scan.parse_code(code)
+        if data is not None:
+            self.leSerialNumber2.setText(data['serial'])
+            self.leMaterialCode2.setText(data['material'])
+            self.leMaterialName2.setText(scan.get_material_name(data['material']))
+        else:
+            self.leDmCode0.setText("Codigo Invalido!")
+            self.leSerialNumber2.clear()
+            self.leMaterialCode2.clear()
+            self.leMaterialName2.clear()
+
+    @pyqtSlot()
+    def _treat_dmcode3(self):
+        code = self.leDmCode3.text()
+        scan = Scanner()
+        data = scan.parse_code(code)
+        if data is not None:
+            self.leSerialNumber3.setText(data['serial'])
+            self.leMaterialCode3.setText(data['material'])
+            self.leMaterialName3.setText(scan.get_material_name(data['material']))
+        else:
+            self.leDmCode0.setText("Codigo Invalido!")
+            self.leSerialNumber3.clear()
+            self.leMaterialCode3.clear()
+            self.leMaterialName3.clear()
+
+
+    @pyqtSlot()
+    def _disbl_read_serial_edit_0(self):
+        if self.cbDisableModuleReadSerial0.isChecked():
+            self.leSerialNumber0.clear()
+            self.leSerialNumber0.setEnabled(False)
+            self.leMaterialCode0.setEnabled(False)
+            self.leMaterialName0.setEnabled(False)
+            self.leDmCode0.setEnabled(False)
+        else:
+            self.leSerialNumber0.setEnabled(True)
+            self.leMaterialCode0.setEnabled(True)
+            self.leMaterialName0.setEnabled(True)
+            self.leDmCode0.setEnabled(True)
+
+    @pyqtSlot()
+    def _disbl_read_serial_edit_1(self):
+        if self.cbDisableModuleReadSerial1.isChecked():
+            self.leSerialNumber1.clear()
+            self.leSerialNumber1.setEnabled(False)
+            self.leMaterialCode1.setEnabled(False)
+            self.leMaterialName1.setEnabled(False)
+            self.leDmCode1.setEnabled(False)
+        else:
+            self.leSerialNumber1.setEnabled(True)
+            self.leMaterialCode1.setEnabled(True)
+            self.leMaterialName1.setEnabled(True)
+            self.leDmCode1.setEnabled(True)
+
+    @pyqtSlot()
+    def _disbl_read_serial_edit_2(self):
+        if self.cbDisableModuleReadSerial2.isChecked():
+            self.leSerialNumber2.clear()
+            self.leSerialNumber2.setEnabled(False)
+            self.leMaterialCode2.setEnabled(False)
+            self.leMaterialName2.setEnabled(False)
+            self.leDmCode2.setEnabled(False)
+        else:
+            self.leSerialNumber2.setEnabled(True)
+            self.leMaterialCode2.setEnabled(True)
+            self.leMaterialName2.setEnabled(True)
+            self.leDmCode2.setEnabled(True)
+
+    @pyqtSlot()
+    def _disbl_read_serial_edit_3(self):
+        if self.cbDisableModuleReadSerial3.isChecked():
+            self.leSerialNumber3.clear()
+            self.leSerialNumber3.setEnabled(False)
+            self.leMaterialCode3.setEnabled(False)
+            self.leMaterialName3.setEnabled(False)
+            self.leDmCode3.setEnabled(False)
+
+        else:
+            self.leSerialNumber3.setEnabled(True)
+            self.leMaterialCode3.setEnabled(True)
+            self.leMaterialName3.setEnabled(True)
+            self.leDmCode3.setEnabled(True)
 
     @pyqtSlot()
     def _connect_serial_port(self):

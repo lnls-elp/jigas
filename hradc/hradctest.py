@@ -18,7 +18,7 @@ class HRADCTest(QThread):
         QThread.__init__(self)
         self._comport = None
         self._baudarate = None
-        self._serial_number = None
+        self._serial_number = []
 
         self._led = None
 
@@ -74,12 +74,14 @@ class HRADCTest(QThread):
     def _test_sequence(self):
 
         hradc = HRADC()
-        hradc.serial_number = self._serial_number
+        #hradc.serial_number = self._serial_number
+        hradc.serial_number = 12358
         res = self._send_to_server(hradc)
 
         if res:
             log = HRADCLog()
-            log.serial_number_hradc = self._serial_number
+            #log.serial_number_hradc = self._serial_number
+            log.serial_number_hradc = 12358
 
             # TODO: Faz os testes e seta os atributos de log
 

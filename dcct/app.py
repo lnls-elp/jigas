@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 from PyQt5.QtWidgets import QWizard, QApplication, QWizardPage
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
-from common.dmreader import ReadDataMatrix
+from common.dmscanner import Scanner
 from PyQt5.uic import loadUiType
 from dccttest import DCCTTest
 import serial
@@ -42,12 +42,11 @@ class DCCTWindow(QWizard, Ui_Class):
         """ Initial widgets configuration """
         self.leBaudrate.setText(str(self._SERIAL_BAUDRATE))
         self.leBaudrate.setReadOnly(True)
+        self.leDmCode.clear()
         self.leSerialNumber.setReadOnly(True)
         self.leSerialNumber.clear()
-        self.lbReadSerialStatus.clear()
-        self.cbEnableSerialNumberEdit.setChecked(False)
-        self.rbConfA.setChecked(True)
-        self.gbVariante.setEnabled(False)
+        self.leMaterialCode.setReadOnly(True)
+        self.leMaterialCode.clear()
         self.lbStatusComunicacao.setText("...")
         self.lbStatusAuxSupply.setText("...")
         self.lbTestStatus.setText("Clique para Iniciar Testes")
@@ -56,8 +55,7 @@ class DCCTWindow(QWizard, Ui_Class):
 
     def _initialize_signals(self):
         """ Configure basic signals """
-        self.pbReadSerialNumber.clicked.connect(self._read_serial_number)
-        self.cbEnableSerialNumberEdit.stateChanged.connect(self._treat_read_serial_edit)
+        self.leDmCode.editingFinished.connect(self._treat_dmcode)
         self.pbConnectSerialPort.clicked.connect(self._connect_serial_port)
         self.pbStartTests.clicked.connect(self._start_test_sequence)
         self.pbCommunicationTest.clicked.connect(self._communication_test)
@@ -143,17 +141,20 @@ class DCCTWindow(QWizard, Ui_Class):
         return False
 
     def _validate_page_serial_number(self):
+        if self.leDmCode.hasFocus():
+            return False
+
         serial = self.leSerialNumber.text()
         try:
             self._test_thread.serial_number = int(serial)
-            if self.gbVariante.isEnabled():
-                if self.rbConfA.isChecked():
-                    self._test_thread.variant = 'CONF A'
-                else:
-                    self._test_thread.variant = 'CONF B'
+            try:
+                self._test_thread.variant = self._material_dcct[self.leMaterialCode]
+            except KeyError:
+                self._test_thread.variant = "CONF A"
             return True
         except ValueError:
             pass
+
         return False
 
     def _validate_page_connect_dcct(self):
@@ -178,23 +179,18 @@ class DCCTWindow(QWizard, Ui_Class):
     def initializePage(self, page):
         if page == self.num_intro_page:
             self._initialize_intro_page()
-            print(self.currentId())
 
         elif page == self.num_serial_number:
             self._initialize_page_serial_number()
-            print(self.currentId())
 
         elif page == self.num_connect_dcct:
             self._initialize_page_connect_dcct()
-            print(self.currentId())
 
         elif page == self.num_serial_port:
             self._initialize_page_test_serial_port()
-            print(self.currentId())
 
         elif page == self.num_start_test:
             self._initialize_page_start_test()
-            print(self.currentId())
 
         else:
             pass
@@ -205,51 +201,37 @@ class DCCTWindow(QWizard, Ui_Class):
             return self._validate_intro_page()
 
         elif current_id == self.num_serial_number:
-            print("Valida 1")
             return self._validate_page_serial_number()
 
         elif current_id == self.num_connect_dcct:
-            print("Valida 2")
             return self._validate_page_connect_dcct()
 
         elif current_id == self.num_serial_port:
-            print("Valida 3")
             return self._validate_page_test_serial_port()
 
         elif current_id == self.num_start_test:
-            print("Valida 4")
             return self._validate_page_start_test()
 
         else:
             return True
 
-    def next(self):
-        if self.currentId() == self.num_start_test:
-            while self.currentId() != self.num_serial_number:
-                self.back()
-
     """*************************************************
     ******************* PyQt Slots *********************
     *************************************************"""
     @pyqtSlot()
-    def _read_serial_number(self):
-        data = ReadDataMatrix()
-        if data[0] in self._material_dcct.keys():
-            self._test_thread.variant = self._material_dcct[data[0]]
-            self._test_thread.serial_number = int(data[1])
-            self.leSerialNumber.setText(data[1])
+    def _treat_dmcode(self):
+        code = self.leDmCode.text()
+        scan = Scanner()
+        data = scan.parse_code(code)
+        if data is not None:
+            self.leSerialNumber.setText(data['serial'])
+            self.leMaterialCode.setText(data['material'])
+            self.leMaterialName.setText(scan.get_material_name(data['material']))
         else:
-            self.lbReadSerialStatus.setText("<p color:'red'><b>ERRO. Digite Manualmente!</b><p/>")
-        print("Read serial number")
-
-    @pyqtSlot()
-    def _treat_read_serial_edit(self):
-        if self.cbEnableSerialNumberEdit.isChecked():
-            self.leSerialNumber.setReadOnly(False)
-            self.gbVariante.setEnabled(True)
-        else:
-            self.leSerialNumber.setReadOnly(True)
-            self.gbVariante.setEnabled(False)
+            self.leDmCode.setText("Codigo Invalido!")
+            self.leSerialNumber.clear()
+            self.leMaterialCode.clear()
+            self.leMaterialName.clear()
 
     @pyqtSlot()
     def _connect_serial_port(self):

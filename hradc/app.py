@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 from PyQt5.QtWidgets import QWizard, QApplication, QWizardPage
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
-from common.dmreader import ReadDataMatrix
+from common.dmscanner import Scanner
 from PyQt5.uic import loadUiType
 from hradctest import HRADCTest
 import serial
@@ -27,6 +27,10 @@ class HRADCWindow(QWizard, Ui_Class):
         self._serial_port_status = False
         self._test_serial_port_status = False
 
+        self._status_load_firmware = False
+
+        self._serial_number = []
+
         self._test_thread = HRADCTest()
 
         self._initialize_widgets()
@@ -40,10 +44,11 @@ class HRADCWindow(QWizard, Ui_Class):
         """ Initial widgets configuration """
         self.leBaudrate.setText(str(self._SERIAL_BAUDRATE))
         self.leBaudrate.setReadOnly(True)
+        self.leDmCode.clear()
         self.leSerialNumber.setReadOnly(True)
         self.leSerialNumber.clear()
-        self.lbReadSerialStatus.clear()
-        self.cbEnableSerialNumberEdit.setChecked(False)
+        self.leMaterialCode.setReadOnly(True)
+        self.leMaterialCode.clear()
         self.lbStatusComunicacao.setText("...")
         self.rbLedsOk.setChecked(False)
         self.rbLedsOk.setChecked(False)
@@ -54,9 +59,9 @@ class HRADCWindow(QWizard, Ui_Class):
 
     def _initialize_signals(self):
         """ Configure basic signals """
-        self.pbReadSerialNumber.clicked.connect(self._read_serial_number)
-        self.cbEnableSerialNumberEdit.stateChanged.connect(self._treat_read_serial_edit)
         self.pbConnectSerialPort.clicked.connect(self._connect_serial_port)
+        self.leDmCode.editingFinished.connect(self._treat_dmcode)
+        self.rbLedsNok.toggled.connect(self._treat_leds_nok)
         self.pbLoadFirmware.clicked.connect(self._load_firmware)
         self.pbStartTests.clicked.connect(self._start_test_sequence)
         self.pbCommunicationTest.clicked.connect(self._communication_test)
@@ -86,6 +91,10 @@ class HRADCWindow(QWizard, Ui_Class):
         self.PageStartTest.setButtonText(self.NextButton, "Novo Teste")
         self.PageStartTest.setButtonText(self.BackButton, "Anterior")
         self.PageStartTest.setButtonText(self.CancelButton, "Cancelar")
+
+        self.button(self.NextButton).clearFocus()
+        self.button(self.BackButton).clearFocus()
+        self.button(self.CancelButton).clearFocus()
 
     """*************************************************
     ************* System Initialization ****************
@@ -148,12 +157,16 @@ class HRADCWindow(QWizard, Ui_Class):
         return False
 
     def _validate_page_serial_number(self):
+        if self.leDmCode.hasFocus():
+            return False
+
         serial = self.leSerialNumber.text()
         try:
-            self._test_thread.serial_number = int(serial)
+            self._serial_number.append(int(serial))
             return True
         except ValueError:
             pass
+
         return False
 
     def _validate_page_connect_hradc(self):
@@ -163,7 +176,46 @@ class HRADCWindow(QWizard, Ui_Class):
         return self._test_serial_port_status
 
     def _validate_page_load_firmware(self):
-        return True
+
+        if not self.rbLedsOk.isChecked() and not self.rbLedsNok.isChecked():
+            return False
+
+        elif self.rbLedsOk.isChecked():
+            """
+            TODO: Salva Status (Led OK)
+            """
+            if self._status_load_firmware:
+                if len(self._serial_number) < 4 and not self.cbEndTests.isChecked():
+                    """
+                    TODO: Clear Widgets
+                    """
+                    while self.currentId() is not self.num_serial_number:
+                        self.back()
+                else:
+                    """
+                    TODO: Clear Widgets
+                    self._test_thread.serial_number = self._serial_number[:]
+                    del self._serial_number[:]
+                    """
+                    return True
+            else:
+                return False
+
+        elif self.cbEndTests:
+            """
+            TODO: Submete Status (Led Falha) e placa Reprovada
+            TODO: Clear Widgets
+            """
+            return True
+        else:
+            """
+            TODO: Submete Status (Led Falha) e placa Reprovada
+            TODO: Clear Widgets
+            """
+            while self.currentId() is not self.num_serial_number:
+                self.back()
+
+        return False
 
     def _validate_page_start_test(self):
         self._initialize_widgets()
@@ -221,29 +273,23 @@ class HRADCWindow(QWizard, Ui_Class):
         else:
             return True
 
-    def next(self):
-        if self.currentId() == self.num_start_test:
-            while self.currentId() != self.num_serial_number:
-                self.back()
-
     """*************************************************
     ******************* PyQt Slots *********************
     *************************************************"""
     @pyqtSlot()
-    def _read_serial_number(self):
-        data = ReadDataMatrix()
+    def _treat_dmcode(self):
+        code = self.leDmCode.text()
+        scan = Scanner()
+        data = scan.parse_code(code)
         if data is not None:
-            self._test_thread.serial_number = int(data[1])
-            self.leSerialNumber.setText(data[1])
+            self.leSerialNumber.setText(data['serial'])
+            self.leMaterialCode.setText(data['material'])
+            self.leMaterialName.setText(scan.get_material_name(data['material']))
         else:
-            self.lbReadSerialStatus.setText("<p color:'red'><b>ERRO. Digite Manualmente!</b><p/>")
-
-    @pyqtSlot()
-    def _treat_read_serial_edit(self):
-        if self.cbEnableSerialNumberEdit.isChecked():
-            self.leSerialNumber.setReadOnly(False)
-        else:
-            self.leSerialNumber.setReadOnly(True)
+            self.leDmCode.setText("Codigo Invalido!")
+            self.leSerialNumber.clear()
+            self.leMaterialCode.clear()
+            self.leMaterialName.clear()
 
     @pyqtSlot()
     def _connect_serial_port(self):
@@ -264,6 +310,13 @@ class HRADCWindow(QWizard, Ui_Class):
             self.lbStatusComunicacao.setText("<p color:'red'>Falha</p>")
         self._test_serial_port_status = True
 
+    @pyqtSlot()
+    def _treat_leds_nok(self):
+        if self.rbLedsNok.isChecked():
+            self.pbLoadFirmware.setEnabled(False)
+        else:
+            self.pbLoadFirmware.setEnabled(True)
+
 
     @pyqtSlot()
     def _start_test_sequence(self):
@@ -278,7 +331,10 @@ class HRADCWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _load_firmware(self):
-        pass
+        """
+        TODO: Load Firmware
+        """
+        self._status_load_firmware = True
 
     @pyqtSlot(bool)
     def _test_finished(self, result):

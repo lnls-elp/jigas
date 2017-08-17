@@ -1,5 +1,5 @@
 from PyQt5.QtCore import pyqtSlot, QThread, pyqtSignal
-from psdata import PowerSupply, PowerSupplyLog
+from common.psdata import PowerSupply, PowerSupplyLog
 from common.elpwebclient import ElpWebClient
 from common.pydrs import SerialDRS
 import serial
@@ -267,6 +267,7 @@ class PowerSupplyTest(QThread):
         client_data = item.data
         client_method = item.method
         client_response = client.do_request(client_method, client_data)
+        print(client_response)
         server_status = self._parse_response(client_response)
         return server_status
 
