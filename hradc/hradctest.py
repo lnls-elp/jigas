@@ -83,17 +83,17 @@ class HRADCTest(QThread):
     def _test_sequence(self):
 
         self.nHRADC = max([board['slot'] for board in self._boardsinfo])
-        self.drs.SendNumberOfHRADC(self.nHRADC)
+        self.drs.Config_nHRADC(self.nHRADC)
         log_res = []
         
         for board in self._boardsinfo:
 
             hradc = HRADC()
 
-            
             hradc.serial_number = board['serial']
             hradc.variant = board['variant']
             self._burden_amplifier = "INA141"
+            
             if hradc.variant = 'HRADC-FBP':
                 hradc.burden_res = 20.0
                 self._cut_frequency = 48228.7
