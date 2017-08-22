@@ -15,7 +15,7 @@ class HRADCWindow(QWizard, Ui_Class):
 
     # Page numbers
     (num_intro_page, num_serial_number, num_connect_hradc,
-    num_serial_port, num_load_firmware, num_start_test) = range(6)
+    num_load_firmware, num_start_test) = range(5)
 
     def __init__(self, parent=None):
         QWizard.__init__(self, parent)
@@ -25,7 +25,7 @@ class HRADCWindow(QWizard, Ui_Class):
 
         self._list_serial_ports()
         self._serial_port_status = False
-        self._test_serial_port_status = False
+        self._test_communication_status = False
 
         self._status_load_firmware = False
 
@@ -50,18 +50,23 @@ class HRADCWindow(QWizard, Ui_Class):
         self.leMaterialCode.setReadOnly(True)
         self.leMaterialCode.clear()
         self.lbStatusComunicacao.setText("...")
-        self.rbLedsOk.setChecked(False)
-        self.rbLedsOk.setChecked(False)
+        self.rbLedStatusOk.setChecked(False)
+        self.rbLedStatusOk.setChecked(False)
+        self.rbLedAlimOk.setChecked(False)
+        self.rbLedAlimOk.setChecked(False)
         self.teFirmwareLog.clear()
         self.lbTestStatus.setText("Clique para Iniciar Testes")
-        self.lbTestResult.setText("Aguarde...")
+        self.lbTestResult1.setText("Aguarde...")
+        self.lbTestResult2.setText("Aguarde...")
+        self.lbTestResult3.setText("Aguarde...")
+        self.lbTestResult4.setText("Aguarde...")
         self.teTestReport.clear()
 
     def _initialize_signals(self):
         """ Configure basic signals """
         self.pbConnectSerialPort.clicked.connect(self._connect_serial_port)
         self.leDmCode.editingFinished.connect(self._treat_dmcode)
-        self.rbLedsNok.toggled.connect(self._treat_leds_nok)
+        self.rbLedStatusNok.toggled.connect(self._treat_leds_nok)
         self.pbLoadFirmware.clicked.connect(self._load_firmware)
         self.pbStartTests.clicked.connect(self._start_test_sequence)
         self.pbCommunicationTest.clicked.connect(self._communication_test)
@@ -79,10 +84,6 @@ class HRADCWindow(QWizard, Ui_Class):
         self.PageConnectHradc.setButtonText(self.NextButton, "Próximo")
         self.PageConnectHradc.setButtonText(self.BackButton, "Anterior")
         self.PageConnectHradc.setButtonText(self.CancelButton, "Cancelar")
-
-        self.PageTestSerialPort.setButtonText(self.NextButton, "Próximo")
-        self.PageTestSerialPort.setButtonText(self.BackButton, "Anterior")
-        self.PageTestSerialPort.setButtonText(self.CancelButton, "Cancelar")
 
         self.PageLoadFirmware.setButtonText(self.NextButton, "Próximo")
         self.PageLoadFirmware.setButtonText(self.BackButton, "Anterior")
@@ -119,7 +120,7 @@ class HRADCWindow(QWizard, Ui_Class):
 
     def _restart_variables(self):
         self._serial_port_status = False
-        self._test_serial_port_status = False
+        self._test_communication_status = False
 
     def _restart_test_thread(self):
         self._test_thread.test_complete.disconnect()
@@ -137,9 +138,6 @@ class HRADCWindow(QWizard, Ui_Class):
         pass
 
     def _initialize_page_connect_hradc(self):
-        pass
-
-    def _initialize_page_test_serial_port(self):
         pass
 
     def _initialize_page_load_firmware(self):
@@ -170,17 +168,16 @@ class HRADCWindow(QWizard, Ui_Class):
         return False
 
     def _validate_page_connect_hradc(self):
+        if not self.rbLedAlimOk.isChecked() and not self.rbLedAlimNok.isChecked():
+            return False
         return True
-
-    def _validate_page_test_serial_port(self):
-        return self._test_serial_port_status
 
     def _validate_page_load_firmware(self):
 
-        if not self.rbLedsOk.isChecked() and not self.rbLedsNok.isChecked():
+        if not self.rbLedStatusOk.isChecked() and not self.rbLedStatusNok.isChecked():
             return False
 
-        elif self.rbLedsOk.isChecked():
+        elif self.rbLedStatusOk.isChecked():
             """
             TODO: Salva Status (Led OK)
             """
@@ -238,9 +235,6 @@ class HRADCWindow(QWizard, Ui_Class):
         elif page == self.num_connect_hradc:
             self._initialize_page_connect_hradc()
 
-        elif page == self.num_serial_port:
-            self._initialize_page_test_serial_port()
-
         elif page == self.num_load_firmware:
             self._initialize_page_load_firmware()
 
@@ -260,9 +254,6 @@ class HRADCWindow(QWizard, Ui_Class):
 
         elif current_id == self.num_connect_hradc:
             return self._validate_page_connect_hradc()
-
-        elif current_id == self.num_serial_port:
-            return self._validate_page_test_serial_port()
 
         elif current_id == self.num_load_firmware:
             return self._validate_page_load_firmware()
@@ -308,11 +299,11 @@ class HRADCWindow(QWizard, Ui_Class):
             self.lbStatusComunicacao.setText("<p color:'green'>OK</p>")
         else:
             self.lbStatusComunicacao.setText("<p color:'red'>Falha</p>")
-        self._test_serial_port_status = True
+        self._test_communication_status = True
 
     @pyqtSlot()
     def _treat_leds_nok(self):
-        if self.rbLedsNok.isChecked():
+        if self.rbLedStatusNok.isChecked():
             self.pbLoadFirmware.setEnabled(False)
         else:
             self.pbLoadFirmware.setEnabled(True)
@@ -336,12 +327,28 @@ class HRADCWindow(QWizard, Ui_Class):
         """
         self._status_load_firmware = True
 
-    @pyqtSlot(bool)
+    @pyqtSlot(list)
     def _test_finished(self, result):
-        if result:
-            self.lbTestResult.setText("Aprovado")
+
+        if result[0] is not None:
+            self.lbTestResult1.setText(result[0])
         else:
-            self.lbTestResult.setText("Reprovado")
+            self.lbTestResult1.setText("NC")
+
+        if result[1] is not None:
+            self.lbTestResult2.setText(result[1])
+        else:
+            self.lbTestResult2.setText("NC")
+
+        if result[2] is not None:
+            self.lbTestResult3.setText(result[2])
+        else:
+            self.lbTestResult3.setText("NC")
+
+        if result[3] is not None:
+            self.lbTestResult4.setText(result[3])
+        else:
+            self.lbTestResult4.setText("NC")
 
     @pyqtSlot(str)
     def _update_test_log(self, value):
