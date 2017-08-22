@@ -82,12 +82,12 @@ class PowerSupplyTest(QThread):
         return result
 
     def _test_sequence(self):
-        result = False
-        MeasDCLink = [[]  for i in range(4)]
-        MeasVout   = [[]  for j in range(4)]
-        MeasTemp   = [[]  for k in range(4)]
-        MeasCurr   = [[[] for l in range(5)] for m in range(4)]
-        test       = [[False for n in range(4)]  for o in range(4)]
+        result = True
+        OnOff  = ['Reprovado' for i in range(4)]
+        MeasDCLink = [[]  for j in range(4)]
+        MeasVout   = [[]  for k in range(4)]
+        MeasTemp   = [[]  for l in range(4)]
+        MeasCurr   = [[[] for m in range(5)] for n in range(4)]
         compare_current = [3, -3, 5, 10, -10]
 
         # If serial connection is lost
@@ -97,9 +97,9 @@ class PowerSupplyTest(QThread):
 
         ps = PowerSupply()
         ps.serial_number = self._serial_number
-        #res = self._send_to_server(ps)
+        res = self._send_to_server(ps)
 
-        if True:#res:
+        if res:
             self.FBP.SetSlaveAdd(1) # Bastidor em teste
             self.FBP.ResetInterlocks()
             self.FBP.TurnOff(0b1111)
@@ -115,21 +115,34 @@ class PowerSupplyTest(QThread):
                 time.sleep(1)
 
                 if self.FBP.Read_ps_OnOff() == 2 ** module:
-                    test[module][0](True)
+                    OnOff[module] = 'Aprovado'
                 else:
-                    test[module][0](False)
                     self.update_gui.emit('O módulo ' + str(module + 1) + ' não ligou corretamente')
+                    OnOff[module] = 'Reprovado'
 
                 self.FBP.TurnOff(2**module)
 
                 if self.FBP.Read_ps_OnOff() == 0:
-                    test[module][0](True)
+                    if OnOff[module] == 'Aprovado':
+                        OnOff[module] = 'Aprovado'
                 else:
-                    test[module][0](False)
+                    OnOff[module] = 'Reprovado'
                     self.update_gui.emit('O módulo ' + str(module + 1) + ' não desligou corretamente')
                 time.sleep(1)
             '''##########################################################################'''
 
+            print('Interlocks Ativos: ')
+            for softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
+                if softinterlock == None:
+                    print('None')
+                else:
+                    print(softinterlock)
+            for hardinterlock in self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()):
+                if hardinterlock == None:
+                    print('None')
+                else:
+                    print(hardinterlock)
+            print('--------------------------------------------\n')
 
             self.FBP.TurnOn(0b1111)   # liga todos os módulos
             time.sleep(5)
@@ -141,7 +154,7 @@ class PowerSupplyTest(QThread):
             self.update_gui.emit('Iniciando teste com módulos em malha aberta a 20%...')
             for module in range(4):
                 self.FBP.ConfigWfmRef(module+1, 20) # ajusta 20% do ciclo de trabalho apenas para o modulo testado
-                time.sleep(1)
+                time.sleep(2)
                 self.FBP.WfmRefUpdate()
                 time.sleep(5)
 
@@ -154,22 +167,40 @@ class PowerSupplyTest(QThread):
                 self.FBP.SetSlaveAdd(1) # bastidor em teste
 
                 print('mod1: ' + str(self.FBP.Read_iMod1()))
+                time.sleep(0.1)
                 print('mod2: ' + str(self.FBP.Read_iMod2()))
+                time.sleep(0.1)
                 print('mod3: ' + str(self.FBP.Read_iMod3()))
+                time.sleep(0.1)
                 print('mod4: ' + str(self.FBP.Read_iMod4()) + '\n')
+                time.sleep(0.1)
 
                 self.FBP.ConfigWfmRef(module+1, 0) # ajusta 0 o ciclo de trabalho apenas para o modulo testado
-                time.sleep(1)
+                time.sleep(2)
                 self.FBP.WfmRefUpdate()
                 time.sleep(1)
             '''##########################################################################'''
+
+            print('Interlocks Ativos: ')
+            for softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
+                if softinterlock == None:
+                    print('None')
+                else:
+                    print(softinterlock)
+            for hardinterlock in self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()):
+                if hardinterlock == None:
+                    print('None')
+                else:
+                    print(hardinterlock)
+            print('--------------------------------------------\n')
+
 
             '''#################### Teste em Malha Aberta com -20% ######################'''
             '''##########################################################################'''
             self.update_gui.emit('Iniciando teste com módulos em malha aberta a -20%...')
             for module in range(4):
                 self.FBP.ConfigWfmRef(module+1, -20) # ajusta 20% do ciclo de trabalho apenas para o modulo testado
-                time.sleep(1)
+                time.sleep(2)
                 self.FBP.WfmRefUpdate()
                 time.sleep(5)
 
@@ -182,18 +213,32 @@ class PowerSupplyTest(QThread):
                 self.FBP.SetSlaveAdd(1) # bastidor em teste
 
                 print('mod1: ' + str(self.FBP.Read_iMod1()))
+                time.sleep(0.1)
                 print('mod2: ' + str(self.FBP.Read_iMod2()))
+                time.sleep(0.1)
                 print('mod3: ' + str(self.FBP.Read_iMod3()))
+                time.sleep(0.1)
                 print('mod4: ' + str(self.FBP.Read_iMod4()) + '\n')
+                time.sleep(0.1)
 
                 self.FBP.ConfigWfmRef(module+1, 0) # ajusta 0 o ciclo de trabalho apenas para o modulo testado
-                time.sleep(1)
+                time.sleep(2)
                 self.FBP.WfmRefUpdate()
                 time.sleep(1)
             '''##########################################################################'''
 
-            print(self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()))
-            print(self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()))
+            print('Interlocks Ativos: ')
+            for softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
+                if softinterlock == None:
+                    print('None')
+                else:
+                    print(softinterlock)
+            for hardinterlock in self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()):
+                if hardinterlock == None:
+                    print('None')
+                else:
+                    print(hardinterlock)
+            print('--------------------------------------------\n')
 
             '''#################### Teste em Malha Fechada com 5A #######################'''
             '''##########################################################################'''
@@ -210,16 +255,20 @@ class PowerSupplyTest(QThread):
                 MeasureList = self._save_CurrentMeasurement(module)
 
                 print('mod1: ' + str(self.FBP.Read_iMod1()))
+                time.sleep(0.1)
                 print('mod2: ' + str(self.FBP.Read_iMod2()))
+                time.sleep(0.1)
                 print('mod3: ' + str(self.FBP.Read_iMod3()))
+                time.sleep(0.1)
                 print('mod4: ' + str(self.FBP.Read_iMod4()) + '\n')
+                time.sleep(0.1)
 
                 for current in MeasureList:
                     MeasCurr[module][2].append(current)
 
                 self.FBP.SetSlaveAdd(1)
                 self.FBP.ConfigWfmRef(module+1, 0) # ajusta 0 o ciclo de trabalho apenas para o modulo testado
-                time.sleep(1)
+                time.sleep(2)
                 self.FBP.WfmRefUpdate()
                 time.sleep(1)
                 self.FBP.OpenLoop(2**module)
@@ -227,16 +276,26 @@ class PowerSupplyTest(QThread):
                 time.sleep(2)
             '''##########################################################################'''
 
-            print(self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()))
-            print(self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()))
+            print('Interlocks Ativos: ')
+            for softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
+                if softinterlock == None:
+                    print('None')
+                else:
+                    print(softinterlock)
+            for hardinterlock in self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()):
+                if hardinterlock == None:
+                    print('None')
+                else:
+                    print(hardinterlock)
+            print('--------------------------------------------\n')
 
             '''################### Teste em Malha Fechada com 10A #######################'''
             '''##########################################################################'''
             self.update_gui.emit('Iniciando teste com módulos em malha fechada a 10A...')
             self.FBP.ClosedLoop(0b1111)
-            time.sleep(1)
+            time.sleep(2)
             self.FBP.OpMode(0)
-            time.sleep(1)
+            time.sleep(2)
             self.FBP.SetISlowRef(10)
             time.sleep(1)
 
@@ -249,31 +308,57 @@ class PowerSupplyTest(QThread):
             self.FBP.SetSlaveAdd(1)
 
             print('mod1: ' + str(self.FBP.Read_iMod1()))
+            time.sleep(0.1)
             print('mod2: ' + str(self.FBP.Read_iMod2()))
+            time.sleep(0.1)
             print('mod3: ' + str(self.FBP.Read_iMod3()))
+            time.sleep(0.1)
             print('mod4: ' + str(self.FBP.Read_iMod4()) + '\n')
+            time.sleep(0.1)
             '''##########################################################################'''
 
-            print(self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()))
-            print(self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()))
+            print('Interlocks Ativos: ')
+            for softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
+                if softinterlock == None:
+                    print('None')
+                else:
+                    print(softinterlock)
+            for hardinterlock in self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()):
+                if hardinterlock == None:
+                    print('None')
+                else:
+                    print(hardinterlock)
+            print('--------------------------------------------\n')
 
             self.update_gui.emit('Realizando medidas de tensão do DC-Link, tensão de saída e temperatura')
             for o in range(8):
                 time.sleep(5)#Alterar tempo
                 MeasDCLink[0].append(self.FBP.Read_vDCMod1())
+                time.sleep(0.1)
                 MeasDCLink[1].append(self.FBP.Read_vDCMod2())
+                time.sleep(0.1)
                 MeasDCLink[2].append(self.FBP.Read_vDCMod3())
+                time.sleep(0.1)
                 MeasDCLink[3].append(self.FBP.Read_vDCMod4())
+                time.sleep(0.1)
 
                 MeasVout[0].append(self.FBP.Read_vOutMod1())
+                time.sleep(0.1)
                 MeasVout[1].append(self.FBP.Read_vOutMod2())
+                time.sleep(0.1)
                 MeasVout[2].append(self.FBP.Read_vOutMod3())
+                time.sleep(0.1)
                 MeasVout[3].append(self.FBP.Read_vOutMod4())
+                time.sleep(0.1)
 
                 MeasTemp[0].append(self.FBP.Read_temp1())
+                time.sleep(0.1)
                 MeasTemp[1].append(self.FBP.Read_temp2())
+                time.sleep(0.1)
                 MeasTemp[2].append(self.FBP.Read_temp3())
+                time.sleep(0.1)
                 MeasTemp[3].append(self.FBP.Read_temp4())
+                time.sleep(0.1)
 
             self.FBP.SetSlaveAdd(1)
             '''################### Teste em Malha Fechada com -10A ######################'''
@@ -292,93 +377,163 @@ class PowerSupplyTest(QThread):
             self.FBP.SetSlaveAdd(1)
 
             print('mod1: ' + str(self.FBP.Read_iMod1()))
+            time.sleep(0.1)
             print('mod2: ' + str(self.FBP.Read_iMod2()))
+            time.sleep(0.1)
             print('mod3: ' + str(self.FBP.Read_iMod3()))
+            time.sleep(0.1)
             print('mod4: ' + str(self.FBP.Read_iMod4()) + '\n')
+            time.sleep(0.1)
             '''##########################################################################'''
 
-            print(self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()))
-            print(self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()))
+            print('Interlocks Ativos: ')
+            for softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
+                if softinterlock == None:
+                    print('None')
+                else:
+                    print(softinterlock)
+            for hardinterlock in self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()):
+                if hardinterlock == None:
+                    print('None')
+                else:
+                    print(hardinterlock)
+            print('--------------------------------------------\n')
 
             self.update_gui.emit('Realizando medidas de tensão do DC-Link, tensão de saída e temperatura')
             for p in range(8):
                 time.sleep(5)# alterar tempo
                 MeasDCLink[0].append(self.FBP.Read_vDCMod1())
+                time.sleep(0.1)
                 MeasDCLink[1].append(self.FBP.Read_vDCMod2())
+                time.sleep(0.1)
                 MeasDCLink[2].append(self.FBP.Read_vDCMod3())
+                time.sleep(0.1)
                 MeasDCLink[3].append(self.FBP.Read_vDCMod4())
+                time.sleep(0.1)
 
                 MeasVout[0].append(self.FBP.Read_vOutMod1())
+                time.sleep(0.1)
                 MeasVout[1].append(self.FBP.Read_vOutMod2())
+                time.sleep(0.1)
                 MeasVout[2].append(self.FBP.Read_vOutMod3())
+                time.sleep(0.1)
                 MeasVout[3].append(self.FBP.Read_vOutMod4())
+                time.sleep(0.1)
 
                 MeasTemp[0].append(self.FBP.Read_temp1())
+                time.sleep(0.1)
                 MeasTemp[1].append(self.FBP.Read_temp2())
+                time.sleep(0.1)
                 MeasTemp[2].append(self.FBP.Read_temp3())
+                time.sleep(0.1)
                 MeasTemp[3].append(self.FBP.Read_temp4())
+                time.sleep(0.1)
 
             self.FBP.SetSlaveAdd(1)
 
-            print('zerar fonte')
             self.FBP.SetISlowRef(0)
             time.sleep(1)
-            print('desligar fonte')
             self.FBP.TurnOff(0b1111)
-            print(MeasCurr)
-            print('')
-            print(MeasDCLink)
-            print('')
-            print(MeasTemp)
-            print('')
-            print(MeasVout)
 
             for module in range(4):
-                #log = PowerSupplyLog()
-                #log.id_canal_power_supply = module + 1
+                log = PowerSupplyLog()
+                log.id_canal_power_supply = module + 1
 
+                test = [True for p in range(9)]
+                n = 0
+
+                self.update_gui.emit('')
                 self.update_gui.emit('Verificando resultados do módulo '\
                                      + str(module + 1) + '...')
-
-                n = 0
-'''
+                '''-------------------------------------------------------------'''
                 for a in compare_current:
                     for b in MeasCurr[module][n]:
-'''                        
-                for a in MeasCurr[module][0]:
-                    if round(a) == 3:
-                        test[module][1] == True
+                        if a == round(b):
+                            if test[n]:
+                                test[n] = True
+                        else:
+                            test[n] = False
+                    if test[n]:
+                        self.update_gui.emit('      Aprovado no teste ' + str(compare_current.index(a) + 1) + ' de corrente de saída')
                     else:
-                        test[module][1] == False
+                        self.update_gui.emit('      Reprovado no teste ' + str(compare_current.index(a) + 1) + ' de corrente de saída')
+                    n = n + 1
+                '''-------------------------------------------------------------'''
 
-                for b in MeasCurr[module][1]:
-                    if round(b) == -3:
-                        test[module][2] == True
+                '''-------------------------------------------------------------'''
+                for c in MeasDCLink[module]:
+                    if round(c) == 15:
+                        if test[5]:
+                            test[5] = True
                     else:
-                        test[module][2] == False
+                        test[5] = False
+                if test[5]:
+                    self.update_gui.emit('      Aprovado no teste de leitura da tensão do DC Link')
+                else:
+                    self.update_gui.emit('      Reprovado no teste de leitura da tensão do DC Link')
+                '''-------------------------------------------------------------'''
 
-                for c in MeasCurr[module][2]:
-                    if round(c) == 5:
-                        test[module][3] == True
+                '''-------------------------------------------------------------'''
+                for d in MeasTemp[module]:
+                    if d < 90:
+                        if test[6]:
+                            test[6] = True
                     else:
-                        test[module][3] == False
+                        test[6] = False
+                if test[6]:
+                    self.update_gui.emit('      Aprovado no teste de leitura da temperatura')
+                else:
+                    self.update_gui.emit('      Reprovado no teste de leitura da temperatura')
+                '''-------------------------------------------------------------'''
 
-                for d in MeasCurr[module][3]:
-                    if round(d) == 10:
-                        test[module][4] == True
+                '''-------------------------------------------------------------'''
+                for e in range(0, len(MeasVout) - 8):
+                    if 7.5 < MeasVout[module][e] < 8.5:
+                        if test[7]:
+                            test[7] = True
                     else:
-                        test[module][4] == False
+                        test[7] = False
+                if test[7]:
+                    self.update_gui.emit('      Aprovado no teste 1 de leitura da tensão de saída')
+                else:
+                    self.update_gui.emit('      Reprovado no teste 1 de leitura da tensão de saída')
+                '''-------------------------------------------------------------'''
 
-                for e in MeasCurr[module][4]:
-                    if round(e) == -10:
-                        test[module][5] == (True)
+                '''-------------------------------------------------------------'''
+                for f in range(8, len(MeasVout)):
+                    if -8.5 < MeasVout[module][f] < -7.5:
+                        if test[8]:
+                            test[8] = True
                     else:
-                        test[module][5] == (False)
+                        test[8] = False
+                if test[8]:
+                    self.update_gui.emit('      Aprovado no teste 2 de leitura da tensão de saída')
+                else:
+                    self.update_gui.emit('      Reprovado no teste 2 de leitura da tensão de saída')
+                '''-------------------------------------------------------------'''
 
+                if test == [True for g in range(9)]:
+                    if result:
+                        result = True
+                    log.test_result = 'Aprovado'
+                else:
+                    result = False
 
+                log.result_test_on_off = OnOff[module]
+                log.serial_number_power_supply = self._serial_number
+                log.iout0                   = MeasCurr[module][3][0]
+                log.iout1                   = MeasCurr[module][4][0]
+                log.vout0                   = MeasVout[module][7]
+                log.vout1                   = MeasVout[module][15]
+                log.vdclink0                = MeasDCLink[module][7]
+                log.vdclink1                = MeasDCLink[module][15]
+                log.temperatura0            = MeasTemp[module][7]
+                log.temperatura1            = MeasTemp[module][15]
+                log.iout_add_20_duty_cycle  = MeasCurr[module][0][0]
+                log.iout_less_20_duty_cycle = MeasCurr[module][1][0]
+                log.details = ''
 
-
-
+                result = self._send_to_server(log)
 
             #TODO: Sequencia de Testes
             """
@@ -403,6 +558,7 @@ class PowerSupplyTest(QThread):
 
             result = self._send_to_server(log)
             """
+
         self.test_complete.emit(result)
         """
             Fim da Simulação
@@ -415,26 +571,34 @@ class PowerSupplyTest(QThread):
         if module == 0:
             self.FBP.SetSlaveAdd(1) # bastidor em teste
             Measurement.append(self.FBP.Read_iMod1()) # corrente de saída lida pelo bastidor testado
+            time.sleep(0.1)
             self.FBP.SetSlaveAdd(5) # jiga bastidor
             Measurement.append(self.FBP.Read_iMod1()) # corrente de saída lida pela jiga bastidor
+            time.sleep(0.1)
 
         elif module == 1:
             self.FBP.SetSlaveAdd(1) # bastidor em teste
             Measurement.append(self.FBP.Read_iMod2()) # corrente de saída lida pelo bastidor testado
+            time.sleep(0.1)
             self.FBP.SetSlaveAdd(5) # jiga bastidor
             Measurement.append(self.FBP.Read_iMod2()) # corrente de saída lida pela jiga bastidor
+            time.sleep(0.1)
 
         elif module == 2:
             self.FBP.SetSlaveAdd(1) # bastidor em teste
             Measurement.append(self.FBP.Read_iMod3()) # corrente de saída lida pelo bastidor testado
+            time.sleep(0.1)
             self.FBP.SetSlaveAdd(5) # jiga bastidor
             Measurement.append(self.FBP.Read_iMod3()) # corrente de saída lida pela jiga bastidor
+            time.sleep(0.1)
 
         elif module == 3:
             self.FBP.SetSlaveAdd(1) # bastidor em teste
             Measurement.append(self.FBP.Read_iMod4()) # corrente de saída lida pelo bastidor testado
+            time.sleep(0.1)
             self.FBP.SetSlaveAdd(5) # jiga bastidor
             Measurement.append(self.FBP.Read_iMod4()) # corrente de saída lida pela jiga bastidor
+            time.sleep(0.1)
 
         return Measurement
 
