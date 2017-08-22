@@ -2,6 +2,7 @@
 from PyQt5.QtWidgets import QWizard, QApplication, QWizardPage
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from common.dmscanner import Scanner
+from common.flashfirmware import LoadFirmware_HRADC
 from PyQt5.uic import loadUiType
 from hradctest import HRADCTest
 import serial
@@ -30,6 +31,7 @@ class HRADCWindow(QWizard, Ui_Class):
         self._status_load_firmware = False
 
         self._serial_number = []
+        self._boardsinfo = []
 
         self._test_thread = HRADCTest()
 
@@ -161,9 +163,27 @@ class HRADCWindow(QWizard, Ui_Class):
             return False
 
         serial = self.leSerialNumber.text()
+        variant = self.leMaterialCode.text()
+        scan = Scanner()
         try:
             self._serial_number.append(int(serial))
+            
+            board = {}
+            board['serial'] = int(serial)
+            board['variant'] = scan.get_material_name(variant)
+            board['pre_tests'] = ''
+            
+            try:
+                board['slot'] = max(0,max([board['slot'] for board in self._boardsinfo]))+1
+            except:
+                board['slot'] = 1
+            
+            if not variant in scan.materiais:
+                raise ValueError
+
+            self._boardsinfo.append(board)
             return True
+        
         except ValueError:
             pass
 
@@ -185,7 +205,7 @@ class HRADCWindow(QWizard, Ui_Class):
             TODO: Salva Status (Led OK)
             """
             if self._status_load_firmware:
-                if len(self._serial_number) < 4 and not self.cbEndTests.isChecked():
+                if self._boardinfo[-1]['slot'] < 4 and not self.cbEndTests.isChecked():
                     """
                     TODO: Clear Widgets
                     """
@@ -197,6 +217,7 @@ class HRADCWindow(QWizard, Ui_Class):
                     self._test_thread.serial_number = self._serial_number[:]
                     del self._serial_number[:]
                     """
+                    self._test_thread._boardsinfo = self._boardsinfo[:]
                     return True
             else:
                 return False
@@ -284,7 +305,8 @@ class HRADCWindow(QWizard, Ui_Class):
         if data is not None:
             self.leSerialNumber.setText(data['serial'])
             self.leMaterialCode.setText(data['material'])
-            self.leMaterialName.setText(scan.get_material_name(data['material']))
+            aux = scan.get_material_name(data['material'])
+            self.leMaterialName.setText(aux)
         else:
             self.leDmCode.setText("Codigo Invalido!")
             self.leSerialNumber.clear()
@@ -331,9 +353,19 @@ class HRADCWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _load_firmware(self):
-        """
-        TODO: Load Firmware
-        """
+        qts = LoadFirmware_HRADC()
+        result = qts.load_firmware()
+        
+        if result is 'success':
+            self._boardsinfo[-1]['slot'] = abs(self._boardsinfo[-1]['slot'])
+        else:
+            self._boardsinfo[-1]['slot'] = -abs(self._boardsinfo[-1]['slot'])
+
+        self.teFirmwareLog.append('Slot ' + str(abs(self._boardsinfo[-1]['slot'])) + ' - S/N ' + str(self._boardsinfo[-1]['serial']) + ' : ' + result)
+        self._boardsinfo[-1]['pre_tests'] = self._boardsinfo[-1]['pre_tests'] + '\t' + result
+
+        print(self._boardsinfo[-1])
+        
         self._status_load_firmware = True
 
     @pyqtSlot(bool)

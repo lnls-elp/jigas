@@ -8,7 +8,7 @@ import time
 
 class HRADCTest(QThread):
 
-    test_complete       = pyqtSignal(bool)
+    test_complete       = pyqtSignal(list)
     update_gui          = pyqtSignal(str)
     connection_lost     = pyqtSignal()
 
@@ -17,12 +17,12 @@ class HRADCTest(QThread):
     def __init__(self):
         QThread.__init__(self)
         self._comport = None
-        self._baudarate = None
-        self._serial_number = []
-
+        self._baudrate = None
+        self._boardsinfo = []
+        self._nHRADC = None
         self._led = None
 
-        self.FBP = SerialDRS()
+        self.drs = SerialDRS()
 
 
     @property
@@ -35,7 +35,7 @@ class HRADCTest(QThread):
 
     @property
     def baudrate(self):
-        return self._baudarate
+        return self._baudrate
 
     @baudrate.setter
     def baudrate(self, value):
@@ -57,51 +57,89 @@ class HRADCTest(QThread):
     def led(self, value):
         self._led = value
 
+    @property
+    def firmware_error(self):
+        return self._firmware_error
+
+    @firmware_error.setter
+    def firmware_error(self, value):
+        self._firmware_error = value
+        
     def open_serial_port(self):
         if self._comport is None or self._baudrate is None:
             return False
         else:
-            return self.FBP.Connect(self._comport, self._baudrate)
+            return self.drs.Connect(self._comport, self._baudrate)
 
     def test_communication(self):
 
         result = True
 
+        
         #TODO: Communication test
 
         return result
 
     def _test_sequence(self):
 
-        hradc = HRADC()
-        #hradc.serial_number = self._serial_number
-        hradc.serial_number = 12358
-        res = self._send_to_server(hradc)
+        self.nHRADC = max([board['slot'] for board in self._boardsinfo])
+        self.drs.SendNumberOfHRADC(self.nHRADC)
+        log_res = []
+        
+        for board in self._boardsinfo:
 
-        if res:
-            log = HRADCLog()
-            #log.serial_number_hradc = self._serial_number
-            log.serial_number_hradc = 12358
+            hradc = HRADC()
 
-            # TODO: Faz os testes e seta os atributos de log
+            
+            hradc.serial_number = board['serial']
+            hradc.variant = board['variant']
+            self._burden_amplifier = "INA141"
+            if hradc.variant = 'HRADC-FBP':
+                hradc.burden_res = 20.0
+                self._cut_frequency = 48228.7
+                self._filter_order = 1       
 
-            """
-            Simulação de valores
-            """
-            log.test_result = "Aprovado"
-            log.device      = self.device['HRADC']
-            log.details = ""
+            res = self._send_to_server(hradc)
 
-            log_res = self._send_to_server(log)
+            if res:
 
-            """
-            Fim da simulação
-            """
+                log_hradc = HRADCLog()
+                log_hradc.serial_number_hradc = board['serial']
+                log_hradc.device = self.device['HRADC']
 
-            # Quando o teste terminar emitir o resultado em uma lista de objetos
-            # do tipo PowerModuleLog
-            self.test_complete.emit(log_res)
+                log_dm = HRADCLog()                  
+                log_dm.serial_number_hradc = board['serial']
+                log_dm.device = self.device['DM']
+                
+                if 'success' in board['pre_tests']:
 
+                    test(board)
+                    
+                    log_hradc.test_result = "?"
+                    log_hradc.details = ""
+
+                    log_dm.test_result = "?"
+                    log_dm.details = ""
+
+                    log_hradc_serverstatus = self._send_to_server(log_hradc)
+                    log_dm_serverstatus = self._send_to_server(log_dm)
+
+                else:
+                    log_hradc.test_result = "Reprovado"
+                    log_hradc.details = board['pre_tests']
+
+                    log_hradc_serverstatus = self._send_to_server(log_hradc)
+
+                log_res.append(log_hradc.test_result)                
+
+        # Quando o teste terminar emitir o resultado em uma lista de objetos
+        # do tipo HRADCLog
+        
+        for i in range(4 - len(log_res)):
+            log_res.append(None)
+        self.test_complete.emit(log_res)
+        
+            
     def _send_to_server(self, item):
         client = ElpWebClient()
         client_data = item.data

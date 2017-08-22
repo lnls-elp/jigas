@@ -103,3 +103,78 @@ class LoadFirmware:
 
         else:
             return "."
+
+class LoadFirmware_HRADC:
+    
+    def __init__(self, pathtofile='..\\common\\common\\flashfirmware\\hradc_cpld_files\\HRADC_v2_1_CPLD_Firmware.cdf'):
+
+        self._path = pathtofile
+        self.status = "initialized"
+
+    @property
+    def pathtofile(self):
+        return self._path
+
+    @pathtofile.setter
+    def pathtofile(self, path):
+        self._path = path
+
+    def load_firmware(self):
+        print("flashing firmware...")
+        command = " CMD /C c:\\altera\\16.0\\qprogrammer\\bin64\\quartus_pgm --quiet -c USB-Blaster " + self._path
+        proc = subprocess.Popen(command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        (out, err) = proc.communicate()
+        out = out.decode("utf-8")
+        #print("out:   " + out)
+
+        if "Successfully performed operation" in out:
+            print("OK")
+            self.status = "Firmware gravado com sucesso"
+
+        elif "Programming hardware cable not detected" in out:
+            print("Erro: Gravador USB-Blaster nao encontrado")
+            self.status = "usb-blaster not found"
+                
+        elif "Can't access JTAG chain" in out:
+            print("Erro: CPLD nao encontrada")
+            self.status = "cpld not found"
+
+        elif "Error (210007): Can't locate programming file" in out:
+            print("Erro: Arquivo binario POF nao encontrado")
+            self.status = "pof file not found"
+
+        elif "Error (213009): File name" in out:
+            print("Erro: Arquivo de configuracao CDF nao encontrado")
+            self.status = 'cdf file not found'
+
+        else:
+            print("Erro desconhecido")
+            self.status = 'unknown error'
+            
+        return(self.status)
+
+    def log_status(self):
+        if self.status == "success":
+            return("codigo gravado com sucesso!")
+
+        elif self.status == "usb-blaster not found":
+            return "erro : o computador nao detectou a conexao USB com o gravador"
+
+        elif self.status == "cpld not found":
+            return "erro : o gravador nao detectou a CPLD"
+
+        elif self.status == "pof file not found":
+            return "erro : arquivo binario POF nao encontrado."
+
+        elif self.status == "cdf file not found":
+            return "erro : arquivo de configuracao CDF nao encontrado"
+        
+        elif self.status == "unknown error":
+            return "erro desconhecido."
+
+        elif self.status == "initialized":
+            return "nenhuma tentativa de gravação realizada."
+
+        else:
+            return "."
+

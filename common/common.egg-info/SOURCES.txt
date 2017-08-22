@@ -7,5 +7,15 @@ common.egg-info/not-zip-safe
 common.egg-info/top_level.txt
 common/dmreader/__init__.py
 common/dmreader/dmreader.py
+common/dmscanner/__init__.py
+common/dmscanner/dmscanner.py
 common/elpwebclient/__init__.py
 common/elpwebclient/elpwebclient.py
+common/flashfirmware/__init__.py
+common/flashfirmware/flashfirmware.py
+common/hradcdata/__init__.py
+common/hradcdata/hradcdata.py
+common/psdata/__init__.py
+common/psdata/psdata.py
+common/pydrs/__init__.py
+common/pydrs/pydrs.py
