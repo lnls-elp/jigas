@@ -84,7 +84,7 @@ class PowerModuleTest(QThread):
     def test_communication(self):
         # Resultado teste de comunicação para os 4 módulos
         n_mod  = 0
-        result = [None for i in range(4)]
+        result = ''
         serial = [self._serial_mod0, self._serial_mod1, self._serial_mod2,
                     self._serial_mod3]
 
@@ -100,12 +100,12 @@ class PowerModuleTest(QThread):
                (test_package[2] == 512) and \
                (test_package[3] == 14)  and \
                (test_package[4] == 223):
-               result = ['OK', 'OK', 'OK', 'OK']
+               result = 'OK'
 
             else:
-                result = ['Falha', 'Falha', 'Falha', 'Falha']
+                result = 'Falha'
         except:
-            result = ['Falha', 'Falha', 'Falha', 'Falha']
+            result = 'Falha'
 
         return result
 
@@ -119,7 +119,7 @@ class PowerModuleTest(QThread):
         mod_result2      = [[] for k in range(4)] # para medidas de vout
         mod_result3      = [[] for l in range(4)] # para medidas de temperatura
         mod_result4      = [[] for m in range(4)] # para medidas de dclink
-        load_current     = ['turnedOff', 0, 5, 10, -10, -5] # correntes setadas
+        load_current     = ['turnedOff', 0, 30.5, 58.5, -58.5, -30.5] # correntes setadas
         compare_current  = [0, 0, 5, 10, -10, -5] # para comparar medidas de correntes
 
         if not self._serial_port.is_open:
@@ -147,6 +147,8 @@ class PowerModuleTest(QThread):
             if module is not None:
                 sum_mod = sum_mod + (2 ** serial.index(module))
 
+        print('sum_mod enviado para UDC: ' + str(sum_mod) + '\n')
+
         for set_current in load_current:
             if set_current == 'turnedOff':
                 self.FBP.TurnOff(sum_mod)
@@ -155,10 +157,10 @@ class PowerModuleTest(QThread):
             else:
                 self.FBP.TurnOn(sum_mod)
                 time.sleep(1)
-                self.FBP.ClosedLoop(sum_mod)
+                self.FBP.OpenLoop(sum_mod)
                 time.sleep(1)
                 self.update_gui.emit('Iniciando medições com módulos ligados a '\
-                                    + str(set_current) + 'A')
+                                    + str(compare_current[load_current.index(set_current)]) + 'A')
                 self.FBP.SetISlowRef(0.25 * set_current)
                 time.sleep(0.5)
                 self.FBP.SetISlowRef(0.5 * set_current)
@@ -268,8 +270,8 @@ class PowerModuleTest(QThread):
                         if round(mod_result4[serial.index(item)][s]) == 15:
                             if test[3]:
                                 test[3] = True
-                            else:
-                                test[3] = False
+                        else:
+                            test[3] = False
                     if test[3]:
                         self.update_gui.emit('      Aprovado no teste de leitura da tensão de entrada')
                     else:
