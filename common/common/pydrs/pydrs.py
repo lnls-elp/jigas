@@ -34,7 +34,8 @@ ListFunc = ['TurnOn','TurnOff','OpenLoop','ClosedLoop','OpMode','RemoteInterface
             'SetISlowRef','ConfigWfmRef','ConfigSigGen', 'EnableSigGen',
             'DisableSigGen','ConfigDPModule','WfmRefUpdate','ResetInterlocks','ConfigPSModel',
             'ConfigHRADC','ConfigHRADCOpMode','EnableHRADCSampling','DisableHRADCSampling','ResetWfmRef',
-            'SetRSAddress','EnableSamplesBuffer','DisableSamplesBuffer']
+            'SetRSAddress','EnableSamplesBuffer','DisableSamplesBuffer','SelectHRADCBoard','SelectTestSource',
+            'ResetHRADCBoards','Config_nHRADC','ReadHRADC_UFM','WriteHRADC_UFM','EraseHRADC_UFM','ReadHRADC_BoardData']
 ListHRADCInputType = ['Vin_bipolar','Vin_unipolar_p','Vin_unipolar_n','Iin_bipolar','Iin_unipolar_p',
                       'Iin_unipolar_n','Vref_bipolar_p','Vref_bipolar_n','GND','Vref_unipolar_p',
                       'Vref_unipolar_n','GND_unipolar','Temp','Reserved0','Reserved1','Reserved2']
@@ -232,7 +233,7 @@ class SerialDRS(object):
         payload_size   = self.size_to_hex(1+2+4+2+2+2) #Payload: ID + hradcID + freqSampling + inputType + enableHeater + enableMonitor
         hex_hradcID    = self.double_to_hex(hradcID)
         hex_freq       = self.float_to_hex(freqSampling)
-        hex_type       = self.double_to_hex(inputType)
+        hex_type       = self.double_to_hex(ListHRADCInputType.index(inputType))
         hex_enHeater   = self.double_to_hex(enableHeater)
         hex_enMonitor  = self.double_to_hex(enableMonitor)
         send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('ConfigHRADC'))+hex_hradcID+hex_freq+hex_type+hex_enHeater+hex_enMonitor
@@ -291,6 +292,74 @@ class SerialDRS(object):
         send_msg       = self.checksum(self.SlaveAdd+send_packet)
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
+
+    def SelectHRADCBoard(self,hradcID):
+        payload_size   = self.size_to_hex(1+2) #Payload: ID
+        hex_hradcID    = self.double_to_hex(hradcID)
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('SelectHRADCBoard'))+hex_hradcID
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def SelectTestSource(self,inputType):
+        payload_size   = self.size_to_hex(1+2) #Payload: inputType
+        hex_type       = self.double_to_hex(ListHRADCInputType.index(inputType))
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('SelectTestSource'))+hex_type
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def ResetHRADCBoards(self, enable):
+        payload_size   = self.size_to_hex(1+2) #Payload: ID+enable(2)
+        hex_enable     = self.double_to_hex(enable)
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('ResetHRADCBoards'))+hex_enable
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def Config_nHRADC(self,nHRADC):
+        payload_size   = self.size_to_hex(1+2) #Payload: nHRADC
+        hex_nhradc     = self.double_to_hex(nHRADC)
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('Config_nHRADC'))+hex_nhradc
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def ReadHRADC_UFM(self,hradcID,ufmadd):
+        payload_size   = self.size_to_hex(1+2+2) #Payload: ID + hradcID + ufmadd
+        hex_hradcID    = self.double_to_hex(hradcID)
+        hex_ufmadd    = self.double_to_hex(ufmadd)
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('ReadHRADC_UFM'))+hex_hradcID+hex_ufmadd
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def WriteHRADC_UFM(self,hradcID,ufmadd,ufmdata):
+        payload_size   = self.size_to_hex(1+2+2+2) #Payload: ID + hradcID + ufmadd + ufmdata
+        hex_hradcID    = self.double_to_hex(hradcID)
+        hex_ufmadd    = self.double_to_hex(ufmadd)
+        hex_ufmdata    = self.double_to_hex(ufmdata)
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('WriteHRADC_UFM'))+hex_hradcID+hex_ufmadd+hex_ufmdata
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def EraseHRADC_UFM(self,hradcID):
+        payload_size   = self.size_to_hex(1+2) #Payload: ID + hradcID
+        hex_hradcID    = self.double_to_hex(hradcID)
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('EraseHRADC_UFM'))+hex_hradcID
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def ReadHRADC_BoardData(self,hradcID):
+        payload_size   = self.size_to_hex(1+2) #Payload: ID + hradcID
+        hex_hradcID    = self.double_to_hex(hradcID)
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('ReadHRADC_BoardData'))+hex_hradcID
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+    
 
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     ======================================================================
@@ -731,7 +800,7 @@ class SerialDRS(object):
     ======================================================================
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-    def Connect(self,port='COM2',baud=6000000):
+    def Connect(self,port='COM4',baud=6000000):
         try:
             SerialDRS.ser = serial.Serial(port,baud,timeout=1) #port format should be 'COM'+number
             return True
