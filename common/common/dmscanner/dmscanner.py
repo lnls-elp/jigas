@@ -25,5 +25,5 @@ class Scanner(QWidget):
 
     def get_material_name(self, material_code):
         if material_code in self.materiais.keys():
-            return self._materiais[material_code]
+            return self.materiais[material_code]
         return "NAO EXISTE"
