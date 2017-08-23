@@ -57,6 +57,7 @@ class DCCTTest(QThread):
         if self._comport is None or self._baudrate is None:
             return False
         else:
+            self.FBP.SetSlaveAdd(5)
             return self.FBP.Connect(self._comport, self._baudrate)
 
     def test_communication(self):
@@ -92,10 +93,14 @@ class DCCTTest(QThread):
             #TODO: Sequencia de Testes
 
             self.FBP.Write_sigGen_Aux(1) # Usando 1 modulo de potência
-            self.FBP.TurnOn()
+            time.sleep(1)
+            self.FBP.TurnOn(0b0001)
             self.update_gui.emit('Fonte ligada')
-            self.FBP.ClosedLoop()
+            time.sleep(1)
+            self.FBP.ClosedLoop(0b0001)
             self.update_gui.emit('Malha fechada')
+            time.sleep(1)
+
             print('variante ' + str(self._variant))
             if self._variant == 'CONF A':
                 list_log.append(DCCTLog())
@@ -188,7 +193,7 @@ class DCCTTest(QThread):
                 else:
                     self.update_gui.emit('Erro no envio de dados para o servidor')
 
-            self.FBP.TurnOff()
+            self.FBP.TurnOff(0b0001)
 
         self.test_complete.emit(result)
 
