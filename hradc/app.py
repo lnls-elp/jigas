@@ -30,7 +30,6 @@ class HRADCWindow(QWizard, Ui_Class):
 
         self._status_load_firmware = False
 
-        self._serial_number = []
         self._boardsinfo = []
 
         self._test_thread = HRADCTest()
@@ -53,9 +52,9 @@ class HRADCWindow(QWizard, Ui_Class):
         self.leMaterialCode.clear()
         self.lbStatusComunicacao.setText("...")
         self.rbLedStatusOk.setChecked(False)
-        self.rbLedStatusOk.setChecked(False)
+        self.rbLedStatusNok.setChecked(False)
         self.rbLedAlimOk.setChecked(False)
-        self.rbLedAlimOk.setChecked(False)
+        self.rbLedAlimNok.setChecked(False)
         self.teFirmwareLog.clear()
         self.lbTestStatus.setText("Clique para Iniciar Testes")
         self.lbTestResult1.setText("Aguarde...")
@@ -68,7 +67,7 @@ class HRADCWindow(QWizard, Ui_Class):
         """ Configure basic signals """
         self.pbConnectSerialPort.clicked.connect(self._connect_serial_port)
         self.leDmCode.editingFinished.connect(self._treat_dmcode)
-        self.rbLedStatusNok.toggled.connect(self._treat_leds_nok)
+        #self.rbLedStatusNok.toggled.connect(self._treat_leds_nok)
         self.pbLoadFirmware.clicked.connect(self._load_firmware)
         self.pbStartTests.clicked.connect(self._start_test_sequence)
         self.pbCommunicationTest.clicked.connect(self._communication_test)
@@ -123,6 +122,7 @@ class HRADCWindow(QWizard, Ui_Class):
     def _restart_variables(self):
         self._serial_port_status = False
         self._test_communication_status = False
+        del self._boardsinfo[:]
 
     def _restart_test_thread(self):
         self._test_thread.test_complete.disconnect()
@@ -163,24 +163,30 @@ class HRADCWindow(QWizard, Ui_Class):
         serial = self.leSerialNumber.text()
         variant = self.leMaterialCode.text()
         scan = Scanner()
-        try:
-            self._serial_number.append(int(serial))
-            
-            board = {}
-            board['serial'] = int(serial)
-            board['variant'] = scan.get_material_name(variant)
-            board['pre_tests'] = ''
-            
-            try:
-                board['slot'] = max(0,max([board['slot'] for board in self._boardsinfo]))+1
-            except:
-                board['slot'] = 1
-            
-            if not variant in scan.materiais:
-                raise ValueError
+        
+        try:            
+            if not int(serial) in [board['serial'] for board in self._boardsinfo]:
 
-            self._boardsinfo.append(board)
+                board = {}
+                board['serial'] = int(serial)
+                board['variant'] = scan.get_material_name(variant)
+                board['pre_tests'] = ''
+                
+                try:
+                    board['slot'] = max(0,max([board['slot'] for board in self._boardsinfo]))+1
+                except:
+                    board['slot'] = 1
+                
+                if not variant in scan.materiais:
+                    raise ValueError
+            
+                self._boardsinfo.append(board)
+
+            self.rbLedAlimOk.setChecked(False)
+            self.rbLedAlimNok.setChecked(False)
+
             return True
+            
         
         except ValueError:
             pass
@@ -188,51 +194,79 @@ class HRADCWindow(QWizard, Ui_Class):
         return False
 
     def _validate_page_connect_hradc(self):
-        if not self.rbLedAlimOk.isChecked() and not self.rbLedAlimNok.isChecked():
-            return False
-        return True
-
-    def _validate_page_load_firmware(self):
-
-        if not self.rbLedStatusOk.isChecked() and not self.rbLedStatusNok.isChecked():
-            return False
-
-        elif self.rbLedStatusOk.isChecked():
-            """
-            TODO: Salva Status (Led OK)
-            """
-            if self._status_load_firmware:
-                if self._boardinfo[-1]['slot'] < 4 and not self.cbEndTests.isChecked():
-                    """
-                    TODO: Clear Widgets
-                    """
-                    while self.currentId() is not self.num_serial_number:
-                        self.back()
-                else:
-                    """
-                    TODO: Clear Widgets
-                    self._test_thread.serial_number = self._serial_number[:]
-                    del self._serial_number[:]
-                    """
-                    self._test_thread._boardsinfo = self._boardsinfo[:]
-                    return True
-            else:
-                return False
-
-        elif self.cbEndTests:
-            """
-            TODO: Submete Status (Led Falha) e placa Reprovada
-            TODO: Clear Widgets
-            """
+        if self.rbLedAlimOk.isChecked():
+            self.rbLedStatusOk.setChecked(False)
+            self.rbLedStatusNok.setChecked(False)
             return True
-        else:
-            """
-            TODO: Submete Status (Led Falha) e placa Reprovada
-            TODO: Clear Widgets
-            """
+              
+        elif self.rbLedAlimNok.isChecked():
+            self._boardsinfo[-1]['pre_tests'] = self._boardsinfo[-1]['pre_tests'] + '\t' + 'Erro: Falha LEDs +/-15V'
+            self._boardsinfo[-1]['slot'] = -abs(self._boardsinfo[-1]['slot'])
+
+            print(self._boardsinfo[-1])
+            print('Falhou LED +/-15V')
+            self.rbLedStatusOk.setChecked(False)
+            self.rbLedStatusNok.setChecked(False)
             while self.currentId() is not self.num_serial_number:
                 self.back()
+                
+        return False
 
+    def _validate_page_load_firmware(self):
+        if self._status_load_firmware:
+                        
+            if self._test_communication_status:
+        
+                if not self.rbLedStatusOk.isChecked() and not self.rbLedStatusNok.isChecked():
+                    return False
+
+                elif self.rbLedStatusOk.isChecked():
+                    
+                    if self._boardsinfo[-1]['slot'] < 4 and not self.cbEndTests.isChecked():
+                        """
+                        TODO: Clear Widgets
+                        """
+                        self._status_load_firmware = False
+                        self._test_communication_status = False
+                        self.lbStatusComunicacao.setText("...")
+                        while self.currentId() is not self.num_serial_number:
+                            self.back()
+                    else:
+                        """
+                        TODO: Clear Widgets
+                        self._test_thread.serial_number = self._serial_number[:]
+                        del self._serial_number[:]
+                        """
+                        self._test_thread._boardsinfo = self._boardsinfo[:]
+                        return True
+                    
+                if self.rbLedStatusNok.isChecked():
+
+                    self._boardsinfo[-1]['pre_tests'] = self._boardsinfo[-1]['pre_tests'] + '\t' + 'Erro: Falha LED Status'
+                    self._boardsinfo[-1]['slot'] = -abs(self._boardsinfo[-1]['slot'])
+                    self._status_load_firmware = False
+                    self._test_communication_status = False
+                    self.lbStatusComunicacao.setText("...")
+                    print(self._boardsinfo[-1])
+                    print('Falhou LED Status')
+                    
+                    if self.cbEndTests.isChecked():
+                        self._test_thread._boardsinfo = self._boardsinfo[:]
+                        return True
+
+                    else:
+                        while self.currentId() is not self.num_serial_number:
+                            self.back()
+
+            elif self._boardsinfo[-1]['slot'] < 0:
+                self._status_load_firmware = False
+                self._test_communication_status = False
+                self.lbStatusComunicacao.setText("...")
+                print(self._boardsinfo[-1])
+                print('Falhou gravação de firmware')
+                while self.currentId() is not self.num_serial_number:
+                    self.back()
+    
         return False
 
     def _validate_page_start_test(self):
@@ -316,20 +350,31 @@ class HRADCWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _communication_test(self):
-        result = self._test_thread.test_communication()
-        if result:
-            self.lbStatusComunicacao.setText("<p color:'green'>OK</p>")
-        else:
-            self.lbStatusComunicacao.setText("<p color:'red'>Falha</p>")
-        self._test_communication_status = True
+        slot = abs(self._boardsinfo[-1]['slot'])
 
+        if self._status_load_firmware:        
+            result = self._test_thread.test_communication(slot)
+            if result:
+                self._boardsinfo[-1]['slot'] = slot
+                self.lbStatusComunicacao.setText("<p color:'green'>OK</p>")
+            else:
+                self._boardsinfo[-1]['pre_tests'] = self._boardsinfo[-1]['pre_tests'] + '\t' + 'Erro: Falha de comunicação com CPLD'
+                self._boardsinfo[-1]['slot'] = -slot
+                self.lbStatusComunicacao.setText("<p color:'red'>Falha</p>")
+                
+            self._test_communication_status = True
+
+        else:
+            self._test_communication_status = False
+
+    '''
     @pyqtSlot()
     def _treat_leds_nok(self):
         if self.rbLedStatusNok.isChecked():
             self.pbLoadFirmware.setEnabled(False)
         else:
             self.pbLoadFirmware.setEnabled(True)
-
+    '''
 
     @pyqtSlot()
     def _start_test_sequence(self):
@@ -346,16 +391,16 @@ class HRADCWindow(QWizard, Ui_Class):
     def _load_firmware(self):
         qts = LoadFirmware_HRADC()
         result = qts.load_firmware()
+
+        slot = abs(self._boardsinfo[-1]['slot'])
         
-        if result is 'success':
-            self._boardsinfo[-1]['slot'] = abs(self._boardsinfo[-1]['slot'])
+        if 'sucesso' in result:
+            self._boardsinfo[-1]['slot'] = slot
         else:
-            self._boardsinfo[-1]['slot'] = -abs(self._boardsinfo[-1]['slot'])
+            self._boardsinfo[-1]['slot'] = -slot
 
-        self.teFirmwareLog.append('Slot ' + str(abs(self._boardsinfo[-1]['slot'])) + ' - S/N ' + str(self._boardsinfo[-1]['serial']) + ' : ' + result)
+        self.teFirmwareLog.append('Slot ' + str(slot) + ' - S/N ' + str(self._boardsinfo[-1]['serial']) + ' : ' + result)
         self._boardsinfo[-1]['pre_tests'] = self._boardsinfo[-1]['pre_tests'] + '\t' + result
-
-        print(self._boardsinfo[-1])
         
         self._status_load_firmware = True
 

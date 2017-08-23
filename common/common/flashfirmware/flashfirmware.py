@@ -128,31 +128,26 @@ class LoadFirmware_HRADC:
         #print("out:   " + out)
 
         if "Successfully performed operation" in out:
-            print("OK")
             self.status = "Firmware gravado com sucesso"
 
         elif "Programming hardware cable not detected" in out:
-            print("Erro: Gravador USB-Blaster nao encontrado")
-            self.status = "usb-blaster not found"
+            self.status = "Erro: Gravador USB-Blaster nao encontrado"
                 
         elif "Can't access JTAG chain" in out:
-            print("Erro: CPLD nao encontrada")
-            self.status = "cpld not found"
+            self.status = "Erro: CPLD nao encontrada"
 
         elif "Error (210007): Can't locate programming file" in out:
-            print("Erro: Arquivo binario POF nao encontrado")
-            self.status = "pof file not found"
+            self.status = "Erro: Arquivo binario POF nao encontrado"
 
         elif "Error (213009): File name" in out:
-            print("Erro: Arquivo de configuracao CDF nao encontrado")
-            self.status = 'cdf file not found'
+            self.status = "Erro: Arquivo de configuracao CDF nao encontrado"
 
         else:
-            print("Erro desconhecido")
-            self.status = 'unknown error'
-            
-        return(self.status)
+            self.status = "Erro desconhecido"
 
+        print(self.status)
+        return(self.status)
+    '''
     def log_status(self):
         if self.status == "success":
             return("codigo gravado com sucesso!")
@@ -177,4 +172,4 @@ class LoadFirmware_HRADC:
 
         else:
             return "."
-
+        '''
