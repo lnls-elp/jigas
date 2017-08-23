@@ -78,8 +78,6 @@ class PowerModuleTest(QThread):
         else:
             self._serial_port.baudrate  = self._baudrate
             self._serial_port.port      = self._comport
-            #self._serial_port.open()
-            #return self._serial_port.is_open
             self.FBP.SetSlaveAdd(5)
             return self.FBP.Connect(self._comport, self._baudrate)
 
@@ -279,8 +277,11 @@ class PowerModuleTest(QThread):
 
                     if test == [True for t in range(4)]:
                         log.test_result = 'Aprovado'
+                        response[serial.index(item)] = True
                     else:
                         log.test_result = 'Reprovado'
+                        response[serial.index(item)] = False
+
 
                     log.iload0 = mod_result1[serial.index(item)][0]
                     log.iload1 = mod_result1[serial.index(item)][1]
@@ -315,20 +316,20 @@ class PowerModuleTest(QThread):
                     self.update_gui.emit('Módulo ' + str(serial.index(item)+1)\
                                         + ' ' + log.test_result)
                     log_res = self._send_to_server(log)
-                    response[serial.index(item)] = log_res
+                    #response[serial.index(item)] = log_res
 
             # Quando o teste terminar emitir o resultado em uma lista de objetos
             # do tipo PowerModuleLog
 
-            self.update_gui.emit('')
-            self.update_gui.emit('Interlocks Ativos:')
-            for softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
-                self.update_gui.emit(softinterlock)
-            for hardinterlock in self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()):
-                self.update_gui.emit(hardinterlock)
-            print('--------------------------------------------\n')
-
             self.test_complete.emit(response)
+
+        self.update_gui.emit('')
+        self.update_gui.emit('Interlocks Ativos:')
+        for softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
+            self.update_gui.emit(softinterlock)
+        for hardinterlock in self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()):
+            self.update_gui.emit(hardinterlock)
+        print('--------------------------------------------\n')
 
     def _read_SoftInterlock(self, int_interlock):
         SoftInterlockList = ['N/A', 'Sobre-tensão na carga 1', 'N/A', \
