@@ -149,7 +149,7 @@ class DCCTLog:
 
     @iload7.setter
     def iload7(self, value):
-        self._iload2 = value
+        self._iload7 = value
 
     @property
     def iload8(self):

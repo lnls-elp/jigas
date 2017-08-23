@@ -19,7 +19,7 @@ class DCCTTest(QThread):
         self._variant = variant
         self.FBP = SerialDRS()
 
-        self._load_current = [0, 2, 4, 6, 8, 10, -10, -8, -6, -4, -2]
+        self._load_current = [0, 0, 2, 4, 6, 8, 10, -10, -8, -6, -4, -2]
 
     @property
     def serial_number(self):
@@ -57,6 +57,7 @@ class DCCTTest(QThread):
         if self._comport is None or self._baudrate is None:
             return False
         else:
+            self.FBP.SetSlaveAdd(5)
             return self.FBP.Connect(self._comport, self._baudrate)
 
     def test_communication(self):
@@ -91,20 +92,30 @@ class DCCTTest(QThread):
         if res:
             #TODO: Sequencia de Testes
 
-            self.FBP.Write_sigGen_Aux(1) # Usando 1 modulo de potência
-            self.FBP.TurnOn()
-            self.update_gui.emit('Fonte ligada')
-            self.FBP.ClosedLoop()
-            self.update_gui.emit('Malha fechada')
             print('variante ' + str(self._variant))
-            if self._variant == 'CONF A':
+            if self._variant == 'DCCT-CONF-A':
                 list_log.append(DCCTLog())
                 list_log.append(DCCTLog())
 
-                for i in self._load_current:
-                    self.FBP.SetISlowRef(i)
-                    self.update_gui.emit('Testando DCCTs com corrente de ' + str(i) + 'A')
-                    time.sleep(2) # Alterar para 30s
+                self.FBP.Write_sigGen_Aux(1) # Usando 1 modulo de potência
+
+                current_DCCT1.append(self.FBP.Read_iMod3()) # medidas de corrente com fonte desligada
+                current_DCCT2.append(self.FBP.Read_iMod4()) # medidas de corrente com fonte desligada
+
+                time.sleep(1)
+                self.FBP.TurnOn(0b0001)
+                self.update_gui.emit('Fonte ligada')
+                time.sleep(1)
+                self.FBP.ClosedLoop(0b0001)
+                self.update_gui.emit('Malha fechada')
+                time.sleep(1)
+
+                for i in range(1, len(self._load_current)):
+                    self.FBP.SetISlowRef(self._load_current[i])
+                    self.update_gui.emit('Testando DCCTs com corrente de ' + str(self._load_current[i]) + 'A')
+                    time.sleep(30) # Alterar para 30s
+                    print(self.FBP.Read_iMod3())
+                    print(self.FBP.Read_iMod3())
                     current_DCCT1.append(self.FBP.Read_iMod3())
                     current_DCCT2.append(self.FBP.Read_iMod4())
 
@@ -123,18 +134,19 @@ class DCCTTest(QThread):
                     list_log[j].test_result = string_result
                     self.update_gui.emit('DCCT' + str(j+1) + ' ' + str(list_log[j].test_result))
 
-                for l in range(0, 2):
-                    list_log[l].iload0 = current_DCCT[l][0]
-                    list_log[l].iload1 = current_DCCT[l][1]
-                    list_log[l].iload2 = current_DCCT[l][2]
-                    list_log[l].iload3 = current_DCCT[l][3]
-                    list_log[l].iload4 = current_DCCT[l][4]
-                    list_log[l].iload5 = current_DCCT[l][5]
-                    list_log[l].iload6 = current_DCCT[l][6]
-                    list_log[l].iload7 = current_DCCT[l][7]
-                    list_log[l].iload8 = current_DCCT[l][8]
-                    list_log[l].iload9 = current_DCCT[l][9]
-                    list_log[l].iload10 = current_DCCT[l][10]
+                for l in range(2):
+                    list_log[l].iload_off = current_DCCT[l][0]
+                    list_log[l].iload0    = current_DCCT[l][1]
+                    list_log[l].iload1    = current_DCCT[l][2]
+                    list_log[l].iload2    = current_DCCT[l][3]
+                    list_log[l].iload3    = current_DCCT[l][4]
+                    list_log[l].iload4    = current_DCCT[l][5]
+                    list_log[l].iload5    = current_DCCT[l][6]
+                    list_log[l].iload6    = current_DCCT[l][7]
+                    list_log[l].iload7    = current_DCCT[l][8]
+                    list_log[l].iload8    = current_DCCT[l][9]
+                    list_log[l].iload9    = current_DCCT[l][10]
+                    list_log[l].iload10   = current_DCCT[l][11]
                     list_log[l].id_canal_dcct = l+1
                     list_log[l].serial_number_dcct = self._serial_number
 
@@ -148,14 +160,24 @@ class DCCTTest(QThread):
                 else:
                     self.update_gui.emit('Erro no envio de dados para o servidor')
 
-            elif self._variant == 'CONF B':
+            elif self._variant == 'DCCT-CONF-B':
                 list_log.append(DCCTLog())
                 list_log.append(None)
 
-                for i in self._load_current:
-                    self.FBP.SetISlowRef(i)
-                    self.update_gui.emit('Testando DCCTs com corrente de ' + str(i) + 'A')
-                    time.sleep(2) # Alterar para 30s
+                current_DCCT1.append(self.FBP.Read_iMod3()) # medidas de corrente com fonte desligada
+
+                time.sleep(1)
+                self.FBP.TurnOn(0b0001)
+                self.update_gui.emit('Fonte ligada')
+                time.sleep(1)
+                self.FBP.ClosedLoop(0b0001)
+                self.update_gui.emit('Malha fechada')
+                time.sleep(1)
+
+                for i in range(1, len(self._load_current)):
+                    self.FBP.SetISlowRef(self._load_current[i])
+                    self.update_gui.emit('Testando DCCTs com corrente de ' + str(self._load_current[i]) + 'A')
+                    time.sleep(30) # Alterar para 30s
                     current_DCCT1.append(self.FBP.Read_iMod3())
 
                 for j in range(0, len(self._load_current)):
@@ -169,17 +191,18 @@ class DCCTTest(QThread):
                 list_log[0].test_result = string_result
                 self.update_gui.emit('DCCT1 ' + str(list_log[0].test_result))
 
-                list_log[0].iload0 = current_DCCT1[0]
-                list_log[0].iload1 = current_DCCT1[1]
-                list_log[0].iload2 = current_DCCT1[2]
-                list_log[0].iload3 = current_DCCT1[3]
-                list_log[0].iload4 = current_DCCT1[4]
-                list_log[0].iload5 = current_DCCT1[5]
-                list_log[0].iload6 = current_DCCT1[6]
-                list_log[0].iload7 = current_DCCT1[7]
-                list_log[0].iload8 = current_DCCT1[8]
-                list_log[0].iload9 = current_DCCT1[9]
-                list_log[0].iload10 = current_DCCT1[10]
+                list_log[0].iload_off = current_DCCT1[0]
+                list_log[0].iload0    = current_DCCT1[1]
+                list_log[0].iload1    = current_DCCT1[2]
+                list_log[0].iload2    = current_DCCT1[3]
+                list_log[0].iload3    = current_DCCT1[4]
+                list_log[0].iload4    = current_DCCT1[5]
+                list_log[0].iload5    = current_DCCT1[6]
+                list_log[0].iload6    = current_DCCT1[7]
+                list_log[0].iload7    = current_DCCT1[8]
+                list_log[0].iload8    = current_DCCT1[9]
+                list_log[0].iload9    = current_DCCT1[10]
+                list_log[0].iload10   = current_DCCT1[11]
                 list_log[0].id_canal_dcct = 1
                 list_log[0].serial_number_dcct = self._serial_number
 
@@ -188,7 +211,7 @@ class DCCTTest(QThread):
                 else:
                     self.update_gui.emit('Erro no envio de dados para o servidor')
 
-            self.FBP.TurnOff()
+            self.FBP.TurnOff(0b0001)
 
         self.test_complete.emit(result)
 

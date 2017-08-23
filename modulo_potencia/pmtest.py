@@ -78,14 +78,13 @@ class PowerModuleTest(QThread):
         else:
             self._serial_port.baudrate  = self._baudrate
             self._serial_port.port      = self._comport
-            #self._serial_port.open()
-            #return self._serial_port.is_open
+            self.FBP.SetSlaveAdd(5)
             return self.FBP.Connect(self._comport, self._baudrate)
 
     def test_communication(self):
         # Resultado teste de comunicação para os 4 módulos
         n_mod  = 0
-        result = [None for i in range(4)]
+        result = ''
         serial = [self._serial_mod0, self._serial_mod1, self._serial_mod2,
                     self._serial_mod3]
 
@@ -101,12 +100,12 @@ class PowerModuleTest(QThread):
                (test_package[2] == 512) and \
                (test_package[3] == 14)  and \
                (test_package[4] == 223):
-               result = ['OK', 'OK', 'OK', 'OK']
+               result = 'OK'
 
             else:
-                result = ['Falha', 'Falha', 'Falha', 'Falha']
+                result = 'Falha'
         except:
-            result = ['Falha', 'Falha', 'Falha', 'Falha']
+            result = 'Falha'
 
         return result
 
@@ -120,7 +119,7 @@ class PowerModuleTest(QThread):
         mod_result2      = [[] for k in range(4)] # para medidas de vout
         mod_result3      = [[] for l in range(4)] # para medidas de temperatura
         mod_result4      = [[] for m in range(4)] # para medidas de dclink
-        load_current     = ['turnedOff', 0, 5, 10, -10, -5] # correntes setadas
+        load_current     = ['turnedOff', 0, 30.5, 58.5, -58.5, -30.5] # correntes setadas
         compare_current  = [0, 0, 5, 10, -10, -5] # para comparar medidas de correntes
 
         if not self._serial_port.is_open:
@@ -143,49 +142,73 @@ class PowerModuleTest(QThread):
         '''Setando todos os valores de corrente e salvando resultados na matriz mod_result'''
         '''###############################################################################'''
 
+        sum_mod = 0
+        for module in serial:
+            if module is not None:
+                sum_mod = sum_mod + (2 ** serial.index(module))
+
+        print('sum_mod enviado para UDC: ' + str(sum_mod) + '\n')
+
         for set_current in load_current:
             if set_current == 'turnedOff':
-                self.FBP.TurnOff()
+                self.FBP.TurnOff(sum_mod)
                 self.update_gui.emit('Iniciando medições com módulos desligados')
-                time.sleep(2) # Alterar para 2 min
+                time.sleep(120) # Alterar para 2 min
             else:
-                self.FBP.TurnOn()
-                self.FBP.ClosedLoop()
-                time.sleep(0.5)
+                self.FBP.TurnOn(sum_mod)
+                time.sleep(1)
+                self.FBP.OpenLoop(sum_mod)
+                time.sleep(1)
                 self.update_gui.emit('Iniciando medições com módulos ligados a '\
-                                    + str(set_current) + 'A')
+                                    + str(compare_current[load_current.index(set_current)]) + 'A')
                 self.FBP.SetISlowRef(0.25 * set_current)
                 time.sleep(0.5)
                 self.FBP.SetISlowRef(0.5 * set_current)
                 time.sleep(0.5)
                 self.FBP.SetISlowRef(set_current)
-                time.sleep(5) # Alterar para 2 min
+                time.sleep(120) # Alterar para 2 min
 
             if serial[0] != None:
                 mod_result1[0].append(self.FBP.Read_iMod1())
+                time.sleep(0.1)
                 mod_result2[0].append(self.FBP.Read_vOutMod1())
+                time.sleep(0.1)
                 mod_result3[0].append(self.FBP.Read_temp1())
+                time.sleep(0.1)
                 mod_result4[0].append(self.FBP.Read_vDCMod1())
+                time.sleep(0.1)
 
             if serial[1] != None:
                 mod_result1[1].append(self.FBP.Read_iMod2())
+                time.sleep(0.1)
                 mod_result2[1].append(self.FBP.Read_vOutMod2())
+                time.sleep(0.1)
                 mod_result3[1].append(self.FBP.Read_temp2())
+                time.sleep(0.1)
                 mod_result4[1].append(self.FBP.Read_vDCMod2())
+                time.sleep(0.1)
 
             if serial[2] != None:
                 mod_result1[2].append(self.FBP.Read_iMod3())
+                time.sleep(0.1)
                 mod_result2[2].append(self.FBP.Read_vOutMod3())
+                time.sleep(0.1)
                 mod_result3[2].append(self.FBP.Read_temp3())
+                time.sleep(0.1)
                 mod_result4[2].append(self.FBP.Read_vDCMod3())
+                time.sleep(0.1)
 
             if serial[3] != None:
                 mod_result1[3].append(self.FBP.Read_iMod4())
+                time.sleep(0.1)
                 mod_result2[3].append(self.FBP.Read_vOutMod4())
+                time.sleep(0.1)
                 mod_result3[3].append(self.FBP.Read_temp4())
+                time.sleep(0.1)
                 mod_result4[3].append(self.FBP.Read_vDCMod4())
+                time.sleep(0.1)
 
-        self.FBP.TurnOff()
+        self.FBP.TurnOff(sum_mod)
         '''###############################################################################'''
         '''###############################################################################'''
 
@@ -247,8 +270,8 @@ class PowerModuleTest(QThread):
                         if round(mod_result4[serial.index(item)][s]) == 15:
                             if test[3]:
                                 test[3] = True
-                            else:
-                                test[3] = False
+                        else:
+                            test[3] = False
                     if test[3]:
                         self.update_gui.emit('      Aprovado no teste de leitura da tensão de entrada')
                     else:
@@ -256,8 +279,11 @@ class PowerModuleTest(QThread):
 
                     if test == [True for t in range(4)]:
                         log.test_result = 'Aprovado'
+                        response[serial.index(item)] = True
                     else:
                         log.test_result = 'Reprovado'
+                        response[serial.index(item)] = False
+
 
                     log.iload0 = mod_result1[serial.index(item)][0]
                     log.iload1 = mod_result1[serial.index(item)][1]
@@ -266,19 +292,19 @@ class PowerModuleTest(QThread):
                     log.iload4 = mod_result1[serial.index(item)][4]
                     log.iload5 = mod_result1[serial.index(item)][5]
 
-                    log.vload0 = mod_result1[serial.index(item)][0]
-                    log.vload1 = mod_result1[serial.index(item)][1]
-                    log.vload2 = mod_result1[serial.index(item)][2]
-                    log.vload3 = mod_result1[serial.index(item)][3]
-                    log.vload4 = mod_result1[serial.index(item)][4]
-                    log.vload5 = mod_result1[serial.index(item)][5]
+                    log.vload0 = mod_result2[serial.index(item)][0]
+                    log.vload1 = mod_result2[serial.index(item)][1]
+                    log.vload2 = mod_result2[serial.index(item)][2]
+                    log.vload3 = mod_result2[serial.index(item)][3]
+                    log.vload4 = mod_result2[serial.index(item)][4]
+                    log.vload5 = mod_result2[serial.index(item)][5]
 
-                    log.vdclink0 = mod_result2[serial.index(item)][0]
-                    log.vdclink1 = mod_result2[serial.index(item)][1]
-                    log.vdclink2 = mod_result2[serial.index(item)][2]
-                    log.vdclink3 = mod_result2[serial.index(item)][3]
-                    log.vdclink4 = mod_result2[serial.index(item)][4]
-                    log.vdclink5 = mod_result2[serial.index(item)][5]
+                    log.vdclink0 = mod_result4[serial.index(item)][0]
+                    log.vdclink1 = mod_result4[serial.index(item)][1]
+                    log.vdclink2 = mod_result4[serial.index(item)][2]
+                    log.vdclink3 = mod_result4[serial.index(item)][3]
+                    log.vdclink4 = mod_result4[serial.index(item)][4]
+                    log.vdclink5 = mod_result4[serial.index(item)][5]
 
                     log.temperatura0 = mod_result3[serial.index(item)][0]
                     log.temperatura1 = mod_result3[serial.index(item)][1]
@@ -292,11 +318,85 @@ class PowerModuleTest(QThread):
                     self.update_gui.emit('Módulo ' + str(serial.index(item)+1)\
                                         + ' ' + log.test_result)
                     log_res = self._send_to_server(log)
-                    response[serial.index(item)] = log_res
+                    #response[serial.index(item)] = log_res
 
             # Quando o teste terminar emitir o resultado em uma lista de objetos
             # do tipo PowerModuleLog
+
             self.test_complete.emit(response)
+
+        self.update_gui.emit('')
+        self.update_gui.emit('Interlocks Ativos:')
+        for softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
+            self.update_gui.emit(softinterlock)
+        for hardinterlock in self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()):
+            self.update_gui.emit(hardinterlock)
+        print('--------------------------------------------\n')
+
+    def _read_SoftInterlock(self, int_interlock):
+        SoftInterlockList = ['N/A', 'Sobre-tensão na carga 1', 'N/A', \
+                             'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A',\
+                             'Sobre-tensão na carga 2', 'N/A',        \
+                             'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A',\
+                             'Sobre-tensão na carga 3', 'N/A',        \
+                             'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A',\
+                             'Sobre-tensão na carga 4', 'N/A',        \
+                             'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A']
+
+        op_bin = 1
+        ActiveSoftInterlocks = []
+
+        print('Soft Interlocks ativos:')
+
+        for i in range(len('{0:b}'.format(int_interlock))):
+            if (int_interlock & (op_bin << i)) == 2**i:
+                ActiveSoftInterlocks.append(SoftInterlockList[i])
+                print(SoftInterlockList[i])
+        print('-------------------------------------------------------------------')
+
+        return ActiveSoftInterlocks
+
+    def _read_HardInterlock(self, int_interlock):
+        HardInterlockList = ['Sobre-corrente na carga 1', 'N/A',                   \
+                             'Sobre-tensão no DC-Link do módulo 1',                \
+                             'Sub-tensão no DC-Link do módulo 1',                  \
+                             'Falha no relé de entrada do DC-Link do módulo 1',    \
+                             'Falha no fusível de entrada do DC-Link do módulo 1', \
+                             'Falha nos drivers do módulo 1',                      \
+                             'Sobre-temperatura no módulo 1',                      \
+                             'Sobre-corrente na carga 2', 'N/A',                   \
+                             'Sobre-tensão no DC-Link do módulo 2',                \
+                             'Sub-tensão no DC-Link do módulo 2',                  \
+                             'Falha no relé de entrada do DC-Link do módulo 2',    \
+                             'Falha no fusível de entrada do DC-Link do módulo 2', \
+                             'Falha nos drivers do módulo 2',                      \
+                             'Sobre-temperatura no módulo 2',                      \
+                             'Sobre-corrente na carga 3', 'N\A',                   \
+                             'Sobre-tensão no DC-Link do módulo 3',                \
+                             'Sub-tensão no DC-Link do módulo 3',                  \
+                             'Falha no relé de entrada no DC-Link do módulo 3',    \
+                             'Falha no fusível de entrada do DC-Link do módulo 3', \
+                             'Falha nos drivers do módulo 3',                      \
+                             'Sobre-temperatura no módulo 3',                      \
+                             'Sobre-corrente na carga 4', 'N/A',                   \
+                             'Sobre-tensão no DC-Link do módulo 4',                \
+                             'Sub-tensão no DC-Link do módulo 4',                  \
+                             'Falha no relé de entrada do DC-Link do módulo 4',    \
+                             'Falha no fusível de entrada do DC-Link do módulo 4', \
+                             'Falha nos drivers do módulo 4',                      \
+                             'Sobre-temperatura no módulo 4']
+        op_bin = 1
+        ActiveHardInterlocks = []
+
+        print('Hard Interlocks ativos:')
+
+        for i in range(len('{0:b}'.format(int_interlock))):
+            if (int_interlock & (op_bin << i)) == 2**i:
+                ActiveHardInterlocks.append(HardInterlockList[i])
+                print(HardInterlockList[i])
+        print('-------------------------------------------------------------------')
+
+        return ActiveHardInterlocks
 
     def _send_to_server(self, item):
         client = ElpWebClient()
