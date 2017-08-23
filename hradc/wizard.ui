@@ -192,7 +192,7 @@
      </font>
     </property>
     <property name="text">
-     <string>3. Leia o número de série do HRADC utilizando a câmera</string>
+     <string>3. Leia o número de série do HRADC utilizando o scanner.</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_10">
@@ -464,7 +464,7 @@
      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;10. Clique em &amp;quot;Próximo&amp;quot;.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>0</x>
