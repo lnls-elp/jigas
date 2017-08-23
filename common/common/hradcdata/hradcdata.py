@@ -29,11 +29,11 @@ class HRADC:
         self._variant = value
 
     @property
-    def burden_resistor(self):
+    def burden_res(self):
         return self._burden_res
 
-    @burden_resistor.setter
-    def burden_resistor(self, value):
+    @burden_res.setter
+    def burden_res(self, value):
         self._burden_res = value
 
     @property
@@ -235,7 +235,7 @@ class HRADCLog:
         data['gnd']                 = self._gnd
         data['vref_p']              = self._vref_p
         data['vref_n']              = self._vref_n
-        data['temperature']         = self._temperature
+        data['temperatura']         = self._temperature
         data['vin_p']               = self._vin_p
         data['vin_n']               = self._vin_n
         data['lin_p']               = self._lin_p
