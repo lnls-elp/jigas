@@ -113,18 +113,18 @@ class PowerSupplyTest(QThread):
                 time.sleep(1)
 
                 if self.FBP.Read_ps_OnOff() == 2 ** module:
-                    OnOff[module] = 'Aprovado'
+                    OnOff[module] = 'OK'
                 else:
                     self.update_gui.emit('O módulo ' + str(module + 1) + ' não ligou corretamente')
-                    OnOff[module] = 'Reprovado'
+                    OnOff[module] = 'NOK'
 
                 self.FBP.TurnOff(2**module)
 
                 if self.FBP.Read_ps_OnOff() == 0:
-                    if OnOff[module] == 'Aprovado':
-                        OnOff[module] = 'Aprovado'
+                    if OnOff[module] == 'OK':
+                        OnOff[module] = 'OK'
                 else:
-                    OnOff[module] = 'Reprovado'
+                    OnOff[module] = 'NOK'
                     self.update_gui.emit('O módulo ' + str(module + 1) + ' não desligou corretamente')
                 time.sleep(1)
             '''##########################################################################'''
@@ -474,6 +474,7 @@ class PowerSupplyTest(QThread):
                         result = True
                     log.test_result = 'Aprovado'
                 else:
+                    log.test_result = 'Reprovado'
                     result = False
 
                 log.result_test_on_off = OnOff[module]
@@ -608,6 +609,7 @@ class PowerSupplyTest(QThread):
     def _send_to_server(self, item):
         client = ElpWebClient()
         client_data = item.data
+        print(client_data)
         client_method = item.method
         client_response = client.do_request(client_method, client_data)
         print(client_response)
