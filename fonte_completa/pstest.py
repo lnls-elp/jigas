@@ -50,8 +50,6 @@ class PowerSupplyTest(QThread):
         else:
             self._serial_port.baudrate  = self._baudrate
             self._serial_port.port      = self._comport
-            #self._serial_port.open()
-            #return self._serial_port.is_open
             return self.FBP.Connect(self._comport, self._baudrate)
 
     def test_communication(self):
@@ -131,18 +129,8 @@ class PowerSupplyTest(QThread):
                 time.sleep(1)
             '''##########################################################################'''
 
-            print('Interlocks Ativos: ')
-            for softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
-                if softinterlock == None:
-                    print('None')
-                else:
-                    print(softinterlock)
-            for hardinterlock in self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()):
-                if hardinterlock == None:
-                    print('None')
-                else:
-                    print(hardinterlock)
-            print('--------------------------------------------\n')
+            self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks())
+            self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks())
 
             self.FBP.TurnOn(0b1111)   # liga todos os módulos
             time.sleep(5)
@@ -181,19 +169,8 @@ class PowerSupplyTest(QThread):
                 time.sleep(1)
             '''##########################################################################'''
 
-            print('Interlocks Ativos: ')
-            for softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
-                if softinterlock == None:
-                    print('None')
-                else:
-                    print(softinterlock)
-            for hardinterlock in self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()):
-                if hardinterlock == None:
-                    print('None')
-                else:
-                    print(hardinterlock)
-            print('--------------------------------------------\n')
-
+            self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks())
+            self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks())
 
             '''#################### Teste em Malha Aberta com -20% ######################'''
             '''##########################################################################'''
@@ -227,18 +204,8 @@ class PowerSupplyTest(QThread):
                 time.sleep(1)
             '''##########################################################################'''
 
-            print('Interlocks Ativos: ')
-            for softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
-                if softinterlock == None:
-                    print('None')
-                else:
-                    print(softinterlock)
-            for hardinterlock in self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()):
-                if hardinterlock == None:
-                    print('None')
-                else:
-                    print(hardinterlock)
-            print('--------------------------------------------\n')
+            self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks())
+            self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks())
 
             '''#################### Teste em Malha Fechada com 5A #######################'''
             '''##########################################################################'''
@@ -276,18 +243,8 @@ class PowerSupplyTest(QThread):
                 time.sleep(2)
             '''##########################################################################'''
 
-            print('Interlocks Ativos: ')
-            for softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
-                if softinterlock == None:
-                    print('None')
-                else:
-                    print(softinterlock)
-            for hardinterlock in self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()):
-                if hardinterlock == None:
-                    print('None')
-                else:
-                    print(hardinterlock)
-            print('--------------------------------------------\n')
+            self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks())
+            self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks())
 
             '''################### Teste em Malha Fechada com 10A #######################'''
             '''##########################################################################'''
@@ -535,34 +492,15 @@ class PowerSupplyTest(QThread):
 
                 result = self._send_to_server(log)
 
-            #TODO: Sequencia de Testes
-            """
-            Simulação de valores
-
-            log = PowerSupplyLog()
-            log.id_canal_power_supply = 1
-            log.test_result = "Aprovado"
-            log.result_test_on_off = "Aprovado"
-            log.serial_number_power_supply = self._serial_number
-            log.iout0 = random.uniform(1.0, 9.0)
-            log.iout1 = random.uniform(1.0, 9.0)
-            log.vout0 = random.uniform(1.0, 9.0)
-            log.vout1 = random.uniform(1.0, 9.0)
-            log.vdclink0 = random.uniform(1.0, 9.0)
-            log.vdclink1 = random.uniform(1.0, 9.0)
-            log.temperatura0 = random.uniform(1.0, 9.0)
-            log.temperatura1 = random.uniform(1.0, 9.0)
-            log.iout_add_20_duty_cycle = random.uniform(1.0, 9.0)
-            log.iout_less_20_duty_cycle = random.uniform(1.0, 9.0)
-            log.details = ""
-
-            result = self._send_to_server(log)
-            """
+        self.update_gui.emit('')
+        self.update_gui.emit('Interlocks Ativos:')
+        for softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
+            self.update_gui.emit(softinterlock)
+        for hardinterlock in self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()):
+            self.update_gui.emit(hardinterlock)
+        print('--------------------------------------------\n')
 
         self.test_complete.emit(result)
-        """
-            Fim da Simulação
-        """
 
     def _save_CurrentMeasurement(self, module):
 
@@ -615,9 +553,13 @@ class PowerSupplyTest(QThread):
         op_bin = 1
         ActiveSoftInterlocks = []
 
+        print('Soft Interlocks ativos:')
+
         for i in range(len('{0:b}'.format(int_interlock))):
             if (int_interlock & (op_bin << i)) == 2**i:
                 ActiveSoftInterlocks.append(SoftInterlockList[i])
+                print(SoftInterlockList[i])
+        print('-------------------------------------------------------------------')
 
         return ActiveSoftInterlocks
 
@@ -653,9 +595,13 @@ class PowerSupplyTest(QThread):
         op_bin = 1
         ActiveHardInterlocks = []
 
+        print('Hard Interlocks ativos:')
+
         for i in range(len('{0:b}'.format(int_interlock))):
             if (int_interlock & (op_bin << i)) == 2**i:
                 ActiveHardInterlocks.append(HardInterlockList[i])
+                print(HardInterlockList[i])
+        print('-------------------------------------------------------------------')
 
         return ActiveHardInterlocks
 

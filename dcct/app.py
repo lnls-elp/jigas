@@ -29,8 +29,6 @@ class DCCTWindow(QWizard, Ui_Class):
 
         self._test_thread = DCCTTest()
 
-        self._material_dcct = {'14024292':'CONF A', '14024295':'CONF B'}
-
         self._initialize_widgets()
         self._initialize_signals()
         self._initialize_wizard_buttons()
@@ -148,9 +146,9 @@ class DCCTWindow(QWizard, Ui_Class):
         try:
             self._test_thread.serial_number = int(serial)
             try:
-                self._test_thread.variant = self._material_dcct[self.leMaterialCode]
+                self._test_thread.variant = self.leMaterialName.text()
             except KeyError:
-                self._test_thread.variant = "CONF A"
+                self._test_thread.variant = 'DCCT-CONF-A'
             return True
         except ValueError:
             pass

@@ -47,6 +47,7 @@ class RackTest(QThread):
         if self._comport is None or self._baudrate is None:
             return False
         else:
+            self.FBP.SetSlaveAdd(5)
             return self.FBP.Connect(self._comport, self._baudrate)
 
     def test_communication(self):
@@ -94,8 +95,8 @@ class RackTest(QThread):
                 self.update_gui.emit('iout2 = ' + str(list_iout2[i]) + ' A')
                 self.update_gui.emit('iout3 = ' + str(list_iout3[i]) + ' A')
 
-                if (abs(round(list_iout0[i]))>=12) or (abs(round(list_iout1[i]))>=12) or (abs(round(list_iout2[i]))>=12) or (abs(round(list_iout3[i]))>=12):
-
+                if (abs(round(list_iout0[i]))>=12) or (abs(round(list_iout1[i]))>=12) \
+                    or (abs(round(list_iout2[i]))>=12) or (abs(round(list_iout3[i]))>=12):
                     self.update_gui.emit('ERRO: REPITA O PROCEDIMENTO DE CONEXÕES DO BASTIDOR E INICIE UM NOVO TESTE')
                     test_setup = False
                     break
