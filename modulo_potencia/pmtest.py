@@ -153,7 +153,7 @@ class PowerModuleTest(QThread):
             if set_current == 'turnedOff':
                 self.FBP.TurnOff(sum_mod)
                 self.update_gui.emit('Iniciando medições com módulos desligados')
-                time.sleep(2) # Alterar para 2 min
+                time.sleep(120) # Alterar para 2 min
             else:
                 self.FBP.TurnOn(sum_mod)
                 time.sleep(1)
@@ -166,7 +166,7 @@ class PowerModuleTest(QThread):
                 self.FBP.SetISlowRef(0.5 * set_current)
                 time.sleep(0.5)
                 self.FBP.SetISlowRef(set_current)
-                time.sleep(5) # Alterar para 2 min
+                time.sleep(120) # Alterar para 2 min
 
             if serial[0] != None:
                 mod_result1[0].append(self.FBP.Read_iMod1())
