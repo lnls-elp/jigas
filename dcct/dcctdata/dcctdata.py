@@ -41,6 +41,7 @@ class DCCTLog:
         self._id_canal_dcct         = None
         self._test_result           = None
         self._serial_number_dcct    = None
+        self._iload_off             = None
         self._iload0                = None
         self._iload1                = None
         self._iload2                = None
@@ -77,6 +78,14 @@ class DCCTLog:
     @serial_number_dcct.setter
     def serial_number_dcct(self, value):
         self._serial_number_dcct = value
+
+    @property
+    def iload_off(self):
+        return self._iload_off
+
+    @iload_off.setter
+    def iload_off(self, value):
+        self._iload_off = value
 
     @property
     def iload0(self):
@@ -179,6 +188,7 @@ class DCCTLog:
         data['id_canal_dcct']       = self._id_canal_dcct
         data['resultado_teste']     = self._test_result
         data['numero_serie_dcct']   = self._serial_number_dcct
+        data['iload_desligado']     = self._iload_off
         data['iload0']              = self._iload0
         data['iload1']              = self._iload1
         data['iload2']              = self._iload2

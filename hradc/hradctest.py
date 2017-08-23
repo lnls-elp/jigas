@@ -5,6 +5,7 @@ from common.pydrs import SerialDRS
 import serial
 import random
 import time
+import struct
 
 class HRADCTest(QThread):
 
@@ -13,6 +14,9 @@ class HRADCTest(QThread):
     connection_lost     = pyqtSignal()
 
     device = {'HRADC':1, 'DM':2}
+    bytesFormat = {'Uint16': 'H', 'Uint32': 'L', 'Uint64': 'Q', 'float': 'f'}
+    ufmOffset = {'serial': 0, 'calibdate': 4, 'variant': 9, 'rburden': 10}
+    hradcVariant = {'HRADC-FBP': 0, 'HRADC-FAX': 1}
 
     def __init__(self):
         QThread.__init__(self)
@@ -78,18 +82,28 @@ class HRADCTest(QThread):
 
     def _test_sequence(self):
 
+        print('Valendo!')
+        
         print(self._boardsinfo)
         self.nHRADC = max([board['slot'] for board in self._boardsinfo])
+        print('Configurando nHRADC')
         self.drs.Config_nHRADC(self.nHRADC)
         time.sleep(1)
-        self.drs.ResetHRADCBoards()
-        time.sleep(2)
+        print('Resetando HRADC')
+        self.drs.ResetHRADCBoards(1)
+        time.sleep(1)
+        self.drs.ResetHRADCBoards(0)
         log_res = []
         
+        print('Començando a ler boardsinfo')
+        
         for board in self._boardsinfo:
-
+            
+            print(board)
+            
             hradc = HRADC()
-
+            ufmdata_16 = []
+    
             hradc.serial_number = board['serial']
             hradc.variant = board['variant']
             hradc.burden_amplifier = "INA141"
@@ -99,9 +113,11 @@ class HRADCTest(QThread):
                 hradc.cut_frequency = 48228.7
                 hradc.filter_order = 1       
 
+            print('Enviando ao servidor dados desta placa')
             res = self._send_to_server(hradc)
 
             if res:
+                print(res)
 
                 log_hradc = HRADCLog()
                 log_hradc.serial_number_hradc = board['serial']
@@ -112,17 +128,49 @@ class HRADCTest(QThread):
                 log_dm.device = self.device['DM']
                 
                 if board['slot'] > 0:
+                    print('Colocando em UFM mode a placa bem sucedida do slot:' + str(board['slot']))
 
-                    #test(board)
                     board['slot'] = board['slot'] - 1
                     self.drs.ConfigHRADCOpMode(board['slot'],1)
-                    time.sleep(0.1)
-                    self.drs.EraseHRADC_UFM(board['slot'])
                     time.sleep(0.5)
-                    self.drs.WriteHRADC_UFM(board['slot'],0,board['serial'])
-                    time.sleep(0.1)
+
+                    print('Enviando serial number')
+                    # Send serial number
+                    ufmdata_16 = self._convertToUint16List(board['serial'],'Uint64')
+                    print(ufmdata_16)
+                    for i in range(len(ufmdata_16)):
+                        print(i+self.ufmOffset['serial'])
+                        print(ufmdata_16[i])
+                        self.drs.WriteHRADC_UFM(board['slot'],i+self.ufmOffset['serial'],ufmdata_16[i])
+                        time.sleep(0.1)
+
+
+                    print('Enviando variante')
+                    # Send variant
+                    ufmdata_16 = self._convertToUint16List(self.hradcVariant[board['variant']],'Uint16')
+                    for i in range(len(ufmdata_16)):
+                        print(i+self.ufmOffset['variant'])
+                        print(ufmdata_16[i])
+                        self.drs.WriteHRADC_UFM(board['slot'],i+self.ufmOffset['variant'],ufmdata_16[i])
+                        time.sleep(0.1)
+
+                    print('Enviando rburden')
+                    # Send Rburden
+                    print(hradc.burden_res)
+                    ufmdata_16 = self._convertToUint16List(hradc.burden_res,'float')
+                    print(ufmdata_16)
+                    for i in range(len(ufmdata_16)):
+                        print(i+self.ufmOffset['rburden'])
+                        print(ufmdata_16[i])
+                        self.drs.WriteHRADC_UFM(board['slot'],i+self.ufmOffset['rburden'],ufmdata_16[i])
+                        time.sleep(0.1) 
+
+                    print('Lendo byte')
+                    time.sleep(0.5)
                     self.drs.ReadHRADC_UFM(board['slot'],0)
-                    
+
+
+                    print('Salvando log e enviando ao servidor')
                     log_hradc.details = board['pre_tests']
                     log_hradc.test_result = "Aprovado"
                     
@@ -134,6 +182,7 @@ class HRADCTest(QThread):
                     log_res.append(log_hradc.test_result) 
 
                 else:
+                    print('Salvando log de placa reprovada enviando ao servidor')
                     log_hradc.test_result = "Reprovado"
                     log_hradc.details = board['pre_tests']
 
@@ -142,6 +191,8 @@ class HRADCTest(QThread):
 
         # Quando o teste terminar emitir o resultado em uma lista de objetos
         # do tipo HRADCLog
+
+        print('Enviando sinal ao app')
         
         for i in range(4 - len(log_res)):
             log_res.append(None)
@@ -168,6 +219,16 @@ class HRADCTest(QThread):
         else:
             return False
 
+    def _convertToUint16List(self, val, format):
+
+        val_16 = []
+        val_b = struct.pack(self.bytesFormat[format],val)
+        print(val_b)
+        for i in range(0,len(val_b),2):
+            val_16.append(struct.unpack('H',val_b[i:i+2])[0])
+        print(val_16)
+        return val_16
+            
     def run(self):
         self._test_sequence()
         #pass

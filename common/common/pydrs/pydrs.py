@@ -309,9 +309,10 @@ class SerialDRS(object):
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
 
-    def ResetHRADCBoards(self):
-        payload_size   = self.size_to_hex(1) #Payload: ID
-        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('ResetHRADCBoards'))
+    def ResetHRADCBoards(self, enable):
+        payload_size   = self.size_to_hex(1+2) #Payload: ID+enable(2)
+        hex_enable     = self.double_to_hex(enable)
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('ResetHRADCBoards'))+hex_enable
         send_msg       = self.checksum(self.SlaveAdd+send_packet)
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
