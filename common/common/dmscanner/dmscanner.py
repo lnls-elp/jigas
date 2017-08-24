@@ -15,9 +15,9 @@ class Scanner(QWidget):
             code = code.split(" ")
             try:
                 data['material'] = code[0]
-                data['var1']     = code[1]
-                data['var2']     = code[2]
-                data['serial']   = code[3]
+                #data['var1']     = code[1]
+                #data['var2']     = code[2]
+                data['serial']   = code[1][2:]
                 return data
             except IndexError:
                 return None
