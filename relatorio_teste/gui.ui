@@ -26,8 +26,8 @@
    <string>Relatorio de Teste</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <widget class="QPushButton" name="pushButton">
+   <item row="1" column="2">
+    <widget class="QPushButton" name="pbUdc">
      <property name="minimumSize">
       <size>
        <width>80</width>
@@ -41,12 +41,50 @@
       </size>
      </property>
      <property name="text">
-      <string>HRADC</string>
+      <string>UDC</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QPushButton" name="pbRack">
+     <property name="minimumSize">
+      <size>
+       <width>80</width>
+       <height>60</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>80</width>
+       <height>60</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Bastidor</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QPushButton" name="pbBurnIn">
+     <property name="minimumSize">
+      <size>
+       <width>80</width>
+       <height>60</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>80</width>
+       <height>60</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Burn-In</string>
      </property>
     </widget>
    </item>
    <item row="0" column="1">
-    <widget class="QPushButton" name="pushButton_2">
+    <widget class="QPushButton" name="pbCalibHradc">
      <property name="minimumSize">
       <size>
        <width>80</width>
@@ -65,85 +103,8 @@ Calibração</string>
      </property>
     </widget>
    </item>
-   <item row="0" column="2">
-    <widget class="QPushButton" name="pushButton_3">
-     <property name="minimumSize">
-      <size>
-       <width>80</width>
-       <height>60</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>80</width>
-       <height>60</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>DCCT</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QPushButton" name="pushButton_6">
-     <property name="minimumSize">
-      <size>
-       <width>80</width>
-       <height>60</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>80</width>
-       <height>60</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>Bastidor</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QPushButton" name="pushButton_5">
-     <property name="minimumSize">
-      <size>
-       <width>80</width>
-       <height>60</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>80</width>
-       <height>60</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>Módulo 
-Potência</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="2">
-    <widget class="QPushButton" name="pushButton_4">
-     <property name="minimumSize">
-      <size>
-       <width>80</width>
-       <height>60</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>80</width>
-       <height>60</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>UDC</string>
-     </property>
-    </widget>
-   </item>
    <item row="2" column="0">
-    <widget class="QPushButton" name="pushButton_9">
+    <widget class="QPushButton" name="pbPowerSupply">
      <property name="minimumSize">
       <size>
        <width>80</width>
@@ -162,8 +123,8 @@ Potência</string>
      </property>
     </widget>
    </item>
-   <item row="2" column="1">
-    <widget class="QPushButton" name="pushButton_7">
+   <item row="1" column="1">
+    <widget class="QPushButton" name="pbPowerModule">
      <property name="minimumSize">
       <size>
        <width>80</width>
@@ -177,7 +138,46 @@ Potência</string>
       </size>
      </property>
      <property name="text">
-      <string>Burn-In</string>
+      <string>Módulo 
+Potência</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2">
+    <widget class="QPushButton" name="pbDcct">
+     <property name="minimumSize">
+      <size>
+       <width>80</width>
+       <height>60</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>80</width>
+       <height>60</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>DCCT</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QPushButton" name="pbHradc">
+     <property name="minimumSize">
+      <size>
+       <width>80</width>
+       <height>60</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>80</width>
+       <height>60</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>HRADC</string>
      </property>
     </widget>
    </item>

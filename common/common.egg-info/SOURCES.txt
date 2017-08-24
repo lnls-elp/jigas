@@ -5,8 +5,6 @@ common.egg-info/SOURCES.txt
 common.egg-info/dependency_links.txt
 common.egg-info/not-zip-safe
 common.egg-info/top_level.txt
-common/dmreader/__init__.py
-common/dmreader/dmreader.py
 common/dmscanner/__init__.py
 common/dmscanner/dmscanner.py
 common/elpwebclient/__init__.py
@@ -15,6 +13,10 @@ common/flashfirmware/__init__.py
 common/flashfirmware/flashfirmware.py
 common/hradcdata/__init__.py
 common/hradcdata/hradcdata.py
+common/keysight3458A/__init__.py
+common/keysight3458A/keysight3458A.py
+common/krohnhite523/__init__.py
+common/krohnhite523/krohnhite523.py
 common/psdata/__init__.py
 common/psdata/psdata.py
 common/pydrs/__init__.py
