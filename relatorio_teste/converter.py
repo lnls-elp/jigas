@@ -36,7 +36,7 @@ class Converter(QThread):
             header = ['Data', 'Serial', 'Variante', 'Medida', 'GND',
                     'Vref Pos', 'Vref Neg', 'Temperatura',
                     'Vin Pos', 'Vin Neg', 'Iin Pos', 'Iin Neg',
-                    'Resultado']
+                    'Resultado', 'Detalhes']
             return header
 
         elif res == '/HradcCalibReport':
