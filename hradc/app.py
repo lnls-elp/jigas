@@ -63,6 +63,23 @@ class HRADCWindow(QWizard, Ui_Class):
         self.lbTestResult4.setText("Aguarde...")
         self.teTestReport.clear()
 
+    def _new_board_widgets_init(self):
+        self.leDmCode.clear()
+        self.leSerialNumber.setReadOnly(True)
+        self.leSerialNumber.clear()
+        self.leMaterialCode.setReadOnly(True)
+        self.leMaterialCode.clear()
+        self.lbStatusComunicacao.setText("...")
+        self.rbLedStatusOk.setChecked(False)
+        self.rbLedStatusNok.setChecked(False)
+        self.rbLedAlimOk.setChecked(False)
+        self.rbLedAlimNok.setChecked(False)
+        self.lbTestResult1.setText("Aguarde...")
+        self.lbTestResult2.setText("Aguarde...")
+        self.lbTestResult3.setText("Aguarde...")
+        self.lbTestResult4.setText("Aguarde...")
+        self.cbEndTests.clear()
+
     def _initialize_signals(self):
         """ Configure basic signals """
         self.pbConnectSerialPort.clicked.connect(self._connect_serial_port)
@@ -163,31 +180,31 @@ class HRADCWindow(QWizard, Ui_Class):
         serial = self.leSerialNumber.text()
         variant = self.leMaterialCode.text()
         scan = Scanner()
-        
-        try:            
+
+        try:
             if not int(serial) in [board['serial'] for board in self._boardsinfo]:
 
                 board = {}
                 board['serial'] = int(serial)
                 board['variant'] = scan.get_material_name(variant)
                 board['pre_tests'] = ''
-                
+
                 try:
                     board['slot'] = max(0,max([board['slot'] for board in self._boardsinfo]))+1
                 except:
                     board['slot'] = 1
-                
+
                 if not variant in scan.materiais:
                     raise ValueError
-            
+
                 self._boardsinfo.append(board)
 
             self.rbLedAlimOk.setChecked(False)
             self.rbLedAlimNok.setChecked(False)
 
             return True
-            
-        
+
+
         except ValueError:
             pass
 
@@ -198,7 +215,7 @@ class HRADCWindow(QWizard, Ui_Class):
             self.rbLedStatusOk.setChecked(False)
             self.rbLedStatusNok.setChecked(False)
             return True
-              
+
         elif self.rbLedAlimNok.isChecked():
             self._boardsinfo[-1]['pre_tests'] = self._boardsinfo[-1]['pre_tests'] + '\t' + 'Erro: Falha LEDs +/-15V'
             self._boardsinfo[-1]['slot'] = -abs(self._boardsinfo[-1]['slot'])
@@ -207,39 +224,34 @@ class HRADCWindow(QWizard, Ui_Class):
             print('Falhou LED +/-15V')
             self.rbLedStatusOk.setChecked(False)
             self.rbLedStatusNok.setChecked(False)
+            self._new_board_widgets_init()
             while self.currentId() is not self.num_serial_number:
                 self.back()
-                
+
         return False
 
     def _validate_page_load_firmware(self):
         if self._status_load_firmware:
-                        
+
             if self._test_communication_status:
-        
+
                 if not self.rbLedStatusOk.isChecked() and not self.rbLedStatusNok.isChecked():
                     return False
 
                 elif self.rbLedStatusOk.isChecked():
-                    
+
                     if self._boardsinfo[-1]['slot'] < 4 and not self.cbEndTests.isChecked():
-                        """
-                        TODO: Clear Widgets
-                        """
+                        self._new_board_widgets_init()
                         self._status_load_firmware = False
                         self._test_communication_status = False
                         self.lbStatusComunicacao.setText("...")
                         while self.currentId() is not self.num_serial_number:
                             self.back()
                     else:
-                        """
-                        TODO: Clear Widgets
-                        self._test_thread.serial_number = self._serial_number[:]
-                        del self._serial_number[:]
-                        """
                         self._test_thread._boardsinfo = self._boardsinfo[:]
+                        self._new_board_widgets_init()
                         return True
-                    
+
                 if self.rbLedStatusNok.isChecked():
 
                     self._boardsinfo[-1]['pre_tests'] = self._boardsinfo[-1]['pre_tests'] + '\t' + 'Erro: Falha LED Status'
@@ -249,12 +261,14 @@ class HRADCWindow(QWizard, Ui_Class):
                     self.lbStatusComunicacao.setText("...")
                     print(self._boardsinfo[-1])
                     print('Falhou LED Status')
-                    
+
                     if self.cbEndTests.isChecked():
                         self._test_thread._boardsinfo = self._boardsinfo[:]
+                        self._new_board_widgets_init()
                         return True
 
                     else:
+                        self._new_board_widgets_init()
                         while self.currentId() is not self.num_serial_number:
                             self.back()
 
@@ -266,7 +280,7 @@ class HRADCWindow(QWizard, Ui_Class):
                 print('Falhou gravação de firmware')
                 while self.currentId() is not self.num_serial_number:
                     self.back()
-    
+
         return False
 
     def _validate_page_start_test(self):
@@ -352,7 +366,7 @@ class HRADCWindow(QWizard, Ui_Class):
     def _communication_test(self):
         slot = abs(self._boardsinfo[-1]['slot'])
 
-        if self._status_load_firmware:        
+        if self._status_load_firmware:
             result = self._test_thread.test_communication(slot)
             if result:
                 self._boardsinfo[-1]['slot'] = slot
@@ -361,7 +375,7 @@ class HRADCWindow(QWizard, Ui_Class):
                 self._boardsinfo[-1]['pre_tests'] = self._boardsinfo[-1]['pre_tests'] + '\t' + 'Erro: Falha de comunicação com CPLD'
                 self._boardsinfo[-1]['slot'] = -slot
                 self.lbStatusComunicacao.setText("<p color:'red'>Falha</p>")
-                
+
             self._test_communication_status = True
 
         else:
@@ -393,7 +407,7 @@ class HRADCWindow(QWizard, Ui_Class):
         result = qts.load_firmware()
 
         slot = abs(self._boardsinfo[-1]['slot'])
-        
+
         if 'sucesso' in result:
             self._boardsinfo[-1]['slot'] = slot
         else:
@@ -401,7 +415,7 @@ class HRADCWindow(QWizard, Ui_Class):
 
         self.teFirmwareLog.append('Slot ' + str(slot) + ' - S/N ' + str(self._boardsinfo[-1]['serial']) + ' : ' + result)
         self._boardsinfo[-1]['pre_tests'] = self._boardsinfo[-1]['pre_tests'] + '\t' + result
-        
+
         self._status_load_firmware = True
 
     @pyqtSlot(list)
