@@ -20,7 +20,7 @@ class Keysight3458A_GPIB(object):
 
     def __init__(self):
         self.rm = visa.ResourceManager()
-                   
+
     def Connect(self,select_instru = 'GPIB0::22::INSTR'):
         self.inst = self.rm.open_resource(select_instru)
         self.inst.clear()
@@ -30,11 +30,11 @@ class Keysight3458A_GPIB(object):
         self.inst.write('RESET')
         #self.inst.write('PRESET NORM;INBUF OFF;CSB;DELAY -1;MEM FIFO;TBUFF ON;NPLC 10;NDIG 8;END 2;TARM AUTO;TRIG AUTO')
         self.inst.write('PRESET NORM;MFORMAT DREAL;OFORMAT ASCII;INBUF OFF;CSB;DELAY -1;MEM OFF;TBUFF ON;NPLC 10;NDIG 8;END 0;TRIG AUTO')
-        
+
 
     def InitDefault(self):
         self.inst.write('PRESET NORM;MFORMAT DREAL;OFORMAT ASCII;INBUF OFF;CSB;DELAY -1;MEM OFF;TBUFF ON;NPLC 10;NDIG 8;END 0;TRIG AUTO')
-    
+
     def SetMeasurementType(self,inputType,inputRange = ''):
         self.inst.write('TRIG HOLD;' + inputType + ' ' + str(inputRange) + ';TRIG AUTO')
 
@@ -73,7 +73,7 @@ if __name__ == '__main__':
 '''
 
 >>> ================================ RESTART ================================
->>> 
+>>>
 >>> DMM.inst.write('TARM SGL')
 (10, <StatusCode.success: 0>)
 >>> DMM.inst.query('MCOUNT?')

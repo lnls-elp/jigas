@@ -105,7 +105,7 @@ class LoadFirmware:
             return "."
 
 class LoadFirmware_HRADC:
-    
+
     def __init__(self, pathtofile='..\\common\\common\\flashfirmware\\hradc_cpld_files\\HRADC_v2_1_CPLD_Firmware.cdf'):
 
         self._path = pathtofile
@@ -121,7 +121,8 @@ class LoadFirmware_HRADC:
 
     def load_firmware(self):
         print("flashing firmware...")
-        command = " CMD /C c:\\altera\\16.0\\qprogrammer\\bin64\\quartus_pgm --quiet -c USB-Blaster " + self._path
+        #command = " CMD /C c:\\altera\\16.0\\qprogrammer\\bin64\\quartus_pgm -c USB-Blaster " + self._path
+        command = " CMD /C c:\\intelFPGA\\16.1\\qprogrammer\\bin64\\quartus_pgm -c USB-Blaster " + self._path
         proc = subprocess.Popen(command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         (out, err) = proc.communicate()
         out = out.decode("utf-8")
@@ -132,7 +133,7 @@ class LoadFirmware_HRADC:
 
         elif "Programming hardware cable not detected" in out:
             self.status = "Erro: Gravador USB-Blaster nao encontrado"
-                
+
         elif "Can't access JTAG chain" in out:
             self.status = "Erro: CPLD nao encontrada"
 
@@ -163,7 +164,7 @@ class LoadFirmware_HRADC:
 
         elif self.status == "cdf file not found":
             return "erro : arquivo de configuracao CDF nao encontrado"
-        
+
         elif self.status == "unknown error":
             return "erro desconhecido."
 

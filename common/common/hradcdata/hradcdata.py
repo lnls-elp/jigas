@@ -127,8 +127,8 @@ class HRADCLog:
         self._temperature           = 0.0
         self._vin_p                 = 0.0
         self._vin_n                 = 0.0
-        self._lin_p                 = 0.0
-        self._lin_n                 = 0.0
+        self._iin_p                 = 0.0
+        self._iin_n                 = 0.0
         self._details               = ""
 
     @property
@@ -204,20 +204,20 @@ class HRADCLog:
         self._vin_n = value
 
     @property
-    def lin_p(self):
-        return self._lin_p
+    def iin_p(self):
+        return self._iin_p
 
-    @lin_p.setter
-    def lin_p(self, value):
-        self._lin_p = value
+    @iin_p.setter
+    def iin_p(self, value):
+        self._iin_p = value
 
     @property
-    def lin_n(self):
-        return self._lin_n
+    def iin_n(self):
+        return self._iin_n
 
-    @lin_n.setter
-    def lin_n(self, value):
-        self._lin_n = value
+    @iin_n.setter
+    def iin_n(self, value):
+        self._iin_n = value
 
     @property
     def details(self):
@@ -238,8 +238,8 @@ class HRADCLog:
         data['temperatura']         = self._temperature
         data['vin_p']               = self._vin_p
         data['vin_n']               = self._vin_n
-        data['lin_p']               = self._lin_p
-        data['lin_n']               = self._lin_n
+        data['iin_p']               = self._iin_p
+        data['iin_n']               = self._iin_n
         data['details']             = self._details
         return data
 
@@ -261,8 +261,8 @@ class HRADCLogCalib:
         self._temp_power_supply     = 0.0
         self._vin_gain              = 0.0
         self._vin_offset            = 0.0
-        self._lin_gain              = 0.0
-        self._lin_offset            = 0.0
+        self._iin_gain              = 0.0
+        self._iin_offset            = 0.0
         self._vref_p                = 0.0
         self._vref_n                = 0.0
         self._gnd                   = 0.0
@@ -316,20 +316,20 @@ class HRADCLogCalib:
         self._vin_offset = value
 
     @property
-    def lin_gain(self):
-        return self._lin_gain
+    def iin_gain(self):
+        return self._iin_gain
 
-    @lin_gain.setter
-    def lin_gain(self, value):
-        self._lin_gain = value
+    @iin_gain.setter
+    def iin_gain(self, value):
+        self._iin_gain = value
 
     @property
-    def lin_offset(self):
-        return self._lin_offset
+    def iin_offset(self):
+        return self._iin_offset
 
-    @lin_offset.setter
-    def lin_offset(self, value):
-        self._lin_offset = value
+    @iin_offset.setter
+    def iin_offset(self, value):
+        self._iin_offset = value
 
     @property
     def vref_p(self):
@@ -363,8 +363,8 @@ class HRADCLogCalib:
         data['temperatura_fonte']   = self._temp_power_supply
         data['ganho_vin']           = self._vin_gain
         data['offset_vin']          = self._vin_offset
-        data['ganho_lin']           = self._lin_gain
-        data['offset_lin']          = self._lin_offset
+        data['ganho_lin']           = self._iin_gain
+        data['offset_lin']          = self._iin_offset
         data['vref_p']              = self._vref_p
         data['vref_n']              = self._vref_n
         data['gnd']                 = self._gnd
