@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 from PyQt5.QtWidgets import QWizard, QApplication, QWizardPage
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from common.dmscanner import Scanner
