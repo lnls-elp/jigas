@@ -26,7 +26,10 @@ class HRADCTest(QThread):
         QThread.__init__(self)
         self._comport = None
         self._baudrate = None
-        self._boardsinfo = []
+        self._boardsinfo = [{'serial' : 1234567890,
+                             'variant' : 'HRADC-FAX',
+                             'pre-tests' : 'Firmware gravado com sucesso',
+                             'slot' : 1}]
         self._nHRADC = None
         self._led = None
 
