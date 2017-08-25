@@ -705,16 +705,16 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="layoutWidget">
+   <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>160</y>
-      <width>332</width>
-      <height>228</height>
+      <x>1</x>
+      <y>161</y>
+      <width>223</width>
+      <height>52</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="verticalLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
       <widget class="QPushButton" name="pbLoadFirmware">
        <property name="minimumSize">
@@ -742,22 +742,47 @@
       </widget>
      </item>
      <item>
-      <widget class="QTextEdit" name="teFirmwareLog">
+      <widget class="QLabel" name="label_12">
        <property name="minimumSize">
         <size>
-         <width>330</width>
-         <height>170</height>
+         <width>140</width>
+         <height>20</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>330</width>
-         <height>170</height>
+         <width>140</width>
+         <height>20</height>
         </size>
+       </property>
+       <property name="text">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Clique para gravar.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </item>
     </layout>
+   </widget>
+   <widget class="QTextEdit" name="teFirmwareLog">
+    <property name="geometry">
+     <rect>
+      <x>1</x>
+      <y>217</y>
+      <width>330</width>
+      <height>170</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>330</width>
+      <height>170</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>330</width>
+      <height>170</height>
+     </size>
+    </property>
    </widget>
   </widget>
   <widget class="QWizardPage" name="PageStartTest">
@@ -863,7 +888,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>511</x>

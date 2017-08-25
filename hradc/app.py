@@ -78,6 +78,7 @@ class HRADCWindow(QWizard, Ui_Class):
         self.lbTestResult2.setText("Aguarde...")
         self.lbTestResult3.setText("Aguarde...")
         self.lbTestResult4.setText("Aguarde...")
+        self.lbStatusLoadingFirmware.setText("Clique para gravar.")
         self.cbEndTests.clear()
 
     def _initialize_signals(self):
@@ -404,6 +405,7 @@ class HRADCWindow(QWizard, Ui_Class):
     @pyqtSlot()
     def _load_firmware(self):
         qts = LoadFirmware_HRADC()
+        self.lbStatusLoadingFirmware.setText("Gravando...")
         result = qts.load_firmware()
 
         slot = abs(self._boardsinfo[-1]['slot'])
@@ -416,6 +418,7 @@ class HRADCWindow(QWizard, Ui_Class):
         self.teFirmwareLog.append('Slot ' + str(slot) + ' - S/N ' + str(self._boardsinfo[-1]['serial']) + ' : ' + result)
         self._boardsinfo[-1]['pre_tests'] = self._boardsinfo[-1]['pre_tests'] + '\t' + result
 
+        self.lbStatusLoadingFirmware.setText("Finalizado!")
         self._status_load_firmware = True
 
     @pyqtSlot(list)
