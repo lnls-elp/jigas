@@ -14,10 +14,12 @@ class Scanner(QWidget):
         if code is not None and code is not "":
             code = code.split(" ")
             try:
-                data['material'] = code[0]
+                #data['material'] = code[0]
                 #data['var1']     = code[1]
                 #data['var2']     = code[2]
-                data['serial']   = code[1][2:]
+                #data['serial']   = code[1][2:]
+                data['serial']   = code[0][2:]
+                data['material'] = code[1][3:]
                 return data
             except IndexError:
                 return None
