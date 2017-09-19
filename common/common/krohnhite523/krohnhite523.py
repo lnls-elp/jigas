@@ -24,18 +24,18 @@ class KrohnHite523_GPIB(object):
     def IDN(self):
         idn_string = self.inst.query('*IDN?')
         return idn_string
-    
+
     def Reset(self):
         self.inst.write('*RST')
-        
+
     def EnableOutput(self):
         new_string = 'V'
-        self.inst.write(new_string)            
-                  
+        self.inst.write(new_string)
+
     def DisableOutput(self):
         new_string = 'Z'
         self.inst.write(new_string)
-        
+
     def DeltaIncrement(self):
         delta_value_string = 'D'
         self.inst.write(delta_value_string)
@@ -53,6 +53,7 @@ class KrohnHite523_GPIB(object):
         self.inst.write(current_level_string)
 
     def SetOutput(self,level,mode):
+        string = ''
         if(mode == 'V'):
             string = str(level) + 'V' if abs(level) > 1e-6 else str(level*1e6) + 'uV'
         elif(mode == 'I'):
@@ -76,8 +77,8 @@ class KrohnHite523_GPIB(object):
             lo_float_chassis_string = 'F'
         else:
             lo_float_chassis_string = 'G'
-        self.inst.write(lo_float_chassis_string)        
-        
+        self.inst.write(lo_float_chassis_string)
+
     def SetVoltageDelta(self,voltage_delta,scale):
         voltage_delta_string = str(voltage_delta)+scale
         self.inst.write(voltage_delta_string)
@@ -89,12 +90,8 @@ class KrohnHite523_GPIB(object):
     def STG(self):
         string = self.inst.query('*STG?')
         return string
-                
+
     def Connect(self,gpibAdd):
         self.inst = self.rm.open_resource(gpibAdd)
         self.inst.timeout = 5000
         #self.inst.write('Z;F')
-
-
-
-    
