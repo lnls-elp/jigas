@@ -1,5 +1,6 @@
 from PyQt5.QtCore import pyqtSlot, QThread, pyqtSignal
 from common.elpwebclient import ElpWebClient
+from common.pydrs import SerialDRS
 from udcdata import UDC, UDCLog
 import serial
 import random
@@ -32,6 +33,8 @@ class UDCTest(QThread):
         self._serial_number = serial_number
         self._led = None
         self._buzzer = None
+
+        self._udc = SerialDRS()
 
     @property
     def serial_number(self):
@@ -77,19 +80,18 @@ class UDCTest(QThread):
         if self._comport is None or self._baudrate is None:
             return False
         else:
-            #TODO: Open serial and return StatusCode
-            pass
+            return self._udc.Connect(self._comport, self._baudrate)
 
     def test_communication(self):
         result = False     # Result for communication test and aux power supply
-        #TODO: Communication test
-        """
-            Simulação de teste
-        """
-        result = True
-        """
-            Fim da Simulação
-        """
+        try:
+            self._udc.Write_sigGen_Aux(1)
+            test_package = self._udc.Read_ps_Model()
+            if (test_package[0] == 0) and (test_package[1] == 17) and (test_package[2] == 512) \
+                and (test_package[3] == 14) and (test_package[4] == 223):
+                result = True
+        except:
+            pass
         return result
 
     def test_sdcard_connection(self):
