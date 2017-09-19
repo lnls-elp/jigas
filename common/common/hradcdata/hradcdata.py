@@ -238,8 +238,8 @@ class HRADCLog:
         data['temperatura']         = self._temperature
         data['vin_p']               = self._vin_p
         data['vin_n']               = self._vin_n
-        data['iin_p']               = self._iin_p
-        data['iin_n']               = self._iin_n
+        data['lin_p']               = self._iin_p
+        data['lin_n']               = self._iin_n
         data['details']             = self._details
         return data
 

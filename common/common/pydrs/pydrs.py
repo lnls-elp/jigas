@@ -359,7 +359,7 @@ class SerialDRS(object):
         send_msg       = self.checksum(self.SlaveAdd+send_packet)
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
-    
+
 
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     ======================================================================

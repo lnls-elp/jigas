@@ -52,18 +52,18 @@ class Keysight3458A_GPIB(object):
         return float(self.inst.read())
         count = self.inst.query('MCOUNT?')
         self.inst.write('RMEM 1,' + count)
-        while(not DMM.inst.stb & 0x80):
+        while(not self.inst.stb & 0x80):
             pass
-        return [float(val) for val in DMM.inst.read().split(',')]
+        return [float(val) for val in self.inst.read().split(',')]
 
     def ReadMeasurementPoints(self,tarmCount = 1):
         #count = self.inst.query('MEM FIFO;TARM SGL,' + str(trigCount) + ';MEM OFF;MATH OFF;MMATH OFF;MCOUNT?')
         #self.inst.write('MEM CONT;RMEM 1,' + count)
         count = self.inst.query('MEM FIFO;TARM SGL,' + str(tarmCount) + ';MCOUNT?')
         self.inst.write('RMEM 1,' + count)
-        while(not DMM.inst.stb & 0x80):
+        while(not self.inst.stb & 0x80):
             pass
-        return [float(val) for val in DMM.inst.read().split(',')]
+        return [float(val) for val in self.inst.read().split(',')]
 
 if __name__ == '__main__':
     DMM = Keysight3458A_GPIB()
