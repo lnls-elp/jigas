@@ -879,6 +879,7 @@ class SerialDRS(object):
         self.ser.write(send_msg.encode('ISO-8859-1'))
         recv_msg = self.ser.read(1+1+2+1+2+1024+1) #Address+Command+Size+ID+Block_idx+data+checksum
         #print(time.time()-t0)
+        print(recv_msg)
         val = []
         for k in range(7,len(recv_msg)-1,4):
             val.extend(struct.unpack('f',recv_msg[k:k+4]))
@@ -901,7 +902,7 @@ class SerialDRS(object):
     ======================================================================
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-    def Connect(self,port='COM4',baud=6000000):
+    def Connect(self,port='COM2',baud=6000000):
         try:
             SerialDRS.ser = serial.Serial(port,baud,timeout=1) #port format should be 'COM'+number
             return True

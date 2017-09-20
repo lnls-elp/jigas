@@ -21,12 +21,19 @@ class HRADCTest(QThread):
     bytesFormat = {'Uint16': 'H', 'Uint32': 'L', 'Uint64': 'Q', 'float': 'f'}
     ufmOffset = {'serial': 0, 'calibdate': 4, 'variant': 9, 'rburden': 10}
     hradcVariant = {'HRADC-FBP': 0, 'HRADC-FAX': 1}
+    hradcInputTypes = ['GND', 'Vref_bipolar_p', 'Vref_bipolar_n', 'Temp',
+                       'Vin_bipolar', 'Iin_bipolar']
 
     def __init__(self):
         QThread.__init__(self)
-        self._comport = None
-        self._baudrate = None
-        self._boardsinfo = []
+        self._comport = 'COM2'
+        self._baudrate = 6000000
+        ser = str(input('Leia S/N: '))
+        ser = int(ser[2:])
+        self._boardsinfo = [{'serial' : ser,
+                             'variant' : 'HRADC-FAX',
+                             'pre_tests' : 'Firmware gravado com sucesso',
+                             'slot' : 1}]
         self._nHRADC = None
         self._led = None
 
@@ -174,9 +181,9 @@ class HRADCTest(QThread):
 
         for board in self._boardsinfo:
 
-            print('\n**************************************************')
-            print('******** Slot: ' + str(board['slot']) + ' ********')
-            print('**************************************************\n\n')
+            print('\n**********************************')
+            print('**************   Slot ' + str(board['slot']) + '   ********')
+            print('**********************************\n\n')
             print(board)
 
             hradc = HRADC()
@@ -192,11 +199,12 @@ class HRADCTest(QThread):
                 hradc.cut_frequency = 48228.7
                 hradc.filter_order = 1
 
-            print('Enviando ao servidor dados desta placa...\n')
+            print('\nEnviando ao servidor dados desta placa...\n')
             res = self._send_to_server(hradc)
 
             if res:
                 print(res)
+                print('\n')
 
                 log_hradc = HRADCLog()
                 log_hradc.serial_number_hradc = board['serial']
@@ -211,7 +219,7 @@ class HRADCTest(QThread):
 
                 if board['slot'] > 0:
 
-                    print('Colocando em UFM mode a placa bem sucedida do slot:' + str(board['slot'])+ '\n')
+                    print('Colocando em UFM mode a placa bem sucedida do slot ' + str(board['slot'])+ '\n')
 
                     board['slot'] = board['slot'] - 1
                     self.drs.ConfigHRADCOpMode(board['slot'],1)
@@ -243,7 +251,6 @@ class HRADCTest(QThread):
                     time.sleep(0.5)
                     self.drs.ReadHRADC_UFM(board['slot'],0)
                     '''
-
                     self.drs.ConfigHRADCOpMode(board['slot'],0)
                     time.sleep(0.5)
                     self._configBoardsToTest(board,'GND')
@@ -251,52 +258,52 @@ class HRADCTest(QThread):
                     self.drs.SelectHRADCBoard(board['slot'])
                     time.sleep(0.1)
 
-                    ###################
-                    #### TESTE GND ####
-                    ###################
+# hradcInputTypes = ['GND', 'Vref_bipolar_p', 'Vref_bipolar_n', 'Temp', 'Vin_bipolar', 'Iin_bipolar']
 
-                    self.drs.ConfigHRADC(board['slot'],100000,'GND',0,0)
-                    time.sleep(0.1)
-                    self.drs.SelectTestSource('GND')
-                    time.sleep(0.1)
-                    self.drs.EnableSamplesBuffer()
-                    time.sleep(1)
-                    self.drs.EnableHRADCSampling()
-                    time.sleep(1)
-                    self.drs.DisableSamplesBuffer()
-                    time.sleep(0.1)
+                    for signalType in hradcInputTypes:
 
-                    buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
-                    if np.array_equal(buff,emptyBuff):
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        return
-                    log_hradc.gnd = buff.mean()
+                        print('\n- ' + signalType + ' -')
 
-                    buff = np.array(self.dmm.ReadMeasurementPoints())
-                    if np.array_equal(buff,emptyBuff):
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        return
-                    log_dm.gnd = buff.mean()
+                        self.drs.ConfigHRADC(board['slot'],100000,signalType,0,0)
+                        time.sleep(0.1)
 
-                    self.drs.DisableHRADCSampling()
-                    time.sleep(0.1)
+                        self.drs.SelectTestSource(signalType)
+                        time.sleep(0.1)
 
+                        self.drs.EnableSamplesBuffer()
+                        time.sleep(1)
 
-                    print('- GND -')
-                    print('HRADC: ' + str(log_hradc.gnd) + ' V')
-                    print('DMM: ' + str(log_dm.gnd) + ' V\n')
+                        self.drs.EnableHRADCSampling()
+                        time.sleep(1)
 
-                    if abs(log_hradc.gnd - self.refVal['GND']) > self.refTol['GND']:
-                        log_hradc.test_result = "Reprovado"
-                        print('HRADC GND Reprovado')
+                        self.drs.DisableSamplesBuffer()
+                        time.sleep(0.5)
 
-                    if abs(log_dm.gnd - self.refVal['GND']) > self.refTol['GND']:
-                        log_dm.test_result = "Reprovado"
-                        print('DM GND Reprovado')
+                        buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
+                        if np.array_equal(buff,emptyBuff):
+                            print('\n************** FALHA SAMPLES BUFFER **************\n')
+                            return
+                        log_hradc.gnd = buff.mean()
+
+                        buff = np.array(self.dmm.ReadMeasurementPoints())
+                        if np.array_equal(buff,emptyBuff):
+                            print('\n************** FALHA DMM SAMPLES **************\n')
+                            return
+                        log_dm.gnd = buff.mean()
+
+                        self.drs.DisableHRADCSampling()
+                        time.sleep(0.1)
+
+                        print('HRADC: ' + str(log_hradc.gnd) + ' V')
+                        print('DMM: ' + str(log_dm.gnd) + ' V\n')
+
+                        if abs(log_hradc.gnd - self.refVal[signalType]) > self.refTol[signalType]:
+                            log_hradc.test_result = "Reprovado"
+                            print('HRADC Reprovado: ' + signalType)
+
+                        if abs(log_dm.gnd - self.refVal[signalType]) > self.refTol[signalType]:
+                            log_dm.test_result = "Reprovado"
+                            print('DMM Reprovado' + signalType)
 
                     #############################
                     #### TESTE Vref_bipolar_p ###
@@ -309,7 +316,7 @@ class HRADCTest(QThread):
                     self.drs.EnableHRADCSampling()
                     time.sleep(1)
                     self.drs.DisableSamplesBuffer()
-                    time.sleep(0.1)
+                    time.sleep(0.5)
 
                     buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
                     if np.array_equal(buff,emptyBuff):
@@ -353,7 +360,7 @@ class HRADCTest(QThread):
                     self.drs.EnableHRADCSampling()
                     time.sleep(1)
                     self.drs.DisableSamplesBuffer()
-                    time.sleep(0.1)
+                    time.sleep(0.5)
 
                     buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
                     if np.array_equal(buff,emptyBuff):
@@ -397,7 +404,7 @@ class HRADCTest(QThread):
                     self.drs.EnableHRADCSampling()
                     time.sleep(1)
                     self.drs.DisableSamplesBuffer()
-                    time.sleep(0.1)
+                    time.sleep(0.5)
 
                     buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
                     if np.array_equal(buff,emptyBuff):
@@ -445,7 +452,7 @@ class HRADCTest(QThread):
                     self.drs.EnableHRADCSampling()
                     time.sleep(1)
                     self.drs.DisableSamplesBuffer()
-                    time.sleep(0.1)
+                    time.sleep(0.5)
 
                     buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
                     if np.array_equal(buff,emptyBuff):
@@ -488,7 +495,7 @@ class HRADCTest(QThread):
                     self.drs.EnableHRADCSampling()
                     time.sleep(1)
                     self.drs.DisableSamplesBuffer()
-                    time.sleep(0.1)
+                    time.sleep(0.5)
 
                     buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
                     if np.array_equal(buff,emptyBuff):
@@ -532,14 +539,14 @@ class HRADCTest(QThread):
                     self.drs.SelectTestSource('Iin_bipolar')
                     time.sleep(0.1)
                     self.dmm.SetMeasurementType('DCI',0.05)
-                    self.source.SetOutput(0,'mA')
+                    self.source.SetOutput(0.05,'I')
                     self.source.EnableOutput()
                     self.drs.EnableSamplesBuffer()
                     time.sleep(1)
                     self.drs.EnableHRADCSampling()
                     time.sleep(1)
                     self.drs.DisableSamplesBuffer()
-                    time.sleep(0.1)
+                    time.sleep(0.5)
 
                     buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
                     if np.array_equal(buff,emptyBuff):
@@ -576,13 +583,13 @@ class HRADCTest(QThread):
                     #### TESTE Iin_bipolar_n ####
                     #############################
 
-                    self.source.SetOutput(-0,'mA')
+                    self.source.SetOutput(-0.05,'I')
                     self.drs.EnableSamplesBuffer()
                     time.sleep(1)
                     self.drs.EnableHRADCSampling()
                     time.sleep(1)
                     self.drs.DisableSamplesBuffer()
-                    time.sleep(0.1)
+                    time.sleep(0.5)
 
                     buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
                     if np.array_equal(buff,emptyBuff):
@@ -697,4 +704,4 @@ class HRADCTest(QThread):
 if __name__ == '__main__':
     hradc = HRADCTest()
     hradc.open_serial_port()
-    #hradc._test_sequence()
+    hradc._test_sequence()

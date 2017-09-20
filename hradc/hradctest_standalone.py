@@ -21,10 +21,12 @@ class HRADCTest(QThread):
     bytesFormat = {'Uint16': 'H', 'Uint32': 'L', 'Uint64': 'Q', 'float': 'f'}
     ufmOffset = {'serial': 0, 'calibdate': 4, 'variant': 9, 'rburden': 10}
     hradcVariant = {'HRADC-FBP': 0, 'HRADC-FAX': 1}
+    hradcInputTypes = ['GND', 'Vref_bipolar_p', 'Vref_bipolar_n', 'Temp',
+                       'Vin_bipolar', 'Iin_bipolar']
 
     def __init__(self):
         QThread.__init__(self)
-        self._comport = 'COM10'
+        self._comport = 'COM2'
         self._baudrate = 6000000
         ser = str(input('Leia S/N: '))
         ser = int(ser[2:])
@@ -148,7 +150,7 @@ class HRADCTest(QThread):
                 print(buff)
                 hradcMean = buff.mean()
                 print(hradcMean)
-                if abs(hradcMean) > self.refTol['GND']:
+                if abs(hradcMean) < self.refTol['GND']:
                     print('TRUE')
                     return True
 
@@ -157,6 +159,7 @@ class HRADCTest(QThread):
 
         except:
             print('EXCEPT')
+            self.drs.DisableHRADCSampling()
             return False
 
     def _test_sequence(self):
@@ -178,6 +181,9 @@ class HRADCTest(QThread):
 
         for board in self._boardsinfo:
 
+            print('\n**********************************')
+            print('**************   Slot ' + str(board['slot']) + '   ********')
+            print('**********************************\n\n')
             print(board)
 
             hradc = HRADC()
@@ -193,11 +199,12 @@ class HRADCTest(QThread):
                 hradc.cut_frequency = 48228.7
                 hradc.filter_order = 1
 
-            print('Enviando ao servidor dados desta placa...\n')
+            print('\nEnviando ao servidor dados desta placa...\n')
             res = self._send_to_server(hradc)
 
             if res:
                 print(res)
+                print('\n')
 
                 log_hradc = HRADCLog()
                 log_hradc.serial_number_hradc = board['serial']
@@ -212,7 +219,7 @@ class HRADCTest(QThread):
 
                 if board['slot'] > 0:
 
-                    print('Colocando em UFM mode a placa bem sucedida do slot:' + str(board['slot'])+ '\n')
+                    print('Colocando em UFM mode a placa bem sucedida do slot ' + str(board['slot'])+ '\n')
 
                     board['slot'] = board['slot'] - 1
                     self.drs.ConfigHRADCOpMode(board['slot'],1)
@@ -265,7 +272,7 @@ class HRADCTest(QThread):
                     self.drs.EnableHRADCSampling()
                     time.sleep(1)
                     self.drs.DisableSamplesBuffer()
-                    time.sleep(0.1)
+                    time.sleep(0.5)
 
                     buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
                     if np.array_equal(buff,emptyBuff):
@@ -286,8 +293,8 @@ class HRADCTest(QThread):
                     self.drs.DisableHRADCSampling()
                     time.sleep(0.1)
 
-                    print('\n******** Slot: ' + str(board['slot']) + ' ********\n\n')
-                    print('- GND -')
+
+                    print('\n- GND -')
                     print('HRADC: ' + str(log_hradc.gnd) + ' V')
                     print('DMM: ' + str(log_dm.gnd) + ' V\n')
 
@@ -310,7 +317,7 @@ class HRADCTest(QThread):
                     self.drs.EnableHRADCSampling()
                     time.sleep(1)
                     self.drs.DisableSamplesBuffer()
-                    time.sleep(0.1)
+                    time.sleep(0.5)
 
                     buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
                     if np.array_equal(buff,emptyBuff):
@@ -331,7 +338,6 @@ class HRADCTest(QThread):
                     self.drs.DisableHRADCSampling()
                     time.sleep(0.1)
 
-                    print('\n******** Slot: ' + str(board['slot']) + ' ********\n\n')
                     print('- Vref_bipolar_p -')
                     print('HRADC: ' + str(log_hradc.vref_p) + ' V')
                     print('DMM: ' + str(log_dm.vref_p) + ' V\n')
@@ -355,7 +361,7 @@ class HRADCTest(QThread):
                     self.drs.EnableHRADCSampling()
                     time.sleep(1)
                     self.drs.DisableSamplesBuffer()
-                    time.sleep(0.1)
+                    time.sleep(0.5)
 
                     buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
                     if np.array_equal(buff,emptyBuff):
@@ -376,7 +382,6 @@ class HRADCTest(QThread):
                     self.drs.DisableHRADCSampling()
                     time.sleep(0.1)
 
-                    print('\n******** Slot: ' + str(board['slot']) + ' ********\n\n')
                     print('- Vref_bipolar_n -')
                     print('HRADC: ' + str(log_hradc.vref_n) + ' V')
                     print('DMM: ' + str(log_dm.vref_n) + ' V\n')
@@ -400,7 +405,7 @@ class HRADCTest(QThread):
                     self.drs.EnableHRADCSampling()
                     time.sleep(1)
                     self.drs.DisableSamplesBuffer()
-                    time.sleep(0.1)
+                    time.sleep(0.5)
 
                     buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
                     if np.array_equal(buff,emptyBuff):
@@ -421,7 +426,6 @@ class HRADCTest(QThread):
                     self.drs.DisableHRADCSampling()
                     time.sleep(0.1)
 
-                    print('\n******** Slot: ' + str(board['slot']) + ' ********\n\n')
                     print('- Temp -')
                     print('HRADC: ' + str(log_hradc.temperature) + ' V')
                     print('DMM: ' + str(log_dm.temperature) + ' V\n')
@@ -449,7 +453,7 @@ class HRADCTest(QThread):
                     self.drs.EnableHRADCSampling()
                     time.sleep(1)
                     self.drs.DisableSamplesBuffer()
-                    time.sleep(0.1)
+                    time.sleep(0.5)
 
                     buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
                     if np.array_equal(buff,emptyBuff):
@@ -470,7 +474,6 @@ class HRADCTest(QThread):
                     self.drs.DisableHRADCSampling()
                     time.sleep(0.1)
 
-                    print('\n******** Slot: ' + str(board['slot']) + ' ********\n\n')
                     print('- Vin_bipolar_p -')
                     print('HRADC: ' + str(log_hradc.vin_p) + ' V')
                     print('DMM: ' + str(log_dm.vin_p) + ' V\n')
@@ -493,7 +496,7 @@ class HRADCTest(QThread):
                     self.drs.EnableHRADCSampling()
                     time.sleep(1)
                     self.drs.DisableSamplesBuffer()
-                    time.sleep(0.1)
+                    time.sleep(0.5)
 
                     buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
                     if np.array_equal(buff,emptyBuff):
@@ -515,7 +518,6 @@ class HRADCTest(QThread):
                     time.sleep(0.1)
                     self.source.DisableOutput()
 
-                    print('\n******** Slot: ' + str(board['slot']) + ' ********\n\n')
                     print('- Vin_bipolar_n -')
                     print('HRADC: ' + str(log_hradc.vin_n) + ' V')
                     print('DMM: ' + str(log_dm.vin_n) + ' V\n')
@@ -538,14 +540,14 @@ class HRADCTest(QThread):
                     self.drs.SelectTestSource('Iin_bipolar')
                     time.sleep(0.1)
                     self.dmm.SetMeasurementType('DCI',0.05)
-                    self.source.SetOutput(0,'mA')
+                    self.source.SetOutput(0.05,'I')
                     self.source.EnableOutput()
                     self.drs.EnableSamplesBuffer()
                     time.sleep(1)
                     self.drs.EnableHRADCSampling()
                     time.sleep(1)
                     self.drs.DisableSamplesBuffer()
-                    time.sleep(0.1)
+                    time.sleep(0.5)
 
                     buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
                     if np.array_equal(buff,emptyBuff):
@@ -566,10 +568,9 @@ class HRADCTest(QThread):
                     self.drs.DisableHRADCSampling()
                     time.sleep(0.1)
 
-                    print('\n******** Slot: ' + str(board['slot']) + ' ********\n\n')
                     print('- Iin_bipolar_p -')
-                    print('HRADC: ' + str(log_hradc.iin_p) + ' V')
-                    print('DMM: ' + str(log_dm.iin_p) + ' V\n')
+                    print('HRADC: ' + str(log_hradc.iin_p) + ' A')
+                    print('DMM: ' + str(log_dm.iin_p) + ' A\n')
 
                     if board['variant'] == 'HRADC-FBP' and abs(log_hradc.iin_p - self.refVal['Iin_bipolar']) > self.refTol['Iin_bipolar']:
                         log_hradc.test_result = "Reprovado"
@@ -583,13 +584,13 @@ class HRADCTest(QThread):
                     #### TESTE Iin_bipolar_n ####
                     #############################
 
-                    self.source.SetOutput(-0,'mA')
+                    self.source.SetOutput(-0.05,'I')
                     self.drs.EnableSamplesBuffer()
                     time.sleep(1)
                     self.drs.EnableHRADCSampling()
                     time.sleep(1)
                     self.drs.DisableSamplesBuffer()
-                    time.sleep(0.1)
+                    time.sleep(0.5)
 
                     buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
                     if np.array_equal(buff,emptyBuff):
@@ -611,10 +612,9 @@ class HRADCTest(QThread):
                     time.sleep(0.1)
                     self.source.DisableOutput()
 
-                    print('\n******** Slot: ' + str(board['slot']) + ' ********\n\n')
                     print('- Iin_bipolar_n -')
-                    print('HRADC: ' + str(log_hradc.iin_n) + ' V')
-                    print('DMM: ' + str(log_dm.iin_n) + ' V\n')
+                    print('HRADC: ' + str(log_hradc.iin_n) + ' A')
+                    print('DMM: ' + str(log_dm.iin_n) + ' A\n')
 
                     if board['variant'] == 'HRADC-FBP' and abs(log_hradc.iin_n + self.refVal['Iin_bipolar']) > self.refTol['Iin_bipolar']:
                         log_hradc.test_result = "Reprovado"
@@ -638,11 +638,17 @@ class HRADCTest(QThread):
                     log_res.append(log_hradc.test_result)
 
                 else:
-                    print('Salvando log de placa reprovada enviando ao servidor')
+                    print('Salvando log de placa reprovada enviando ao servidor...')
                     log_hradc.test_result = "Reprovado"
                     log_hradc.details = board['pre_tests']
 
                     log_hradc_serverstatus = self._send_to_server(log_hradc)
+
+            else:
+                print('Falha de comunicacao com servidor!')
+
+                # TODO: incluir falha de comunicacao com servidor no sinal log_res
+                #log_res.append('')
 
 
         # Quando o teste terminar emitir o resultado em uma lista de objetos
@@ -690,7 +696,7 @@ class HRADCTest(QThread):
             if slot == board['slot']:
                 self.drs.ConfigHRADC(slot,100000,inputType,0,0)
             else:
-                self.drs.ConfigHRADC(slot,100000,'GND')
+                self.drs.ConfigHRADC(slot,100000,'GND',0,0)
 
     def run(self):
         self._test_sequence()

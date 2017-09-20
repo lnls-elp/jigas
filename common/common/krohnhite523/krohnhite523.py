@@ -58,7 +58,7 @@ class KrohnHite523_GPIB(object):
             string = str(level) + 'V' if abs(level) > 1e-6 else str(level*1e6) + 'uV'
         elif(mode == 'I'):
             string = str(level*1e3) + 'mA'
-        print(string)
+        #print(string)
         self.inst.write(string)
 
     def SetVoltageLimit(self,voltage_limit):
