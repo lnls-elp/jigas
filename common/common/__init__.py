@@ -1,6 +1,7 @@
 from . import dmscanner
 from . import elpwebclient
 from . import pydrs
+from . import funcs
 
 from . import hradcdata
 from . import psdata

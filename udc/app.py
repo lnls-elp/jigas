@@ -37,11 +37,12 @@ class UDCWindow(QWizard, Ui_Class):
         self._initialize_wizard_buttons()
 
         #test status
-        self._load_test_firmware_status
-        self._load_final_firmware_status
-        self._leds_status
-        self._buzzer_status
-        self._communication_status
+        self._load_test_firmware_status = False
+        self._load_final_firmware_status = False
+        self._leds_status = False
+        self._buzzer_status = False
+        self._communication_status = False
+        self._test_result = False
 
     """*************************************************
     *************** GUI Initialization *****************
@@ -88,6 +89,8 @@ class UDCWindow(QWizard, Ui_Class):
         self.teTestReport.clear()
         self.lbStatusLoadingTestFirmware.setText("Clique para gravar.")
         self.lbStatusLoadingFinalFirmware.setText("Clique para gravar.")
+        self.pbConnectSerialPort.setText("Conectar")
+        self.pbConnectSerialPort.setEnabled(True)
 
     def _initialize_signals(self):
         """ Configure basic signals """
@@ -177,8 +180,16 @@ class UDCWindow(QWizard, Ui_Class):
         self._test_thread.io_expander.disconnect()
         self._test_thread.ethernet.disconnect()
 
-    def _finish_test_thread(self):
-        self._disconnect_test_signals()
+    def _restart_variables(self):
+        self._load_test_firmware_status = False
+        self._load_final_firmware_status = False
+        self._leds_status = False
+        self._buzzer_status = False
+        self._communication_status = False
+
+    def _restart_test_thread(self):
+        self._test_thread.test_complete.disconnect()
+        self._test_thread.update_gui.disconnect()
         self._test_thread.quit()
         self._test_thread.wait()
 
@@ -249,19 +260,34 @@ class UDCWindow(QWizard, Ui_Class):
 #        return False
 
     def _validate_page_load_test_firmware(self):
+        self._leds_status = self.rbLedsOk.isChecked()
+        self._buzzer_status = self.rbBuzzerOk.isChecked()
 
-        return True
+        if self._load_test_firmware_status and self._leds_status \
+            and self._buzzer_status and self._communication_status:
+            return True
+        else:
+            # TODO: Mandar dados para o servidor
+            self._restart_variables()
+            self._initialize_widgets()
+            self._jump_to(self.num_serial_number)
+            return False
 
     def _validate_page_start_test(self):
-        print('Validate Start Test')
-        self._initialize_widgets()
-        self._finish_test_thread()
-        while self.currentId() is not self.num_serial_number:
-            self.back()
-        return False
+        if self._test_result:
+            return True
+        else:
+            self._initialize_widgets()
+            self._restart_test_thread()
+            self._jump_to(self.num_serial_number)
+            return False
 
     def _validate_page_load_final_firmware(self):
-        return True
+        if self._load_final_firmware_status:
+            self._initialize_widgets()
+            self._restart_test_thread()
+            self._jump_to(self.num_serial_number)
+        return False
 
     def _validate_page_test_finished(self):
         return True
@@ -334,31 +360,57 @@ class UDCWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _load_test_firmware(self):
+        arm_status = False
+        c28_status = False
         fw = LoadFirmware()
 
-        fw.arm_pathtofile = "/firmware/test/firmware_arm" #Ver nome
-        fw.c28_pathtofile = "/firmware/test/firmware_c28" #Ver nome
+        fw.arm_pathtofile = "/firmware/test/m3_test.out" #Ver nome
+        fw.c28_pathtofile = "/firmware/test/c28_test.out" #Ver nome
 
         self.teTestFirmwareLog.append("Gravando firmware de testes ARM:\n")
         fw.flash_firmware('arm')
         self.teTestFirmwareLog.append(fw.log_status)
+        print(fw.status)
+        if fw.status is "sucess":
+            arm_status = True
         self.teTestFirmwareLog.append("Gravando firmware de testes C28:\n")
         fw.flash_firmware('c28')
         self.teTestFirmwareLog.append(fw.log_status)
+        print(fw.status)
+        if fw.status is "sucess":
+            c28_status = True
+
+        if arm_status and c28_status:
+            self._load_test_firmware_status = True
+        else:
+            self._load_test_firmware_status = False
 
     @pyqtSlot()
     def _load_final_firmware(self):
+        arm_status = False
+        c28_status = False
         fw = LoadFirmware()
 
-        fw.arm_pathtofile = "/firmware/final/firmware_arm" #Ver nome
-        fw.c28_pathtofile = "/firmware/final/firmware_c28" #Ver nome
+        fw.arm_pathtofile = "/firmware/final/c28_final.out" #Ver nome
+        fw.c28_pathtofile = "/firmware/final/m3_final.out" #Ver nome
 
-        self.teTestFirmwareLog.append("Gravando firmware final ARM:\n")
+        self.teFinalFirmwareLog.append("Gravando firmware de testes ARM:\n")
         fw.flash_firmware('arm')
-        self.teTestFirmwareLog.append(fw.log_status)
-        self.teTestFirmwareLog.append("Gravando firmware final C28:\n")
+        self.teFinalFirmwareLog.append(fw.log_status)
+        print(fw.status)
+        if fw.status is "sucess":
+            arm_status = True
+        self.teFinalFirmwareLog.append("Gravando firmware de testes C28:\n")
         fw.flash_firmware('c28')
-        self.teTestFirmwareLog.append(fw.log_status)
+        self.teFinalFirmwareLog.append(fw.log_status)
+        print(fw.status)
+        if fw.status is "sucess":
+            c28_status = True
+
+        if arm_status and c28_status:
+            self._load_final_firmware_status = True
+        else:
+            self._load_final_firmware_status = False
 
     @pyqtSlot()
     def _connect_serial_port(self):
@@ -366,9 +418,16 @@ class UDCWindow(QWizard, Ui_Class):
         baud = int(self.leBaudrate.text())
         self._test_thread.baudrate = baud
         self._test_thread.comport  = com
-        self._serial_port_status = self._test_thread.open_serial_port()
+        self._serial_port_status    = self._test_thread.open_serial_port()
         if self._serial_port_status:
             self.pbConnectSerialPort.setEnabled(False)
+            self.pbConnectSerialPort.setText("Conectado!")
+        self._communication_status  = self._test_thread.test_communication()
+        if self._communication_status:
+            self.lbStatusComunicacao.setText("OK")
+        else:
+            self.lbStatusComunicacao.setText("Falha")
+
 
     @pyqtSlot()
     def _communication_test(self):

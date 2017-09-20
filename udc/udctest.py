@@ -4,10 +4,15 @@ from common.pydrs import SerialDRS
 from udcdata import UDC, UDCLog
 import serial
 import random
+import time
 
 class UDCTest(QThread):
-    FAIL        = "Falha"
-    SUCCESS     = "OK"
+    DISAPPROVED        = "Falha"
+    APPROVED           = "OK"
+    START_TEST         = 0x00
+    READ_RESULT        = 0x01
+    SUCESS             = 0x00
+    FAIL               = 0x01
 
     test_complete       = pyqtSignal(bool)
     update_gui          = pyqtSignal(str)
@@ -94,86 +99,77 @@ class UDCTest(QThread):
             pass
         return result
 
-    def test_sdcard_connection(self):
-        result = False
-        #TODO: Connection test
-        """
-            Simulação de teste
-        """
-        result = True
-        """
-            Fim da Simulação
-        """
-        return result
-
     def _test_eeprom(self):
-        result = self.FAIL
-        #TODO: Testes
+        result = self.DISAPPROVED
+        self._udc.UdcEepromTest(self.START_TEST)
+        time.sleep(0.05)
+        response = self._udc.UdcEepromTest(self.READ_RESULT)
+        #TODO: Treat response
         self.eeprom.emit(result)
         return result
 
     def _test_flash(self):
-        result = self.FAIL
+        result = self.DISAPPROVED
         #TODO: Testes
         self.flash.emit(result)
         return result
 
     def _test_ram(self):
-        result = self.FAIL
+        result = self.DISAPPROVED
         #TODO: Testes
         self.ram.emit(result)
         return result
 
     def _test_adc(self):
-        result = [self.FAIL for i in range(8)]
+        result = [self.DISAPPROVED for i in range(8)]
         #TODO: Testes
         self.adc.emit(result)
         return result
 
     def _test_rtc_communication(self):
-        result = self.FAIL
+        result = self.DISAPPROVED
         #TODO: Testes
         self.rtc_com.emit(result)
         return result
 
     def _test_rtc_interrupt(self):
-        result = self.FAIL
+        result = self.DISAPPROVED
         #TODO: Testes
         self.rtc_int.emit(result)
         return result
 
     def _test_temperature_sensor_communication(self):
-        result = self.FAIL
+        result = self.DISAPPROVED
         #TODO: Testes
         self.sensor_temp_com.emit(result)
         return result
 
     def _test_temperature_sensor_value(self):
-        result = self.FAIL
+        result = self.DISAPPROVED
         #TODO: Testes
         self.sensor_temp_val.emit(result)
         return result
 
     def _test_rs485(self):
-        result = [self.FAIL for i in range(3)]
+        result = [self.DISAPPROVED for i in range(3)]
         #TODO: Testes
         self.rs485.emit(result)
         return result
 
     def _test_alim_isol_plane(self):
-        result = self.FAIL
+        result = self.DISAPPROVED
         #TODO: Testes
         self.isol_plane.emit(result)
         return result
 
     def _test_io_expander(self):
-        result = [self.FAIL for i in range(2)]
+        result = [self.DISAPPROVED for i in range(2)]
         #TODO: Testes
         self.io_expander.emit(result)
         return result
 
     def _test_ethernet(self):
-        result = [self.FAIL for i in range(2)]
+        result = [self.DISAPPROVED for i in range(2)]
         #TODO: Testes
         self.ethernet.emit(result)
         return result
