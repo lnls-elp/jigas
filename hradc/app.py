@@ -79,7 +79,7 @@ class HRADCWindow(QWizard, Ui_Class):
         self.lbTestResult3.setText("Aguarde...")
         self.lbTestResult4.setText("Aguarde...")
         self.lbStatusLoadingFirmware.setText("Clique para gravar.")
-        self.cbEndTests.clear()
+        self.cbEndTests.setChecked(False)
 
     def _initialize_signals(self):
         """ Configure basic signals """
@@ -404,8 +404,8 @@ class HRADCWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _load_firmware(self):
-        qts = LoadFirmware_HRADC()
         self.lbStatusLoadingFirmware.setText("Gravando...")
+        qts = LoadFirmware_HRADC()
         result = qts.load_firmware()
 
         slot = abs(self._boardsinfo[-1]['slot'])
