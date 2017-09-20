@@ -17,9 +17,8 @@ class UDCWindow(QWizard, Ui_Class):
     SUCCESS     = "OK"
 
     # Page numbers
-    (num_intro_page, num_serial_number, num_connect_udc,
-    num_visual_test, num_serial_port, num_hard_verifications,
-    num_start_test) = range(7)
+    (num_serial_number, num_connect_udc, num_load_test_firmware,
+    num_start_test, num_load_final_firmware) = range(5)
 
     def __init__(self, parent=None):
         QWizard.__init__(self, parent)
@@ -30,7 +29,6 @@ class UDCWindow(QWizard, Ui_Class):
         self._list_serial_ports()
         self._serial_port_status = False
         self._test_serial_port_status = False
-        self._sdcard_insert_status = False
 
         self._test_thread = UDCTest()
 
@@ -55,7 +53,6 @@ class UDCWindow(QWizard, Ui_Class):
         self.rbLedsNok.setChecked(False)
         self.rbBuzzerOk.setChecked(False)
         self.rbBuzzerNok.setChecked(False)
-        self.lbSdCardInsert.setText("Clique para detectar")
         self.lbTestStatus.setText("Iniciar...")
         self.lbTestResult.setText("Aguarde...")
         self.lbEeprom.setText("...")
@@ -82,21 +79,19 @@ class UDCWindow(QWizard, Ui_Class):
         self.lbEthernetInit.setText("...")
         self.lbEthernetPing.setText("...")
         self.teTestReport.clear()
+        self.lbStatusLoadingTestFirmware.setText("Clique para gravar.")
+        self.lbStatusLoadingFinalFirmware.setText("Clique para gravar.")
 
     def _initialize_signals(self):
         """ Configure basic signals """
         self.leDmCode.editingFinished.connect(self._treat_dmcode)
         self.pbConnectSerialPort.clicked.connect(self._connect_serial_port)
         self.pbStartTests.clicked.connect(self._start_test_sequence)
-        self.pbCommunicationTest.clicked.connect(self._communication_test)
-        self.pbDetectSdCard.clicked.connect(self._sdcard_connection_test)
+        self.pbLoadTestFirmware.clicked.connect(self._load_test_firmware)
+        self.pbLoadFinalFirmware.clicked.connect(self._load_final_firmware)
         self.finished.connect(self._finish_wizard_execution)
 
     def _initialize_wizard_buttons(self):
-        self.PageIntro.setButtonText(self.NextButton, "Próximo")
-        self.PageIntro.setButtonText(self.BackButton, "Anterior")
-        self.PageIntro.setButtonText(self.CancelButton, "Cancelar")
-
         self.PageSerialNumber.setButtonText(self.NextButton, "Próximo")
         self.PageSerialNumber.setButtonText(self.BackButton, "Anterior")
         self.PageSerialNumber.setButtonText(self.CancelButton, "Cancelar")
@@ -105,21 +100,17 @@ class UDCWindow(QWizard, Ui_Class):
         self.PageConnectUDC.setButtonText(self.BackButton, "Anterior")
         self.PageConnectUDC.setButtonText(self.CancelButton, "Cancelar")
 
-        self.PageVisualTest.setButtonText(self.NextButton, "Próximo")
-        self.PageVisualTest.setButtonText(self.BackButton, "Anterior")
-        self.PageVisualTest.setButtonText(self.CancelButton, "Cancelar")
+        self.PageLoadTestFirmware.setButtonText(self.NextButton, "Próximo")
+        self.PageLoadTestFirmware.setButtonText(self.BackButton, "Anterior")
+        self.PageLoadTestFirmware.setButtonText(self.CancelButton, "Cancelar")
 
-        self.PageTestSerialPort.setButtonText(self.NextButton, "Próximo")
-        self.PageTestSerialPort.setButtonText(self.BackButton, "Anterior")
-        self.PageTestSerialPort.setButtonText(self.CancelButton, "Cancelar")
-
-        self.PageHardwareVerifications.setButtonText(self.NextButton, "Próximo")
-        self.PageHardwareVerifications.setButtonText(self.BackButton, "Anterior")
-        self.PageHardwareVerifications.setButtonText(self.CancelButton, "Cancelar")
-
-        self.PageStartTest.setButtonText(self.NextButton, "Novo Teste")
+        self.PageStartTest.setButtonText(self.NextButton, "Próximo")
         self.PageStartTest.setButtonText(self.BackButton, "Anterior")
         self.PageStartTest.setButtonText(self.CancelButton, "Cancelar")
+
+        self.PageLoadFinalFirmware.setButtonText(self.NextButton, "Novo Teste")
+        self.PageLoadFinalFirmware.setButtonText(self.BackButton, "Anterior")
+        self.PageLoadFinalFirmware.setButtonText(self.CancelButton, "Cancelar")
 
 
     """*************************************************
@@ -183,34 +174,24 @@ class UDCWindow(QWizard, Ui_Class):
     """*************************************************
     ************* Pages Initialization *****************
     *************************************************"""
-    def _initialize_intro_page(self):
-        pass
-
     def _initialize_page_serial_number(self):
         pass
 
     def _initialize_page_connect_udc(self):
         pass
 
-    def _initialize_page_visual_test(self):
-        pass
-
-    def _initialize_page_test_serial_port(self):
-        pass
-
-    def _initialize_page_hardware_verifications(self):
+    def _initialize_page_load_test_firmware(self):
         pass
 
     def _initialize_page_start_test(self):
         self.teTestReport.clear()
 
+    def _initialize_page_load_final_firmware(self):
+        pass
+
     """*************************************************
     ************** Pages Validation ********************
     *************************************************"""
-    def _validate_intro_page(self):
-        #return self._serial_port_status
-        return True
-
     def _validate_page_serial_number(self):
         if self.leDmCode.hasFocus():
             return False
@@ -226,29 +207,26 @@ class UDCWindow(QWizard, Ui_Class):
     def _validate_page_connect_udc(self):
         return True
 
-    def _validate_page_visual_test(self):
-        if (self.rbLedsOk.isChecked() or self.rbLedsNok.isChecked()) and \
-            (self.rbBuzzerOk.isChecked() or self.rbBuzzerNok.isChecked()):
+#    def _validate_page_visual_test(self):
+#        if (self.rbLedsOk.isChecked() or self.rbLedsNok.isChecked()) and \
+#            (self.rbBuzzerOk.isChecked() or self.rbBuzzerNok.isChecked()):
+#
+#            if self.rbLedsOk.isChecked():
+#                self._test_thread.led = self.SUCCESS
+#            else:
+#                self._test_thread.led = self.FAIL
+#
+#            if self.rbBuzzerOk.isChecked():
+#                self._test_thread.buzzer = self.SUCCESS
+#            else:
+#                self._test_thread.buzzer = self.FAIL
+#
+#            return True
+#
+#        return False
 
-            if self.rbLedsOk.isChecked():
-                self._test_thread.led = self.SUCCESS
-            else:
-                self._test_thread.led = self.FAIL
-
-            if self.rbBuzzerOk.isChecked():
-                self._test_thread.buzzer = self.SUCCESS
-            else:
-                self._test_thread.buzzer = self.FAIL
-
-            return True
-
-        return False
-
-    def _validate_page_test_serial_port(self):
-        return self._test_serial_port_status
-
-    def _initialize_page_hardware_verifications(self):
-        return self._sdcard_insert_status
+    def _validate_page_load_test_firmware(self):
+        return True
 
     def _validate_page_start_test(self):
         print('Validate Start Test')
@@ -258,58 +236,47 @@ class UDCWindow(QWizard, Ui_Class):
             self.back()
         return False
 
+    def _validate_page_load_final_firmware(self):
+        return True
+
 
     """*************************************************
     *********** Default Methods (Wizard) ***************
     *************************************************"""
     def initializePage(self, page):
-        if page == self.num_intro_page:
-            self._initialize_intro_page()
-
-        elif page == self.num_serial_number:
+        if page == self.num_serial_number:
             self._initialize_page_serial_number()
 
         elif page == self.num_connect_udc:
             self._initialize_page_connect_udc()
 
-        elif page == self.num_visual_test:
-            self._initialize_page_visual_test()
-
-        elif page == self.num_serial_port:
-            self._initialize_page_test_serial_port()
-
-        elif page == self.num_hard_verifications:
-            return self._initialize_page_hardware_verifications()
+        elif page == self.num_load_test_firmware:
+            self._initialize_page_load_test_firmware()
 
         elif page == self.num_start_test:
             self._initialize_page_start_test()
-            print(self.currentId())
 
+        elif page == self.num_load_final_firmware:
+            self._initialize_page_load_final_firmware()
         else:
             pass
 
     def validateCurrentPage(self):
         current_id = self.currentId()
-        if current_id == self.num_intro_page:
-            return self._validate_intro_page()
-
-        elif current_id == self.num_serial_number:
+        if current_id == self.num_serial_number:
             return self._validate_page_serial_number()
 
         elif current_id == self.num_connect_udc:
             return self._validate_page_connect_udc()
 
-        elif current_id == self.num_visual_test:
-            return self._validate_page_visual_test()
-
-        elif current_id == self.num_serial_port:
-            return self._validate_page_test_serial_port()
-
-        elif current_id == self.num_hard_verifications:
-            return self._validate_page_hardware_verifications()
+        elif current_id == self.num_load_test_firmware:
+            return self._validate_page_load_test_firmware()
 
         elif current_id == self.num_start_test:
             return self._validate_page_start_test()
+
+        elif current_id == self.num_load_test_firmware:
+            return self._validate_page_load_test_firmware()
 
         else:
             return True
@@ -333,6 +300,14 @@ class UDCWindow(QWizard, Ui_Class):
             self.leMaterialName.clear()
 
     @pyqtSlot()
+    def _load_test_firmware(self):
+        pass
+
+    @pyqtSlot()
+    def _load_final_firmware(self):
+        pass
+
+    @pyqtSlot()
     def _connect_serial_port(self):
         com = str(self.comboComPort.currentText())
         baud = int(self.leBaudrate.text())
@@ -354,16 +329,6 @@ class UDCWindow(QWizard, Ui_Class):
             self._test_serial_port_status = True
         else:
             self._test_serial_port_status = False
-
-    @pyqtSlot()
-    def _sdcard_connection_test(self):
-        test = self._test_thread.test_sdcard_connection()
-        if test:
-            self.lbSdCardInsert.setText("SUCESSO!! Cartão Detectado")
-            self._sdcard_insert_status = True
-        else:
-            self.lbSdCardInsert.setText("ERRO!! Cartão não inserido")
-            self._sdcard_insert_status = False
 
     @pyqtSlot()
     def _start_test_sequence(self):
