@@ -1697,6 +1697,49 @@
     </property>
    </widget>
   </widget>
+  <widget class="QWizardPage" name="PageTestFinished">
+   <widget class="QLabel" name="label_29">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>70</width>
+      <height>70</height>
+     </rect>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>70</width>
+      <height>70</height>
+     </size>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>images/sirius_logo.jpeg</pixmap>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_55">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>220</y>
+      <width>111</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Teste Finalizado!</string>
+    </property>
+   </widget>
+  </widget>
   <widget class="QWizardPage" name="PageStartTest_1">
    <widget class="QTextEdit" name="teTestReport_1">
     <property name="geometry">

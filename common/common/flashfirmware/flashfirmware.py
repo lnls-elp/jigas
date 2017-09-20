@@ -24,6 +24,14 @@ class LoadFirmware:
     def c28_pathtofile(self, path):
         self._c28 = path
 
+    @property
+    def status(self):
+        return self.status
+
+    @status.setter
+    def status(self, value):
+        self.status = value
+
     def flash_firmware(self, core):
         print("flashing firmware...")
         if core == 'arm':

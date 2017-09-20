@@ -18,7 +18,7 @@ class UDCWindow(QWizard, Ui_Class):
 
     # Page numbers
     (num_serial_number, num_connect_udc, num_load_test_firmware,
-    num_start_test, num_load_final_firmware) = range(5)
+    num_start_test, num_load_final_firmware, num_test_finished) = range(6)
 
     def __init__(self, parent=None):
         QWizard.__init__(self, parent)
@@ -35,6 +35,13 @@ class UDCWindow(QWizard, Ui_Class):
         self._initialize_widgets()
         self._initialize_signals()
         self._initialize_wizard_buttons()
+
+        #test status
+        self._load_test_firmware_status
+        self._load_final_firmware_status
+        self._leds_status
+        self._buzzer_status
+        self._communication_status
 
     """*************************************************
     *************** GUI Initialization *****************
@@ -112,6 +119,10 @@ class UDCWindow(QWizard, Ui_Class):
         self.PageLoadFinalFirmware.setButtonText(self.BackButton, "Anterior")
         self.PageLoadFinalFirmware.setButtonText(self.CancelButton, "Cancelar")
 
+        self.PageTestFinished.setButtonText(self.NextButton, "Novo Teste")
+        self.PageTestFinished.setButtonText(self.BackButton, "Anterior")
+        self.PageTestFinished.setButtonText(self.CancelButton, "Cancelar")
+
 
     """*************************************************
     ************* System Initialization ****************
@@ -171,6 +182,15 @@ class UDCWindow(QWizard, Ui_Class):
         self._test_thread.quit()
         self._test_thread.wait()
 
+    def _jump_to(self, value):
+        if value > self.currentId():
+            while self.currentId() is not value:
+                self.next()
+
+        if value < self.currentId():
+            while self.currentId() is not value:
+                self.back()
+
     """*************************************************
     ************* Pages Initialization *****************
     *************************************************"""
@@ -187,6 +207,9 @@ class UDCWindow(QWizard, Ui_Class):
         self.teTestReport.clear()
 
     def _initialize_page_load_final_firmware(self):
+        pass
+
+    def _initialize_page_test_finished(self):
         pass
 
     """*************************************************
@@ -226,6 +249,7 @@ class UDCWindow(QWizard, Ui_Class):
 #        return False
 
     def _validate_page_load_test_firmware(self):
+
         return True
 
     def _validate_page_start_test(self):
@@ -239,6 +263,8 @@ class UDCWindow(QWizard, Ui_Class):
     def _validate_page_load_final_firmware(self):
         return True
 
+    def _validate_page_test_finished(self):
+        return True
 
     """*************************************************
     *********** Default Methods (Wizard) ***************
@@ -258,6 +284,10 @@ class UDCWindow(QWizard, Ui_Class):
 
         elif page == self.num_load_final_firmware:
             self._initialize_page_load_final_firmware()
+
+        elif page == self.num_test_finished:
+            self._initialize_page_test_finished()
+
         else:
             pass
 
@@ -277,6 +307,9 @@ class UDCWindow(QWizard, Ui_Class):
 
         elif current_id == self.num_load_test_firmware:
             return self._validate_page_load_test_firmware()
+
+        elif current_id == self.num_test_finished:
+            return self._validate_page_test_finished()
 
         else:
             return True
@@ -301,11 +334,31 @@ class UDCWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _load_test_firmware(self):
-        pass
+        fw = LoadFirmware()
+
+        fw.arm_pathtofile = "/firmware/test/firmware_arm" #Ver nome
+        fw.c28_pathtofile = "/firmware/test/firmware_c28" #Ver nome
+
+        self.teTestFirmwareLog.append("Gravando firmware de testes ARM:\n")
+        fw.flash_firmware('arm')
+        self.teTestFirmwareLog.append(fw.log_status)
+        self.teTestFirmwareLog.append("Gravando firmware de testes C28:\n")
+        fw.flash_firmware('c28')
+        self.teTestFirmwareLog.append(fw.log_status)
 
     @pyqtSlot()
     def _load_final_firmware(self):
-        pass
+        fw = LoadFirmware()
+
+        fw.arm_pathtofile = "/firmware/final/firmware_arm" #Ver nome
+        fw.c28_pathtofile = "/firmware/final/firmware_c28" #Ver nome
+
+        self.teTestFirmwareLog.append("Gravando firmware final ARM:\n")
+        fw.flash_firmware('arm')
+        self.teTestFirmwareLog.append(fw.log_status)
+        self.teTestFirmwareLog.append("Gravando firmware final C28:\n")
+        fw.flash_firmware('c28')
+        self.teTestFirmwareLog.append(fw.log_status)
 
     @pyqtSlot()
     def _connect_serial_port(self):
