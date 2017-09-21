@@ -22,7 +22,7 @@ class HRADCTest(QThread):
     ufmOffset = {'serial': 0, 'calibdate': 4, 'variant': 9, 'rburden': 10}
     hradcVariant = {'HRADC-FBP': 0, 'HRADC-FAX': 1}
     hradcInputTypes = ['GND', 'Vref_bipolar_p', 'Vref_bipolar_n', 'Temp',
-                       'Vin_bipolar', 'Iin_bipolar']
+                       'Vin_bipolar_p', 'Vin_bipolar_n', 'Iin_bipolar_p','Iin_bipolar_n']
 
     def __init__(self):
         QThread.__init__(self)
@@ -45,8 +45,10 @@ class HRADCTest(QThread):
                        'Vref_bipolar_p': 5,
                        'Vref_bipolar_n': -5,
                        'Temp': -0.35,
-                       'Vin_bipolar': 10,
-                       'Iin_bipolar': 0.05
+                       'Vin_bipolar_p': 10,
+                       'Vin_bipolar_n': -10,
+                       'Iin_bipolar_p': 0.05,
+                       'Iin_bipolar_n': -0.05
                        }
 
         self.refTol = {'GND': 0.02,
@@ -202,6 +204,17 @@ class HRADCTest(QThread):
             print('\nEnviando ao servidor dados desta placa...\n')
             res = self._send_to_server(hradc)
 
+            self.source.DisableOutput()
+            self.source.Reset()
+            self.source.LOFloatChassis('F')
+            self.source.OutputTermination(0)
+            self.source.SetVoltageLimit(2)
+            self.source.SetOutput(-10,'V')
+
+            self.dmm.InitDefault()
+            self.dmm.SetMeasurementType('DCV',10)
+            self.dmm.SetMultipointMeas(3)
+
             if res:
                 print(res)
                 print('\n')
@@ -211,11 +224,13 @@ class HRADCTest(QThread):
                 log_hradc.device = self.device['HRADC']
                 log_hradc.test_result = "Aprovado"
                 log_hradc.details = board['pre_tests']
+                log_hradc_list = []
 
                 log_dm = HRADCLog()
                 log_dm.serial_number_hradc = board['serial']
                 log_dm.device = self.device['DM']
                 log_dm.test_result = "Aprovado"
+                log_dm_list = []
 
                 if board['slot'] > 0:
 
@@ -258,17 +273,42 @@ class HRADCTest(QThread):
                     self.drs.SelectHRADCBoard(board['slot'])
                     time.sleep(0.1)
 
-# hradcInputTypes = ['GND', 'Vref_bipolar_p', 'Vref_bipolar_n', 'Temp', 'Vin_bipolar', 'Iin_bipolar']
+# hradcInputTypes = ['GND', 'Vref_bipolar_p', 'Vref_bipolar_n', 'Temp', 'Vin_bipolar', 'Vin_bipolar', 'Iin_bipolar']
 
                     for signalType in hradcInputTypes:
 
+                        unit = ' V'
+
+                        if(signalType == 'Vin_bipolar_p')|(signalType == 'Vin_bipolar_n'):
+                            inputType = 'Vin_bipolar'
+                        elif(signalType == 'Iin_bipolar_p')|(signalType == 'Iin_bipolar_n'):
+                            inputType = 'Iin_bipolar'
+                            unit = ' A'
+                        else:
+                            inputType = signalType
                         print('\n- ' + signalType + ' -')
 
-                        self.drs.ConfigHRADC(board['slot'],100000,signalType,0,0)
+                        self.drs.ConfigHRADC(board['slot'],100000,inputType,0,0)
                         time.sleep(0.1)
 
-                        self.drs.SelectTestSource(signalType)
+                        self.drs.SelectTestSource(inputType)
                         time.sleep(0.1)
+
+                        if signalType == 'Vin_bipolar_p':
+                            self.source.SetOutput(10,'V')
+                            self.source.EnableOutput()
+                        elif signalType == 'Vin_bipolar_n':
+                            self.source.SetOutput(-10,'V')
+                            self.source.EnableOutput()
+                        elif signalType == 'Iin_bipolar_p':
+                            self.source.SetOutput(0.05,'I')
+                            self.source.EnableOutput()
+                        elif signalType == 'Iin_bipolar_n':
+                            self.source.SetOutput(-0.05,'I')
+                            self.source.EnableOutput()
+                        else:
+                            self.source.DisableOutput()
+                            self.source.SetOutput(0,'V')
 
                         self.drs.EnableSamplesBuffer()
                         time.sleep(1)
@@ -283,353 +323,53 @@ class HRADCTest(QThread):
                         if np.array_equal(buff,emptyBuff):
                             print('\n************** FALHA SAMPLES BUFFER **************\n')
                             return
-                        log_hradc.gnd = buff.mean()
+                        #log_hradc.gnd = buff.mean()
+                        log_hradc_list.append(buff.mean())
 
                         buff = np.array(self.dmm.ReadMeasurementPoints())
                         if np.array_equal(buff,emptyBuff):
                             print('\n************** FALHA DMM SAMPLES **************\n')
                             return
-                        log_dm.gnd = buff.mean()
+                        #log_dm.gnd = buff.mean()
+                        log_dm_list.append(buff.mean())
 
                         self.drs.DisableHRADCSampling()
                         time.sleep(0.1)
 
-                        print('HRADC: ' + str(log_hradc.gnd) + ' V')
-                        print('DMM: ' + str(log_dm.gnd) + ' V\n')
+                        self.source.DisableOutput()
 
-                        if abs(log_hradc.gnd - self.refVal[signalType]) > self.refTol[signalType]:
+                        print('HRADC: ' + str(log_hradc_list[-1]) + unit)
+                        print('DMM: ' + str(log_dm_list[-1]) + unit + '\n')
+
+                        if abs(log_hradc_list[-1] - self.refVal[signalType]) > self.refTol[signalType]:
                             log_hradc.test_result = "Reprovado"
                             print('HRADC Reprovado: ' + signalType)
 
-                        if abs(log_dm.gnd - self.refVal[signalType]) > self.refTol[signalType]:
+                        if abs(log_dm_list[-1] - self.refVal[signalType]) > self.refTol[signalType]:
                             log_dm.test_result = "Reprovado"
                             print('DMM Reprovado' + signalType)
 
-                    #############################
-                    #### TESTE Vref_bipolar_p ###
-                    #############################
-
-                    self.drs.ConfigHRADC(board['slot'],100000,'Vref_bipolar_p',0,0)
-                    time.sleep(0.1)
-                    self.drs.EnableSamplesBuffer()
-                    time.sleep(1)
-                    self.drs.EnableHRADCSampling()
-                    time.sleep(1)
-                    self.drs.DisableSamplesBuffer()
-                    time.sleep(0.5)
-
-                    buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
-                    if np.array_equal(buff,emptyBuff):
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        return
-                    log_hradc.vref_p = buff.mean()
-
-                    buff = np.array(self.dmm.ReadMeasurementPoints())
-                    if np.array_equal(buff,emptyBuff):
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        return
-                    log_dm.vref_p = buff.mean()
-
-                    self.drs.DisableHRADCSampling()
-                    time.sleep(0.1)
-
-                    print('- Vref_bipolar_p -')
-                    print('HRADC: ' + str(log_hradc.vref_p) + ' V')
-                    print('DMM: ' + str(log_dm.vref_p) + ' V\n')
-
-                    if abs(log_hradc.vref_p - self.refVal['Vref_bipolar_p']) > self.refTol['Vref_bipolar_p']:
-                        log_hradc.test_result = "Reprovado"
-                        print('HRADC Vref+ Reprovado')
-
-                    if abs(log_dm.vref_p - self.refVal['Vref_bipolar_p']) > self.refTol['Vref_bipolar_p']:
-                        log_dm.test_result = "Reprovado"
-                        print('DM Vref+ Reprovado')
-
-                    #############################
-                    #### TESTE Vref_bipolar_n ###
-                    #############################
-
-                    self.drs.ConfigHRADC(board['slot'],100000,'Vref_bipolar_n',0,0)
-                    time.sleep(0.1)
-                    self.drs.EnableSamplesBuffer()
-                    time.sleep(1)
-                    self.drs.EnableHRADCSampling()
-                    time.sleep(1)
-                    self.drs.DisableSamplesBuffer()
-                    time.sleep(0.5)
-
-                    buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
-                    if np.array_equal(buff,emptyBuff):
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        return
-                    log_hradc.vref_n = buff.mean()
-
-                    buff = np.array(self.dmm.ReadMeasurementPoints())
-                    if np.array_equal(buff,emptyBuff):
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        return
-                    log_dm.vref_n = buff.mean()
-
-                    self.drs.DisableHRADCSampling()
-                    time.sleep(0.1)
-
-                    print('- Vref_bipolar_n -')
-                    print('HRADC: ' + str(log_hradc.vref_n) + ' V')
-                    print('DMM: ' + str(log_dm.vref_n) + ' V\n')
-
-                    if abs(log_hradc.vref_n - self.refVal['Vref_bipolar_n']) > self.refTol['Vref_bipolar_n']:
-                        log_hradc.test_result = "Reprovado"
-                        print('HRADC Vref- Reprovado')
-
-                    if abs(log_dm.vref_n - self.refVal['Vref_bipolar_n']) > self.refTol['Vref_bipolar_n']:
-                        log_dm.test_result = "Reprovado"
-                        print('DM Vref- Reprovado')
-
-                    ####################
-                    #### TESTE Temp ####
-                    ####################
-
-                    self.drs.ConfigHRADC(board['slot'],100000,'Temp',0,0)
-                    time.sleep(0.1)
-                    self.drs.EnableSamplesBuffer()
-                    time.sleep(1)
-                    self.drs.EnableHRADCSampling()
-                    time.sleep(1)
-                    self.drs.DisableSamplesBuffer()
-                    time.sleep(0.5)
-
-                    buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
-                    if np.array_equal(buff,emptyBuff):
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        return
-                    log_hradc.temperature = buff.mean()
-
-                    buff = np.array(self.dmm.ReadMeasurementPoints())
-                    if np.array_equal(buff,emptyBuff):
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        return
-                    log_dm.temperature = buff.mean()
-
-                    self.drs.DisableHRADCSampling()
-                    time.sleep(0.1)
-
-                    print('- Temp -')
-                    print('HRADC: ' + str(log_hradc.temperature) + ' V')
-                    print('DMM: ' + str(log_dm.temperature) + ' V\n')
-
-                    if abs(log_hradc.temperature - self.refVal['Temp']) > self.refTol['Temp']:
-                        log_hradc.test_result = "Reprovado"
-                        print('HRADC Temp Reprovado')
-
-                    if abs(log_dm.temperature - self.refVal['Temp']) > self.refTol['Temp']:
-                        log_dm.test_result = "Reprovado"
-                        print('DM Temp Reprovado')
-
-                    #############################
-                    #### TESTE Vin_bipolar_p ####
-                    #############################
-
-                    self.drs.ConfigHRADC(board['slot'],100000,'Vin_bipolar',0,0)
-                    time.sleep(0.1)
-                    self.drs.SelectTestSource('Vin_bipolar')
-                    time.sleep(0.1)
-                    self.source.SetOutput(10,'V')
-                    self.source.EnableOutput()
-                    self.drs.EnableSamplesBuffer()
-                    time.sleep(1)
-                    self.drs.EnableHRADCSampling()
-                    time.sleep(1)
-                    self.drs.DisableSamplesBuffer()
-                    time.sleep(0.5)
-
-                    buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
-                    if np.array_equal(buff,emptyBuff):
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        return
-                    log_hradc.vin_p = buff.mean()
-
-                    buff = np.array(self.dmm.ReadMeasurementPoints())
-                    if np.array_equal(buff,emptyBuff):
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        return
-                    log_dm.vin_p = buff.mean()
-
-                    self.drs.DisableHRADCSampling()
-                    time.sleep(0.1)
-
-                    print('- Vin_bipolar_p -')
-                    print('HRADC: ' + str(log_hradc.vin_p) + ' V')
-                    print('DMM: ' + str(log_dm.vin_p) + ' V\n')
-
-                    if abs(log_hradc.vin_p - self.refVal['Vin_bipolar']) > self.refTol['Vin_bipolar']:
-                        log_hradc.test_result = "Reprovado"
-                        print('HRADC Vin+ Reprovado')
-
-                    if abs(log_dm.vin_p - self.refVal['Vin_bipolar']) > self.refTol['Vin_bipolar']:
-                        log_dm.test_result = "Reprovado"
-                        print('HRADC Vin+ Reprovado')
-
-                    #############################
-                    #### TESTE Vin_bipolar_n ####
-                    #############################
-
-                    self.source.SetOutput(-10,'V')
-                    self.drs.EnableSamplesBuffer()
-                    time.sleep(1)
-                    self.drs.EnableHRADCSampling()
-                    time.sleep(1)
-                    self.drs.DisableSamplesBuffer()
-                    time.sleep(0.5)
-
-                    buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
-                    if np.array_equal(buff,emptyBuff):
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        return
-                    log_hradc.vin_n = buff.mean()
-
-                    buff = np.array(self.dmm.ReadMeasurementPoints())
-                    if np.array_equal(buff,emptyBuff):
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        return
-                    log_dm.vin_n = buff.mean()
-
-                    self.drs.DisableHRADCSampling()
-                    time.sleep(0.1)
-                    self.source.DisableOutput()
-
-                    print('- Vin_bipolar_n -')
-                    print('HRADC: ' + str(log_hradc.vin_n) + ' V')
-                    print('DMM: ' + str(log_dm.vin_n) + ' V\n')
-
-
-                    if abs(log_hradc.vin_n + self.refVal['Vin_bipolar']) > self.refTol['Vin_bipolar']:
-                        log_hradc.test_result = "Reprovado"
-                        print('HRADC Vin- Reprovado')
-
-                    if abs(log_dm.vin_n + self.refVal['Vin_bipolar']) > self.refTol['Vin_bipolar']:
-                        log_dm.test_result = "Reprovado"
-                        print('DM Vin- Reprovado')
-
-                    #############################
-                    #### TESTE Iin_bipolar_p ####
-                    #############################
-
-                    self.drs.ConfigHRADC(board['slot'],100000,'Iin_bipolar',0,0)
-                    time.sleep(0.1)
-                    self.drs.SelectTestSource('Iin_bipolar')
-                    time.sleep(0.1)
-                    self.dmm.SetMeasurementType('DCI',0.05)
-                    self.source.SetOutput(0.05,'I')
-                    self.source.EnableOutput()
-                    self.drs.EnableSamplesBuffer()
-                    time.sleep(1)
-                    self.drs.EnableHRADCSampling()
-                    time.sleep(1)
-                    self.drs.DisableSamplesBuffer()
-                    time.sleep(0.5)
-
-                    buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
-                    if np.array_equal(buff,emptyBuff):
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        return
-                    log_hradc.iin_p = buff.mean()
-
-                    buff = np.array(self.dmm.ReadMeasurementPoints())
-                    if np.array_equal(buff,emptyBuff):
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        return
-                    log_dm.iin_p = buff.mean()
-
-                    self.drs.DisableHRADCSampling()
-                    time.sleep(0.1)
-
-                    print('- Iin_bipolar_p -')
-                    print('HRADC: ' + str(log_hradc.iin_p) + ' A')
-                    print('DMM: ' + str(log_dm.iin_p) + ' A\n')
-
-                    if board['variant'] == 'HRADC-FBP' and abs(log_hradc.iin_p - self.refVal['Iin_bipolar']) > self.refTol['Iin_bipolar']:
-                        log_hradc.test_result = "Reprovado"
-                        print('HRADC Iin+ Reprovado')
-
-                    if board['variant'] == 'HRADC-FBP' and abs(log_dm.iin_p - self.refVal['Iin_bipolar']) > self.refTol['Iin_bipolar']:
-                        log_dm.test_result = "Reprovado"
-                        print('DM Iin+ Reprovado')
-
-                    #############################
-                    #### TESTE Iin_bipolar_n ####
-                    #############################
-
-                    self.source.SetOutput(-0.05,'I')
-                    self.drs.EnableSamplesBuffer()
-                    time.sleep(1)
-                    self.drs.EnableHRADCSampling()
-                    time.sleep(1)
-                    self.drs.DisableSamplesBuffer()
-                    time.sleep(0.5)
-
-                    buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
-                    if np.array_equal(buff,emptyBuff):
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        return
-                    log_hradc.iin_n = buff.mean()
-
-                    buff = np.array(self.dmm.ReadMeasurementPoints())
-                    if np.array_equal(buff,emptyBuff):
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        print('************** FALHA SAMPLES BUFFER **************')
-                        return
-                    log_dm.iin_n = buff.mean()
-
-                    self.drs.DisableHRADCSampling()
-                    time.sleep(0.1)
-                    self.source.DisableOutput()
-
-                    print('- Iin_bipolar_n -')
-                    print('HRADC: ' + str(log_hradc.iin_n) + ' A')
-                    print('DMM: ' + str(log_dm.iin_n) + ' A\n')
-
-                    if board['variant'] == 'HRADC-FBP' and abs(log_hradc.iin_n + self.refVal['Iin_bipolar']) > self.refTol['Iin_bipolar']:
-                        log_hradc.test_result = "Reprovado"
-                        print('HRADC Iin- Reprovado')
-
-                    if board['variant'] == 'HRADC-FBP' and abs(log_dm.iin_n + self.refVal['Iin_bipolar']) > self.refTol['Iin_bipolar']:
-                        log_dm.test_result = "Reprovado"
-                        print('DM Iin- Reprovado')
-
-
                     print('Salvando log e enviando ao servidor...')
+
+                    log_hradc._iin_n = log_hradc_list.pop()
+                    log_hradc._iin_p = log_hradc_list.po()
+                    log_hradc._vin_n = log_hradc_list.pop()
+                    log_hradc._vin_p = log_hradc_list.pop()
+                    log_hradc._temperature = log_hradc_list.pop()
+                    log_hradc._vref_n = log_hradc_list.pop()
+                    log_hradc._vref_p = log_hradc_list.pop()
+                    log_hradc._gnd = log_hradc_list.pop()
                     log_hradc.details = board['pre_tests']
 
-
-                    #log_hradc.test_result = "Aprovado"
-                    #log_dm.test_result = "Aprovado"
+                    log_dm._iin_n = log_dm_list.pop()
+                    log_dm._iin_p = log_dm_list.po()
+                    log_dm._vin_n = log_dm_list.pop()
+                    log_dm._vin_p = log_dm_list.pop()
+                    log_dm._temperature = log_dm_list.pop()
+                    log_dm._vref_n = log_dm_list.pop()
+                    log_dm._vref_p = log_dm_list.pop()
+                    log_dm._gnd = log_dm_list.pop()
+                    log_dm.details = board['pre_tests']
 
                     log_hradc_serverstatus = self._send_to_server(log_hradc)
                     log_dm_serverstatus = self._send_to_server(log_dm)
