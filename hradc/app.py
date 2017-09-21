@@ -373,7 +373,7 @@ class HRADCWindow(QWizard, Ui_Class):
                 self._boardsinfo[-1]['slot'] = slot
                 self.lbStatusComunicacao.setText("<p color:'green'>OK</p>")
             else:
-                self._boardsinfo[-1]['pre_tests'] = self._boardsinfo[-1]['pre_tests'] + '\t' + 'Erro: Falha de comunicação com CPLD'
+                self._boardsinfo[-1]['pre_tests'] = self._boardsinfo[-1]['pre_tests'] + '\t' + 'Erro: Falha de comunicacao com CPLD'
                 self._boardsinfo[-1]['slot'] = -slot
                 self.lbStatusComunicacao.setText("<p color:'red'>Falha</p>")
 
