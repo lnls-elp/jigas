@@ -129,7 +129,7 @@ class LoadFirmware_HRADC:
 
     def load_firmware(self):
         print("\nGravando firmware...")
-        """
+
         #command = " CMD /C c:\\altera\\16.0\\qprogrammer\\bin64\\quartus_pgm -c USB-Blaster " + self._path
         #command = " CMD /C c:\\intelFPGA\\16.1\\qprogrammer\\bin64\\quartus_pgm -c USB-Blaster " + self._path
         command = " CMD /C c:\\intelFPGA_lite\\17.0\\quartus\\bin64\\quartus_pgm -c USB-Blaster " + self._path
@@ -137,9 +137,9 @@ class LoadFirmware_HRADC:
         (out, err) = proc.communicate()
         out = out.decode("utf-8")
         #print("out:   " + out)
-        """
-        out = "Successfully performed operation"
-        
+
+        #out = "Successfully performed operation"
+
         if "Successfully performed operation" in out:
             self.status = "Firmware gravado com sucesso"
 
