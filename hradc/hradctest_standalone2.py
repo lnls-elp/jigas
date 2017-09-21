@@ -28,7 +28,7 @@ class HRADCTest(QThread):
         QThread.__init__(self)
         self._comport = 'COM2'
         self._baudrate = 6000000
-        ser = str(input('Leia S/N: '))
+        ser = str(input('\nLeia S/N: '))
         ser = int(ser[2:])
         self._boardsinfo = [{'serial' : ser,
                              'variant' : 'HRADC-FAX',
@@ -55,8 +55,10 @@ class HRADCTest(QThread):
                        'Vref_bipolar_p': 0.02,
                        'Vref_bipolar_n': 0.02,
                        'Temp': 0.1,
-                       'Vin_bipolar': 0.02,
-                       'Iin_bipolar': 0.0001}
+                       'Vin_bipolar_p': 0.02,
+                       'Vin_bipolar_n': 0.02,
+                       'Iin_bipolar_p': 0.0001,
+                       'Iin_bipolar_n': 0.0001}
 
     @property
     def comport(self):
@@ -166,7 +168,7 @@ class HRADCTest(QThread):
 
     def _test_sequence(self):
 
-        print('Valendo!\n')
+        print('\n ### Valendo! ###\n')
 
         print(self._boardsinfo)
         self.nHRADC = max([board['slot'] for board in self._boardsinfo])
@@ -183,9 +185,9 @@ class HRADCTest(QThread):
 
         for board in self._boardsinfo:
 
-            print('\n**********************************')
-            print('**************   Slot ' + str(board['slot']) + '   ********')
-            print('**********************************\n\n')
+            print('\n******************************************')
+            print('***************   Slot ' + str(board['slot']) + '   ***************')
+            print('******************************************\n\n')
             print(board)
 
             hradc = HRADC()
@@ -234,27 +236,27 @@ class HRADCTest(QThread):
 
                 if board['slot'] > 0:
 
-                    print('Colocando em UFM mode a placa bem sucedida do slot ' + str(board['slot'])+ '\n')
+                    print('Colocando em UFM mode a placa bem sucedida do slot ' + str(board['slot'])+ '...')
 
                     board['slot'] = board['slot'] - 1
                     self.drs.ConfigHRADCOpMode(board['slot'],1)
                     time.sleep(0.5)
 
-                    print('Enviando serial number...')
+                    print('\nEnviando serial number...')
                     # Send serial number
                     ufmdata_16 = self._convertToUint16List(board['serial'],'Uint64')
                     for i in range(len(ufmdata_16)):
                         self.drs.WriteHRADC_UFM(board['slot'],i+self.ufmOffset['serial'],ufmdata_16[i])
                         time.sleep(0.1)
 
-                    print('Enviando variante...')
+                    print('\nEnviando variante...')
                     # Send variant
                     ufmdata_16 = self._convertToUint16List(self.hradcVariant[board['variant']],'Uint16')
                     for i in range(len(ufmdata_16)):
                         self.drs.WriteHRADC_UFM(board['slot'],i+self.ufmOffset['variant'],ufmdata_16[i])
                         time.sleep(0.1)
 
-                    print('Enviando rburden...')
+                    print('\nEnviando rburden...')
                     # Send Rburden
                     ufmdata_16 = self._convertToUint16List(hradc.burden_res,'float')
                     for i in range(len(ufmdata_16)):
@@ -273,11 +275,11 @@ class HRADCTest(QThread):
                     self.drs.SelectHRADCBoard(board['slot'])
                     time.sleep(0.1)
 
-# hradcInputTypes = ['GND', 'Vref_bipolar_p', 'Vref_bipolar_n', 'Temp', 'Vin_bipolar', 'Vin_bipolar', 'Iin_bipolar']
-
-                    for signalType in hradcInputTypes:
+                    for signalType in self.hradcInputTypes:
 
                         unit = ' V'
+
+                        print('\n - ' + signalType + ' -')
 
                         if(signalType == 'Vin_bipolar_p')|(signalType == 'Vin_bipolar_n'):
                             inputType = 'Vin_bipolar'
@@ -286,7 +288,7 @@ class HRADCTest(QThread):
                             unit = ' A'
                         else:
                             inputType = signalType
-                        print('\n- ' + signalType + ' -')
+
 
                         self.drs.ConfigHRADC(board['slot'],100000,inputType,0,0)
                         time.sleep(0.1)
@@ -301,9 +303,11 @@ class HRADCTest(QThread):
                             self.source.SetOutput(-10,'V')
                             self.source.EnableOutput()
                         elif signalType == 'Iin_bipolar_p':
+                            self.dmm.SetMeasurementType('DCI',0.05)
                             self.source.SetOutput(0.05,'I')
                             self.source.EnableOutput()
                         elif signalType == 'Iin_bipolar_n':
+                            self.dmm.SetMeasurementType('DCI',0.05)
                             self.source.SetOutput(-0.05,'I')
                             self.source.EnableOutput()
                         else:
@@ -322,6 +326,7 @@ class HRADCTest(QThread):
                         buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
                         if np.array_equal(buff,emptyBuff):
                             print('\n************** FALHA SAMPLES BUFFER **************\n')
+                            self.source.DisableOutput()
                             return
                         #log_hradc.gnd = buff.mean()
                         log_hradc_list.append(buff.mean())
@@ -329,6 +334,7 @@ class HRADCTest(QThread):
                         buff = np.array(self.dmm.ReadMeasurementPoints())
                         if np.array_equal(buff,emptyBuff):
                             print('\n************** FALHA DMM SAMPLES **************\n')
+                            self.source.DisableOutput()
                             return
                         #log_dm.gnd = buff.mean()
                         log_dm_list.append(buff.mean())
@@ -347,12 +353,12 @@ class HRADCTest(QThread):
 
                         if abs(log_dm_list[-1] - self.refVal[signalType]) > self.refTol[signalType]:
                             log_dm.test_result = "Reprovado"
-                            print('DMM Reprovado' + signalType)
+                            print('DMM Reprovado:' + signalType)
 
                     print('Salvando log e enviando ao servidor...')
 
                     log_hradc._iin_n = log_hradc_list.pop()
-                    log_hradc._iin_p = log_hradc_list.po()
+                    log_hradc._iin_p = log_hradc_list.pop()
                     log_hradc._vin_n = log_hradc_list.pop()
                     log_hradc._vin_p = log_hradc_list.pop()
                     log_hradc._temperature = log_hradc_list.pop()
@@ -362,7 +368,7 @@ class HRADCTest(QThread):
                     log_hradc.details = board['pre_tests']
 
                     log_dm._iin_n = log_dm_list.pop()
-                    log_dm._iin_p = log_dm_list.po()
+                    log_dm._iin_p = log_dm_list.pop()
                     log_dm._vin_n = log_dm_list.pop()
                     log_dm._vin_p = log_dm_list.pop()
                     log_dm._temperature = log_dm_list.pop()
@@ -393,11 +399,14 @@ class HRADCTest(QThread):
         # Quando o teste terminar emitir o resultado em uma lista de objetos
         # do tipo HRADCLog
 
-        print('Enviando sinal ao app')
+        self.source.DisableOutput()
+        self.source.SetOutput(0,'V')
+
+        print('\nEnviando sinal ao app...')
 
         for i in range(4 - len(log_res)):
             log_res.append(None)
-        print('log_res:' + str(log_res))
+        print('\nlog_res:' + str(log_res))
         self.test_complete.emit(log_res)
 
 
