@@ -240,6 +240,8 @@ class SerialDRS(object):
         hex_enMonitor  = self.double_to_hex(enableMonitor)
         send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('ConfigHRADC'))+hex_hradcID+hex_freq+hex_type+hex_enHeater+hex_enMonitor
         send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        print(hradcID)
+        print(inputType)
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
 
@@ -300,6 +302,7 @@ class SerialDRS(object):
         hex_hradcID    = self.double_to_hex(hradcID)
         send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('SelectHRADCBoard'))+hex_hradcID
         send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        print(hradcID)
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
 
@@ -308,6 +311,7 @@ class SerialDRS(object):
         hex_type       = self.double_to_hex(ListHRADCInputType.index(inputType))
         send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('SelectTestSource'))+hex_type
         send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        print(inputType)
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
 
@@ -903,7 +907,7 @@ class SerialDRS(object):
         self.ser.write(send_msg.encode('ISO-8859-1'))
         recv_msg = self.ser.read(1+1+2+1+2+1024+1) #Address+Command+Size+ID+Block_idx+data+checksum
         #print(time.time()-t0)
-        print(recv_msg)
+        #print(recv_msg)
         val = []
         for k in range(7,len(recv_msg)-1,4):
             val.extend(struct.unpack('f',recv_msg[k:k+4]))

@@ -1,6 +1,7 @@
 from PyQt5.QtCore import pyqtSlot, QThread, pyqtSignal
 from common.psdata import PowerSupply, PowerSupplyLog
 from common.elpwebclient import ElpWebClient
+from common.pydrs import SerialDRS
 import serial
 import random
 
@@ -16,7 +17,8 @@ class BurnInTest(QThread):
         self._comport = None
         self._baudarate = None
         self._serial_number = []
-        self._serial_port = serial.Serial()
+        self._ps_address = 1
+        self.FBP = SerialDRS()
 
     @property
     def serial_number(self):
@@ -46,22 +48,61 @@ class BurnInTest(QThread):
         if self._comport is None or self._baudrate is None:
             return False
         else:
-            self._serial_port.baudrate  = self._baudrate
-            self._serial_port.port      = self._comport
-            self._serial_port.open()
-            return self._serial_port.is_open
+            #self._serial_port.baudrate  = self._baudrate
+            #self._serial_port.port      = self._comport
+            #self._serial_port.open()
+            #return self._serial_port.is_open
+            return self.FBP.Connect(self._comport, self._baudrate)
 
-    def test_communication(self):
-        result = (False, False)     # Result for communication test and aux power supply
-        #TODO: Communication test
-        """
-            Simulação de teste
-        """
-        result = (True, True)
-        """
-            Fim da Simulação
-        """
+    def test_communication(self, ps_address):
+        result = False     # Result for communication test and aux power supply
+        self.FBP.SetSlaveAdd(ps_address)
+
+        try:
+            self.FBP.Write_sigGen_Aux(4)
+            test_package = self.FBP.Read_ps_Model()
+
+            if (test_package[0] ==   0) and \
+               (test_package[1] ==  17) and \
+               (test_package[2] == 512) and \
+               (test_package[3] ==  14) and \
+               (test_package[4] == 223):
+                result = True
+            else:
+                result = False
+        except:
+            result = False
+            print('Falha na comunicação')
+
         return result
+
+    def find_address(self):
+        test_address = 1
+
+        while (self.test_communication(test_address) == False):
+            test_address = test_address + 1
+
+        print('o endereço da fonte é: ' + str(test_address))
+        return test_address
+
+    def set_address(self):
+        write_gui  = []
+        ps_address = self.find_address()
+        self.FBP.SetSlaveAdd(ps_address)
+        write_gui.append(str(self._ps_address))
+
+        if self.test_communication(ps_address):
+            self.FBP.SetRSAddress(self.write_address)
+
+            if self.test_communication(self._ps_address):
+                write_gui.append('endereço ' + str(self._ps_address) + ' gravado com sucesso')
+                print('endereço ' + str(self._ps_address) + ' gravado com sucesso')
+                self._ps_address = self._ps_address + 1
+            else:
+                write_gui.append('erro na gravação do endereço')
+                print('erro na gravação do endereço')
+                
+        return write_gui
 
     def _test_sequence(self):
         result = False
