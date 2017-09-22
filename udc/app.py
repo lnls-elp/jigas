@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from PyQt5.QtWidgets import QWizard, QApplication, QWizardPage
+from PyQt5.QtWidgets import QWizard, QApplication, QWizardPage, QMessageBox
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from common.dmscanner import Scanner
 from PyQt5.uic import loadUiType
@@ -43,6 +43,7 @@ class UDCWindow(QWizard, Ui_Class):
         self._buzzer_status = False
         self._communication_status = False
         self._test_result = False
+        self._test_finished_status = False
 
     """*************************************************
     *************** GUI Initialization *****************
@@ -87,6 +88,8 @@ class UDCWindow(QWizard, Ui_Class):
         self.pbTestBuzzer.setEnabled(True)
         self.pbTestBuzzer.setText("Testar")
         self.cbReprove.setChecked(False)
+        self.pbStartTests.setEnabled(True)
+        self.pbStartTests.setText("Iniciar Testes")
         self.lbStatusLoadingTestFirmware.setText("Clique para gravar.")
         self.lbStatusLoadingFinalFirmware.setText("Clique para gravar.")
         self.pbConnectSerialPort.setText("Conectar")
@@ -186,6 +189,8 @@ class UDCWindow(QWizard, Ui_Class):
         self._leds_status = False
         self._buzzer_status = False
         self._communication_status = False
+        self._test_result = False
+        self._test_finished_status = False
 
     def _restart_test_thread(self):
         self._test_thread.test_complete.disconnect()
@@ -290,17 +295,22 @@ class UDCWindow(QWizard, Ui_Class):
             return False
 
     def _validate_page_start_test(self):
-        if self._test_result:
-            return True
+        if self._leds_status and self._buzzer_status and self.test_finished_status:
+            if self._test_result:
+                return True
+            else:
+                self._initialize_widgets()
+                self._restart_variables()
+                self._restart_test_thread()
+                self._jump_to(self.num_serial_number)
+                return False
         else:
-            self._initialize_widgets()
-            self._restart_test_thread()
-            self._jump_to(self.num_serial_number)
             return False
 
     def _validate_page_load_final_firmware(self):
         if self._load_final_firmware_status:
             self._initialize_widgets()
+            self._restart_variables()
             self._restart_test_thread()
             self._jump_to(self.num_serial_number)
         return False
@@ -469,8 +479,30 @@ class UDCWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _start_test_sequence(self):
-        self._connect_test_signals()
-        self._test_thread.start()
+        if (self.rbLedsOk.isChecked() or self.rbLedsNok.isChecked()) and \
+        (self.rbBuzzerOk.isChecked() or self.rbBuzzerNok.isChecked()) and \
+        (self._test_leds and self._test_buzzer):
+            if self.rbLedsOk.isChecked():
+                self._test_thread.led = True
+            else:
+                self._test_thread.led = True
+
+            if self.rbBuzzerOk.isChecked():
+                self._test_thread.buzzer = False
+            else:
+                self._test_thread.buzzer = False
+            self.pbStartTests.setEnabled(False)
+            self.pbStartTests.setText("Testando...")
+            self._connect_test_signals()
+            self._test_thread.start()
+        else:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Information)
+            msg.setText("LEDs e Buzzer")
+            msg.setInformativeText("Leds e Buzzer precisam ser testados antes.")
+            msg.setWindowTitle("Leds e Buzzer")
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.exec_()
 
     @pyqtSlot()
     def _finish_wizard_execution(self):
@@ -478,6 +510,9 @@ class UDCWindow(QWizard, Ui_Class):
 
     @pyqtSlot(bool)
     def _test_finished(self, result):
+        self._test_finished_status = True
+        self.pbStartTests.setEnabled(True)
+        self.pbStartTests.setText("Finalizado!")
         if result:
             self.lbTestResult.setText("Aprovado")
         else:
@@ -546,12 +581,22 @@ class UDCWindow(QWizard, Ui_Class):
         self._test_thread.wait()
 
     @pyqtSlot()
-    def _test_leds():
-        pass
+    def _test_leds(self):
+        self.pbTestLeds.setEnabled(False)
+        self.pbTestLeds.setText("Testando")
+        result = self._test_thread.test_led()
+        self._leds_status = True
+        self.pbTestLeds.setEnabled(True)
+        self.pbTestLeds.setText("Testar")
 
     @pyqtSlot()
-    def _test_buzzer():
-        pass
+    def _test_buzzer(self):
+        self.pbTestBuzzer.setEnabled(False)
+        self.pbTestBuzzer.setText("Testando")
+        result = self._test_thread.test_buzzer()
+        self._buzzer_status = True
+        self.pbTestBuzzer.setEnabled(True)
+        self.pbTestBuzzer.setText("Testar")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
