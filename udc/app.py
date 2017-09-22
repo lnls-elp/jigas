@@ -244,6 +244,7 @@ class UDCWindow(QWizard, Ui_Class):
         return False
 
     def _validate_page_connect_udc(self):
+        self._connect_test_signals()
         return True
 
 #    def _validate_page_visual_test(self):
@@ -295,7 +296,7 @@ class UDCWindow(QWizard, Ui_Class):
             return False
 
     def _validate_page_start_test(self):
-        if self._leds_status and self._buzzer_status and self.test_finished_status:
+        if self._leds_status and self._buzzer_status and self._test_finished_status:
             if self._test_result:
                 return True
             else:
@@ -491,6 +492,7 @@ class UDCWindow(QWizard, Ui_Class):
                 self._test_thread.buzzer = False
             else:
                 self._test_thread.buzzer = False
+            self._disconnect_test_signals()
             self.pbStartTests.setEnabled(False)
             self.pbStartTests.setText("Testando...")
             self._connect_test_signals()
@@ -512,7 +514,8 @@ class UDCWindow(QWizard, Ui_Class):
     def _test_finished(self, result):
         self._test_finished_status = True
         self.pbStartTests.setEnabled(True)
-        self.pbStartTests.setText("Finalizado!")
+        self.pbStartTests.setText("Novo Teste!")
+        self.lbTestStatus.setText("Finalizado")
         if result:
             self.lbTestResult.setText("Aprovado")
         else:
@@ -547,11 +550,11 @@ class UDCWindow(QWizard, Ui_Class):
 
     @pyqtSlot(str)
     def _update_rtc_label(self, value):
-        self.lbRtcInt.setText(value)
+        self.lbRtc.setText(value)
 
     @pyqtSlot(str)
     def _update_sensor_temp_label(self, value):
-        self.lbSensorTempCom.setText(value)
+        self.lbSensorTemp.setText(value)
 
     @pyqtSlot(str)
     def _update_rs485_label(self, value):
@@ -572,6 +575,10 @@ class UDCWindow(QWizard, Ui_Class):
     @pyqtSlot(str)
     def _update_ethernet_ping_label(self, value):
         self.lbEthernetPing.setText(value)
+
+    @pyqtSlot(str)
+    def _update_loopback_label(self, value):
+        self.lbLoopback.setText(value)
 
     @pyqtSlot()
     def _send_partial_complete(self):

@@ -35,6 +35,7 @@ class UDCTest(QThread):
     io_expander             = pyqtSignal(str)
     ethernet_ping           = pyqtSignal(str)
     ethernet_init           = pyqtSignal(str)
+    loopback                = pyqtSignal(str)
 
     def __init__(self, comport=None, baudrate=None, serial_number=None):
         QThread.__init__(self)
@@ -129,7 +130,6 @@ class UDCTest(QThread):
 
     def test_led(self):
         result = self.DISAPPROVED
-        print("Testando Leds...")
         self.update_gui.emit("Testando Leds...")
         #self._udc.UdcLedTest(self.START_TEST)
         time.sleep(self.SLEEP_TIME)
@@ -141,7 +141,7 @@ class UDCTest(QThread):
         """
             End Simulation
         """
-        if (response is self.SUCESS) and self._led:
+        if (response is self.SUCESS):
             result = self.APPROVED
             self._test_res_led = True
         else:
@@ -164,7 +164,7 @@ class UDCTest(QThread):
         """
             End Simulation
         """
-        if (response is self.SUCESS) and self._buzzer:
+        if (response is self.SUCESS):
             result = self.APPROVED
             self._test_res_led = True
         else:
@@ -184,7 +184,8 @@ class UDCTest(QThread):
         """
             Simulate Value
         """
-        response = self._get_randon()
+        #response = self._get_randon()
+        response = [5, 9, 9 ,9, 5, 9, 9 ,9, 9, 9]
         """
             End Simulation
         """
@@ -257,10 +258,10 @@ class UDCTest(QThread):
                 End Simulation
             """
             if response is self.SUCESS:
-                result[i] = self.APPROVED
+                result[i - 1] = self.APPROVED
             else:
-                result[i] = self.DISAPPROVED
-            self.update_gui.emit(result[i])
+                result[i - 1] = self.DISAPPROVED
+            self.update_gui.emit(result[i - 1])
         self.adc.emit(result)
         for i in range(8):
             if result[i] is self.APPROVED:
@@ -427,10 +428,10 @@ class UDCTest(QThread):
                 End Simulation
             """
             if response is self.SUCESS:
-                result_bool[i] = True
+                result_bool[i - 1] = True
                 self.update_gui.emit(self.APPROVED)
             else:
-                result_bool[i] = False
+                result_bool[i - 1] = False
                 self._details += "\t Erro Loopback " + str(i)
                 self.update_gui.emit(self.DISAPPROVED)
         if False in result_bool:
@@ -455,6 +456,8 @@ class UDCTest(QThread):
         test_res_adc         = self._test_adc()
         test_res_uart        = self._test_rs485()
         test_res_loopback    = self._test_periph_loopback()
+        test_res_ethern_init = self._test_ethernet_init()
+        test_res_ethern_ping = self._test_ethernet_ping()
 
         udc = UDC()
         udc.serial_number = self._serial_number
@@ -517,6 +520,16 @@ class UDCTest(QThread):
             else:
                 log.control_aliment_isol_plane = self.DISAPPROVED
 
+            if test_res_ethern_init:
+                log.ethernet_initialization = self.APPROVED
+            else:
+                log.ethernet_initialization = self.DISAPPROVED
+
+            if test_res_ethern_ping:
+                log.ethernet_ping = self.APPROVED
+            else:
+                log.ethernet_ping = self.DISAPPROVED
+
             if test_res_adc[0]:
                 log.adc_ch_1 = self.APPROVED
             else:
@@ -557,10 +570,11 @@ class UDCTest(QThread):
             else:
                 log.adc_ch_8 = self.DISAPPROVED
 
-            if test_res_io_expander and test_res_leds and test_res_buzzer and \
+            if test_res_io_expander and self._led and self._buzzer and \
                 test_res_eeprom and test_res_flash and test_res_ram and \
                 test_res_rtc and test_res_temp and test_res_isol_plane and \
                 test_res_adc and test_res_uart and test_res_loopback and \
+                test_res_ethern_init and test_res_ethern_ping and \
                 test_res_adc[0] and test_res_adc[1] and test_res_adc[2] and \
                 test_res_adc[3] and test_res_adc[4] and test_res_adc[5] and \
                 test_res_adc[6] and test_res_adc[7]:
