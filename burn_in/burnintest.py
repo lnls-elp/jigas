@@ -4,6 +4,7 @@ from common.elpwebclient import ElpWebClient
 from common.pydrs import SerialDRS
 import serial
 import random
+import time
 
 class BurnInTest(QThread):
     test_complete       = pyqtSignal(bool)
@@ -57,6 +58,7 @@ class BurnInTest(QThread):
     def test_communication(self, ps_address):
         result = False     # Result for communication test and aux power supply
         self.FBP.SetSlaveAdd(ps_address)
+        time.sleep(1)
 
         try:
             self.FBP.Write_sigGen_Aux(4)
@@ -80,6 +82,7 @@ class BurnInTest(QThread):
         test_address = 1
 
         while (self.test_communication(test_address) == False):
+            print(test_address)
             test_address = test_address + 1
 
         print('o endereço da fonte é: ' + str(test_address))
@@ -101,7 +104,7 @@ class BurnInTest(QThread):
             else:
                 write_gui.append('erro na gravação do endereço')
                 print('erro na gravação do endereço')
-                
+
         return write_gui
 
     def _test_sequence(self):
