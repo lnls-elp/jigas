@@ -30,27 +30,29 @@ class UDCLog:
 
         self._test_result                   = None
         self._serial_number_udc             = None
-        self._io_expander0                  = None
-        self._io_expander1                  = None
-        self._leds                          = None
-        self._buzzer                        = None
-        self._eeprom                        = None
-        self._flash                         = None
-        self._ram                           = None
-        self._rtc_communication             = None
-        self._rtc_interrupt                 = None
-        self._temperature_sensor_com        = None
-        self._temperature_sensor_val        = None
-        self._control_aliment_isol_plane    = None
-        self._rs4850                        = None
-        self._rs4851                        = None
-        self._rs4852                        = None
-        self._sdcard_insert                 = None
-        self._sdcard_communication          = None
-        self._ethernet_initizalization      = None
-        self._ethernet_ping                 = None
-        self._loopback                      = None
-        self._details                       = None
+        self._io_expander                   = ""
+        self._leds                          = ""
+        self._buzzer                        = ""
+        self._eeprom                        = ""
+        self._flash                         = ""
+        self._ram                           = ""
+        self._rtc                           = ""
+        self._temperature_sensor            = ""
+        self._control_aliment_isol_plane    = ""
+        self._uart                          = ""
+        self._sdcard                        = ""
+        self._ethernet_initizalization      = ""
+        self._ethernet_ping                 = ""
+        self._loopback                      = ""
+        self._details                       = ""
+        self._adc_ch_1                      = ""
+        self._adc_ch_2                      = ""
+        self._adc_ch_3                      = ""
+        self._adc_ch_4                      = ""
+        self._adc_ch_5                      = ""
+        self._adc_ch_6                      = ""
+        self._adc_ch_7                      = ""
+        self._adc_ch_8                      = ""
 
     @property
     def test_result(self):
@@ -69,20 +71,12 @@ class UDCLog:
         self._serial_number_udc = value
 
     @property
-    def io_expander0(self):
-        return self._io_expander0
+    def io_expander(self):
+        return self._io_expander
 
-    @io_expander0.setter
-    def io_expander0(self, value):
-        self._io_expander0 = value
-
-    @property
-    def io_expander1(self):
-        return self._io_expander1
-
-    @io_expander1.setter
-    def io_expander1(self, value):
-        self._io_expander1 = value
+    @io_expander.setter
+    def io_expander(self, value):
+        self._io_expander = value
 
     @property
     def leds(self):
@@ -125,36 +119,20 @@ class UDCLog:
         self._ram = value
 
     @property
-    def rtc_communication(self):
-        return self._rtc_communication
+    def rtc(self):
+        return self._rtc
 
-    @rtc_communication.setter
-    def rtc_communication(self, value):
-        self._rtc_communication = value
-
-    @property
-    def rtc_interrupt(self):
-        return self._rtc_interrupt
-
-    @rtc_interrupt.setter
-    def rtc_interrupt(self, value):
-        self._rtc_interrupt = value
+    @rtc.setter
+    def rtc(self, value):
+        self._rtc = value
 
     @property
-    def temperature_sensor_com(self):
-        return self._temperature_sensor_com
+    def temperature_sensor(self):
+        return self._temperature_sensor
 
-    @temperature_sensor_com.setter
-    def temperature_sensor_com(self, value):
-        self._temperature_sensor_com = value
-
-    @property
-    def temperature_sensor_val(self):
-        return self._temperature_sensor_val
-
-    @temperature_sensor_val.setter
-    def temperature_sensor_val(self, value):
-        self._temperature_sensor_val = value
+    @temperature_sensor.setter
+    def temperature_sensor(self, value):
+        self._temperature_sensor = value
 
     @property
     def control_aliment_isol_plane(self):
@@ -165,44 +143,20 @@ class UDCLog:
         self._control_aliment_isol_plane = value
 
     @property
-    def rs4850(self):
-        return self._rs4850
+    def uart(self):
+        return self._uart
 
-    @rs4850.setter
-    def rs4850(self, value):
-        self._rs4850 = value
-
-    @property
-    def rs4851(self):
-        return self._rs4851
-
-    @rs4851.setter
-    def rs4851(self, value):
-        self._rs4851 = value
+    @uart.setter
+    def uart(self, value):
+        self._uart = value
 
     @property
-    def rs4852(self):
-        return self._rs4852
+    def sdcard(self):
+        return self._sdcard
 
-    @rs4852.setter
-    def rs4852(self, value):
-        self._rs4852 = value
-
-    @property
-    def sdcard_insert(self):
-        return self._sdcard_insert
-
-    @sdcard_insert.setter
-    def sdcard_insert(self, value):
-        self._sdcard_insert = value
-
-    @property
-    def sdcard_communication(self):
-        return self._sdcard_communication
-
-    @sdcard_communication.setter
-    def sdcard_communication(self, value):
-        self._sdcard_communication = value
+    @sdcard.setter
+    def sdcard(self, value):
+        self._sdcard = value
 
     @property
     def ethernet_initialization(self):
@@ -229,6 +183,70 @@ class UDCLog:
         self._loopback = value
 
     @property
+    def adc_ch_1(self):
+        return self._adc_ch_1
+
+    @adc_ch_1.setter
+    def adc_ch_1(self, value):
+        self._adc_ch_1 = value
+
+    @property
+    def adc_ch_2(self):
+        return self._adc_ch_2
+
+    @adc_ch_2.setter
+    def adc_ch_2(self, value):
+        self._adc_ch_2 = value
+
+    @property
+    def adc_ch_3(self):
+        return self._adc_ch_3
+
+    @adc_ch_3.setter
+    def adc_ch_3(self, value):
+        self._adc_ch_3 = value
+
+    @property
+    def adc_ch_4(self):
+        return self._adc_ch_4
+
+    @adc_ch_4.setter
+    def adc_ch_4(self, value):
+        self._adc_ch_4 = value
+
+    @property
+    def adc_ch_5(self):
+        return self._adc_ch_5
+
+    @adc_ch_5.setter
+    def adc_ch_5(self, value):
+        self._adc_ch_5 = value
+
+    @property
+    def adc_ch_6(self):
+        return self._adc_ch_6
+
+    @adc_ch_6.setter
+    def adc_ch_6(self, value):
+        self._adc_ch_6 = value
+
+    @property
+    def adc_ch_7(self):
+        return self._adc_ch_7
+
+    @adc_ch_7.setter
+    def adc_ch_7(self, value):
+        self._adc_ch_7 = value
+
+    @property
+    def adc_ch_8(self):
+        return self._adc_ch_8
+
+    @adc_ch_8.setter
+    def adc_ch_8(self, value):
+        self._adc_ch_8 = value
+
+    @property
     def details(self):
         return self._details
 
@@ -240,26 +258,28 @@ class UDCLog:
         data = {}
         data['resultado_teste']                 = self._test_result
         data['numero_serie_udc']                = self._serial_number_udc
-        data['io_expander0']                    = self._io_expander0
-        data['io_expander1']                    = self._io_expander1
+        data['io_expander']                     = self._io_expander
         data['leds']                            = self._leds
         data['buzzer']                          = self._buzzer
         data['eeprom']                          = self._eeprom
         data['flash']                           = self._flash
         data['ram']                             = self._ram
-        data['rtc_communication']               = self._rtc_communication
-        data['rtc_interrupt']                   = self._rtc_interrupt
-        data['sensor_temperatura_com']          = self._temperature_sensor_com
-        data['sensor_temperatura_val']          = self._temperature_sensor_val
+        data['rtc']                             = self._rtc
+        data['sensor_temperatura']              = self._temperature_sensor
         data['control_aliment_plano_isolado']   = self._control_aliment_isol_plane
-        data['rs4850']                          = self._rs4850
-        data['rs4851']                          = self._rs4851
-        data['rs4852']                          = self._rs4852
-        data['sdcard_inserido']                 = self._sdcard_insert
-        data['sdcard_communication']            = self._sdcard_communication
+        data['uart']                            = self._uart
+        data['sdcard']                          = self._sdcard
         data['ethernet_inicializacao']          = self._ethernet_initizalization
         data['ethernet_ping']                   = self._ethernet_ping
         data['loopback']                        = self._loopback
+        data['adc_ch_1']                        = self._adc_ch_1
+        data['adc_ch_2']                        = self._adc_ch_2
+        data['adc_ch_3']                        = self._adc_ch_3
+        data['adc_ch_4']                        = self._adc_ch_4
+        data['adc_ch_5']                        = self._adc_ch_5
+        data['adc_ch_6']                        = self._adc_ch_6
+        data['adc_ch_7']                        = self._adc_ch_7
+        data['adc_ch_8']                        = self._adc_ch_8
         data['details']                         = self._details
         return data
 
