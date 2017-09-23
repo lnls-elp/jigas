@@ -10,11 +10,11 @@ import time
 class UDCTest(QThread):
     DISAPPROVED             = "Falha"
     APPROVED                = "OK"
-    START_TEST              = 0x00
-    READ_RESULT             = 0x01
-    SUCESS                  = 0x00
-    FAIL                    = 0x01
-    SLEEP_TIME              = 0.05
+    START_TEST              = 0
+    READ_RESULT             = 1
+    SUCESS                  = b'\x00'
+    FAIL                    = b'\x01'
+    SLEEP_TIME              = 0.2
 
     test_complete           = pyqtSignal(bool)
     update_gui              = pyqtSignal(str)
@@ -131,16 +131,10 @@ class UDCTest(QThread):
     def test_led(self):
         result = self.DISAPPROVED
         self.update_gui.emit("Testando Leds...")
-        #self._udc.UdcLedTest(self.START_TEST)
+        self._udc.UdcLedTest(self.START_TEST)
         time.sleep(self.SLEEP_TIME)
-        #response = self._udc.UdcLedTest(self.READ_RESULT)
-        """
-            Simulate Value
-        """
-        response = self._get_randon()
-        """
-            End Simulation
-        """
+        response = self._udc.UdcLedTest(self.READ_RESULT)
+        print("Resposta UDC: " + str(response.decode()))
         if (response is self.SUCESS):
             result = self.APPROVED
             self._test_res_led = True

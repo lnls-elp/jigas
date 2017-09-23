@@ -6,7 +6,7 @@ class LoadFirmware:
 
         self._arm = arm_pathtofile
         self._c28 = c28_pathtofile
-        self.status = "initialized"
+        self._status = "initialized"
 
     @property
     def arm_pathtofile(self):
@@ -26,13 +26,14 @@ class LoadFirmware:
 
     @property
     def status(self):
-        return self.status
+        return self._status
 
     @status.setter
     def status(self, value):
-        self.status = value
+        self._status = value
 
     def flash_firmware(self, core):
+
         print("flashing firmware...")
         if core == 'arm':
             flashcommand = " CMD /C ccs_base\\DebugServer\\bin\\DSLite flash -c user_files/configs/f28m36p63c2.ccxml -l user_files/settings/generated.ufsettings  -f -v " + self._arm
@@ -43,70 +44,70 @@ class LoadFirmware:
         (out, err) = proc.communicate()
         if err:
             print("ERRO")
-            out = out.decode("utf-8")
-            err = err.decode("utf-8")
+            out = out.decode("ISO-8859-1")
+            err = err.decode("ISO-8859-1")
             print("out:   " + out)
             print("err:   "+err)
             if "problem loading file" in err:
                 if "Could not open file" in err:
                     print("arquivo nao encontrado")
-                    self.status = "file not found fault"
+                    self._status = "file not found fault"
                 elif "Could not determine target type of file" in err:
                     print("arquivo incompativel ou corrompido")
-                    self.status = "file extension fault"
+                    self._status = "file extension fault"
                 else:
                     print("erro com o arquivo.")
-                    self.status = "file unknown error"
+                    self._status = "file unknown error"
             elif "Operation was aborted" in err:
                 if "FTDI driver" in out:
                     print("cabo desconectado")
-                    self.status = "cable fault"
+                    self._status = "cable fault"
                 elif "power loss" in out:
                     print("problema de alimentacao")
-                    self.status = "power fault"
+                    self._status = "power fault"
                 else:
                     print("problema desconhecido")
-                    self.status = "aborted unknown error"
+                    self._status = "aborted unknown error"
             elif "Does not match the target type" in err:
-                self.status = "target file error"
+                self._status = "target file error"
             elif "nothing to do" in err:
-                self.status = "missing file error"
+                self._status = "missing file error"
             else:
-                self.status = "unknown error"
+                self._status = "unknown error"
         else:
-            self.status = "success"
+            self._status = "success"
             print("OK")
-        return(self.status)
+        return(self._status)
 
     def log_status(self):
-        if self.status == "success":
+        if self._status == "success":
             return("código gravado com sucesso!")
 
-        elif self.status == "file not found fault":
+        elif self._status == "file not found fault":
             return "erro : arquivo não encontrado."
 
-        elif self.status == "file extension fault":
+        elif self._status == "file extension fault":
             return "erro : arquivo não é do tipo esperado ou está corrompido."
 
-        elif self.status == "file unknown error":
+        elif self._status == "file unknown error":
             return "erro : não foi possível abrir o arquivo escolhido."
 
-        elif self.status == "cable fault":
+        elif self._status == "cable fault":
             return "erro : o computador não detectou a conexão USB com o gravador."
 
-        elif self.status == "power fault":
+        elif self._status == "power fault":
             return "erro : o dispositivo não está ligado."
 
-        elif self.status == "aborted unknown error":
+        elif self._status == "aborted unknown error":
             return "erro : gravação interrompida."
 
-        elif self.status == "target file error":
+        elif self._status == "target file error":
             return "erro : o arquivo selecionado não corresponde ao núcleo."
 
-        elif self.status == "unknown error":
+        elif self._status == "unknown error":
             return "erro desconhecido."
 
-        elif self.status == "initialized":
+        elif self._status == "initialized":
             return "nenhuma tentativa de gravação realizada."
 
         else:

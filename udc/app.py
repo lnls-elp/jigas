@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 from PyQt5.QtWidgets import QWizard, QApplication, QWizardPage, QMessageBox
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
+from common.flashfirmware import LoadFirmware
 from common.dmscanner import Scanner
 from PyQt5.uic import loadUiType
 from udctest import UDCTest
@@ -24,7 +25,7 @@ class UDCWindow(QWizard, Ui_Class):
         QWizard.__init__(self, parent)
         self.setupUi(self)
 
-        self._SERIAL_BAUDRATE = 6000000
+        self._SERIAL_BAUDRATE = 115200
 
         self._list_serial_ports()
         self._serial_port_status = False
@@ -387,34 +388,33 @@ class UDCWindow(QWizard, Ui_Class):
     @pyqtSlot()
     def _load_test_firmware(self):
         self.lbStatusLoadingTestFirmware.setText("Gravando...")
-        #arm_status = False
-        #c28_status = False
-        #fw = LoadFirmware()
+        arm_status = False
+        c28_status = False
+        fw = LoadFirmware()
 
-        #fw.arm_pathtofile = "/firmware/test/m3_test.out" #Ver nome
-        #fw.c28_pathtofile = "/firmware/test/c28_test.out" #Ver nome
+        fw.arm_pathtofile = "firmware\\test\\arm_test.out" #Ver nome
+        fw.c28_pathtofile = "firmware\\test\\dsp_test.out" #Ver nome
 
-        #self.teTestFirmwareLog.append("Gravando firmware de testes ARM:\n")
-        #fw.flash_firmware('arm')
-        #self.teTestFirmwareLog.append(fw.log_status)
-        #print(fw.status)
-        #if fw.status is "sucess":
-        #    arm_status = True
-        #self.teTestFirmwareLog.append("Gravando firmware de testes C28:\n")
-        #fw.flash_firmware('c28')
-        #self.teTestFirmwareLog.append(fw.log_status)
-        #print(fw.status)
-        #if fw.status is "sucess":
-        #    c28_status = True
+        self.teTestFirmwareLog.append("Gravando firmware de testes ARM:\n")
+        fw.flash_firmware('arm')
+        self.teTestFirmwareLog.append(fw.log_status())
+        print(fw.status)
+        if fw.status is "sucess":
+            arm_status = True
+        self.teTestFirmwareLog.append("Gravando firmware de testes C28:\n")
+        fw.flash_firmware('c28')
+        self.teTestFirmwareLog.append(fw.log_status())
+        print(fw.status)
+        if fw.status is "sucess":
+            c28_status = True
 
-        #if arm_status and c28_status:
-        #    self._load_test_firmware_status = True
-        #    self.lbStatusLoadingTestFirmware.setText("Sucesso!")
-        #else:
-        #    self._load_test_firmware_status = False
-        #    self.lbStatusLoadingTestFirmware.setText("Erro!")
-        self.lbStatusLoadingTestFirmware.setText("Sucesso!")
-        self._load_test_firmware_status = True #Remove this
+        if arm_status and c28_status:
+            self._load_test_firmware_status = True
+            self.lbStatusLoadingTestFirmware.setText("Sucesso!")
+        else:
+            self._load_test_firmware_status = False
+            self.lbStatusLoadingTestFirmware.setText("Erro!")
+
 
     @pyqtSlot()
     def _load_final_firmware(self):
@@ -428,13 +428,13 @@ class UDCWindow(QWizard, Ui_Class):
 
         #self.teFinalFirmwareLog.append("Gravando firmware de testes ARM:\n")
         #fw.flash_firmware('arm')
-        #self.teFinalFirmwareLog.append(fw.log_status)
+        #self.teFinalFirmwareLog.append(fw.log_status())
         #print(fw.status)
         #if fw.status is "sucess":
         #    arm_status = True
         #self.teFinalFirmwareLog.append("Gravando firmware de testes C28:\n")
         #fw.flash_firmware('c28')
-        #self.teFinalFirmwareLog.append(fw.log_status)
+        #self.teFinalFirmwareLog.append(fw.log_status())
         #print(fw.status)
         #if fw.status is "sucess":
         #    c28_status = True
