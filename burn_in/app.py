@@ -166,7 +166,7 @@ class PowerSupplyWindow(QWizard, Ui_Class):
         if sys.platform.startswith('win'):
             ports = ['COM%s' % (i + 1) for i in range(256)]
         elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
-            ports = glob.glob('/dev/tty[A-Za-z]*')
+            ports = glob.glob('/dev/*')
         elif sys.platform.startswith('darwin'):
             ports = glob.glob('/dev/tty.*')
         else:
@@ -658,7 +658,10 @@ class PowerSupplyWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _set_address(self):
-        pass
+        write_gui = self._test_thread.set_address()
+        self.lbAddress.setText(write_gui[0])
+        self.teAddressingLog.setText(write_gui[1])
+        #pass
 
     @pyqtSlot()
     def _start_test_sequence(self):
