@@ -87,11 +87,15 @@ class KrohnHite523_GPIB(object):
         current_delta_string = str(current_delta)+scale
         self.inst.write(current_delta_string)
 
+    def GetTemperature(self):
+        temp = self.inst.query('*TMP?')
+        return float(temp[5:9])
+
     def STG(self):
         string = self.inst.query('*STG?')
         return string
 
-    def Connect(self,gpibAdd):
+    def Connect(self,gpibAdd = 'GPIB0::25::INSTR'):
         self.inst = self.rm.open_resource(gpibAdd)
         self.inst.timeout = 5000
         #self.inst.write('Z;F')

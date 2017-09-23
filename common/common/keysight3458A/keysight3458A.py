@@ -45,11 +45,11 @@ class Keysight3458A_GPIB(object):
     def GetLastMeasurement(self):
         return float(self.inst.read())
 
-    def TrigMultipointMeas(self,tarmcount = 1):
+    def TrigMultipointMeas(self,tarmCount = 1):
         self.inst.write('MEM FIFO;TARM SGL,' + str(tarmCount))
 
     def GetMultipointMeas(self):
-        return float(self.inst.read())
+        #return float(self.inst.read())
         count = self.inst.query('MCOUNT?')
         self.inst.write('RMEM 1,' + count)
         while(not self.inst.stb & 0x80):
@@ -64,6 +64,10 @@ class Keysight3458A_GPIB(object):
         while(not self.inst.stb & 0x80):
             pass
         return [float(val) for val in self.inst.read().split(',')]
+
+    def GetTemperature(self):
+        temp = self.inst.query('TEMP?')
+        return float(temp)
 
 if __name__ == '__main__':
     DMM = Keysight3458A_GPIB()

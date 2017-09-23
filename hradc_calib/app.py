@@ -171,33 +171,45 @@ class HRADCWindow(QWizard, Ui_Class):
         return False
 
     def _validate_page_serial_number(self):
+        serial_list = []
         try:
-            self._test_thread.serial_mod0 = int(self.leSerialNumber0.text())
+            #self._test_thread.serial_mod0 = int(self.leSerialNumber0.text())
+            serial_list.append(int(self.leSerialNumber0.text()))
         except ValueError:
-            self._test_thread.serial_mod0 = None
+            #self._test_thread.serial_mod0 = None
+            serial_list.append(None)
             if not self.cbDisableModuleReadSerial0.isChecked():
                 return False
 
         try:
-            self._test_thread.serial_mod1 = int(self.leSerialNumber1.text())
+            #self._test_thread.serial_mod1 = int(self.leSerialNumber1.text())
+            serial_list.append(int(self.leSerialNumber1.text()))
         except ValueError:
-            self._test_thread.serial_mod1 = None
+            #self._test_thread.serial_mod1 = None
+            serial_list.append(None)
             if not self.cbDisableModuleReadSerial1.isChecked():
                 return False
 
         try:
-            self._test_thread.serial_mod2 = int(self.leSerialNumber2.text())
+            #self._test_thread.serial_mod2 = int(self.leSerialNumber2.text())
+            serial_list.append(int(self.leSerialNumber2.text()))
         except ValueError:
-            self._test_thread.serial_mod2 = None
+            #self._test_thread.serial_mod2 = None
+            serial_list.append(None)
             if not self.cbDisableModuleReadSerial2.isChecked():
                 return False
 
         try:
-            self._test_thread.serial_mod3 = int(self.leSerialNumber3.text())
+            #self._test_thread.serial_mod3 = int(self.leSerialNumber3.text())
+            serial_list.append(int(self.leSerialNumber3.text()))
         except ValueError:
-            self._test_thread.serial_mod3 = None
+            #self._test_thread.serial_mod3 = None
+            serial_list.append(None)
             if not self.cbDisableModuleReadSerial3.isChecked():
                 return False
+
+        self._test_thread.serial_list = serial_list[:]
+        print(serial_list)
 
         if self.cbDisableModuleReadSerial0.isChecked() and \
             self.cbDisableModuleReadSerial1.isChecked() and \
