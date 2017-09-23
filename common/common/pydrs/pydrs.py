@@ -35,9 +35,9 @@ ListFunc = ['TurnOn','TurnOff','OpenLoop','ClosedLoop','OpMode','RemoteInterface
             'DisableSigGen','ConfigDPModule','WfmRefUpdate','ResetInterlocks','ConfigPSModel',
             'ConfigHRADC','ConfigHRADCOpMode','EnableHRADCSampling','DisableHRADCSampling','ResetWfmRef',
             'SetRSAddress','EnableSamplesBuffer','DisableSamplesBuffer','SelectHRADCBoard','SelectTestSource',
-            'ResetHRADCBoards','Config_nHRADC','ReadHRADC_UFM','WriteHRADC_UFM','EraseHRADC_UFM','ReadHRADC_BoardData',
-            'UdcIoExpanderTest', 'UdcLedTest', 'UdcBuzzerTest', 'UdcEepromTest', 'UdcFlashTest', 'UdcRamTest',
-            'UdcRtcTest', 'UdcSensorTempTest', 'UdcIsoPlaneTest', 'UdcAdcTest', 'UdcUartTest', 'UdcLoopBackTest']
+            'ResetHRADCBoards','Config_nHRADC','ReadHRADC_UFM','WriteHRADC_UFM','EraseHRADC_UFM','ReadHRADC_BoardData']
+ListTestFunc = ['UdcIoExpanderTest', 'UdcLedTest', 'UdcBuzzerTest', 'UdcEepromTest', 'UdcFlashTest', 'UdcRamTest',
+                'UdcRtcTest', 'UdcSensorTempTest', 'UdcIsoPlaneTest', 'UdcAdcTest', 'UdcUartTest', 'UdcLoopBackTest']
 ListHRADCInputType = ['Vin_bipolar','Vin_unipolar_p','Vin_unipolar_n','Iin_bipolar','Iin_unipolar_p',
                       'Iin_unipolar_n','Vref_bipolar_p','Vref_bipolar_n','GND','Vref_unipolar_p',
                       'Vref_unipolar_n','GND_unipolar','Temp','Reserved0','Reserved1','Reserved2']
@@ -367,128 +367,112 @@ class SerialDRS(object):
         return self.ser.read(6)
 
     def UdcEepromTest(self, rw, data=None):
-        hex_data = []
-        if data is None:
-            payload_size    = self.size_to_hex(1 + 2)
+        if data is not None:
+            payload_size    = self.size_to_hex(12)
             hex_rw          = self.double_to_hex(rw)
-            send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('UdcEepromTest'))+hex_rw
-            send_msg        = self.checksum(self.SlaveAdd+send_packet)
-            self.ser.write(send_msg.encode('ISO-8859-1'))
-            return self.ser.read(6)
-        else:
-            payload_size    = self.size_to_hex(1 + 2 + (2 * 10))
-            hex_rw          = self.double_to_hex(rw)
+            hex_byte_0      = self.double_to_hex(data[0])
+            hex_byte_1      = self.double_to_hex(data[1])
+            hex_byte_2      = self.double_to_hex(data[2])
+            hex_byte_3      = self.double_to_hex(data[3])
+            hex_byte_4      = self.double_to_hex(data[4])
+            hex_byte_5      = self.double_to_hex(data[5])
+            hex_byte_6      = self.double_to_hex(data[6])
+            hex_byte_7      = self.double_to_hex(data[7])
+            hex_byte_8      = self.double_to_hex(data[8])
+            hex_byte_9      = self.double_to_hex(data[9])
+            send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcEepromTest'))+hex_rw[0]+ \
+                                hex_byte_0[0] + hex_byte_1[0] + hex_byte_2[0] + hex_byte_3[0] + hex_byte_4[0] + hex_byte_5[0]+ \
+                                hex_byte_6[0] + hex_byte_7[0] + hex_byte_8[0] + hex_byte_9[0]
+            self.ser.write(send_packet.encode('ISO-8859-1'))
+            return self.ser.read(10)
 
-            for item in data:
-                hex_data.append(self.double_to_hex(item))
-
-            (hex_data_0, hex_data_1, hex_data_2, hex_data_3, hex_data_4,
-            hex_data_5, hex_data_6, hex_data_7, hex_data_8, hex_data_9) = hex_data
-
-            send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('UdcEepromTest'))+hex_rw + \
-                                hex_data_0 + hex_data_1 + hex_data_2 + hex_data_3 + hex_data_4 + hex_data_5 + hex_data_6 + \
-                                hex_data_7 + hex_data_8 + hex_data_9
-            send_msg        = self.checksum(self.SlaveAdd+send_packet)
-            self.ser.write(send_msg.encode('ISO-8859-1'))
-            return self.ser.read(15)
 
     def UdcFlashTest(self, rw):
-        payload_size    = self.size_to_hex(1 + 2)
+        payload_size    = self.size_to_hex(2)
         hex_rw          = self.double_to_hex(rw)
-        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('UdcFlashTest'))+hex_rw
-        send_msg        = self.checksum(self.SlaveAdd+send_packet)
-        self.ser.write(send_msg.encode('ISO-8859-1'))
-        return self.ser.read(6)
+        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcFlashTest'))+hex_rw[0]
+        self.ser.write(send_packet.encode('ISO-8859-1'))
+        return self.ser.read()
 
     def UdcRamTest(self, rw):
-        payload_size    = self.size_to_hex(1 + 2)
+        payload_size    = self.size_to_hex(2)
         hex_rw          = self.double_to_hex(rw)
-        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('UdcRamTest'))+hex_rw
-        send_msg        = self.checksum(self.SlaveAdd+send_packet)
-        self.ser.write(send_msg.encode('ISO-8859-1'))
-        return self.ser.read(6)
+        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcRamTest'))+hex_rw[0]
+        self.ser.write(send_packet.encode('ISO-8859-1'))
+        return self.ser.read()
 
     def UdcAdcTest(self, rw, channel):
-        payload_size    = self.size_to_hex(1 + 2 + 2)
+        payload_size    = self.size_to_hex(3)
         hex_rw          = self.double_to_hex(rw)
         hex_channel     = self.double_to_hex(channel)
-        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('UdcAdcTest'))+hex_rw+hex_channel
-        send_msg        = self.checksum(self.SlaveAdd+send_packet)
-        self.ser.write(send_msg.encode('ISO-8859-1'))
-        return self.ser.read(6)
+        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcAdcTest'))+hex_rw[0]+hex_channel[0]
+        self.ser.write(send_packet.encode('ISO-8859-1'))
+        return self.ser.read()
 
     def UdcSensorTempTest(self, rw):
-        payload_size    = self.size_to_hex(1 + 2)
+        payload_size    = self.size_to_hex(2)
         hex_rw          = self.double_to_hex(rw)
-        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('UdcSensorTempTest'))+hex_rw
-        send_msg        = self.checksum(self.SlaveAdd+send_packet)
-        self.ser.write(send_msg.encode('ISO-8859-1'))
-        return self.ser.read(6)
+        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcSensorTempTest'))+hex_rw[0]
+        self.ser.write(send_packet.encode('ISO-8859-1'))
+        return self.ser.read()
 
     def UdcRtcTest(self, rw):
-        payload_size    = self.size_to_hex(1 + 2)
+        payload_size    = self.size_to_hex(2)
         hex_rw          = self.double_to_hex(rw)
-        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('UdcRtcTest'))+hex_rw
-        send_msg        = self.checksum(self.SlaveAdd+send_packet)
-        self.ser.write(send_msg.encode('ISO-8859-1'))
-        return self.ser.read(6)
+        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcRtcTest'))+hex_rw[0]
+        self.ser.write(send_packet.encode('ISO-8859-1'))
+        return self.ser.read()
 
     def UdcUartTest(self, rw):
-        payload_size    = self.size_to_hex(1 + 2)
+        payload_size    = self.size_to_hex(2)
         hex_rw          = self.double_to_hex(rw)
-        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('UdcUartTest'))+hex_rw
-        send_msg        = self.checksum(self.SlaveAdd+send_packet)
-        self.ser.write(send_msg.encode('ISO-8859-1'))
-        return self.ser.read(6)
+        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcUartTest'))+hex_rw[0]
+        self.ser.write(send_packet.encode('ISO-8859-1'))
+        return self.ser.read()
 
     def UdcIoExpanderTest(self, rw):
-        payload_size    = self.size_to_hex(1 + 2)
+        payload_size    = self.size_to_hex(2)
         hex_rw          = self.double_to_hex(rw)
-        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('UdcIoExpanderTest'))+hex_rw
-        send_msg        = self.checksum(self.SlaveAdd+send_packet)
-        self.ser.write(send_msg.encode('ISO-8859-1'))
-        return self.ser.read(6)
+        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcIoExpanderTest'))+hex_rw[0]
+        self.ser.write(send_packet.encode('ISO-8859-1'))
+        return self.ser.read()
 
-    def UdcEthernetTest(self, rw):
-        payload_size    = self.size_to_hex(1 + 2)
-        hex_rw          = self.double_to_hex(rw)
-        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('UdcEthernetTest'))+hex_rw
-        send_msg        = self.checksum(self.SlaveAdd+send_packet)
-        self.ser.write(send_msg.encode('ISO-8859-1'))
-        return self.ser.read(6)
+#    def UdcEthernetTest(self, rw):
+#        payload_size    = self.size_to_hex(2)
+#        hex_rw          = self.double_to_hex(rw)
+#        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcEthernetTest'))+hex_rw
+#        self.ser.write(send_packet.encode('ISO-8859-1'))
+#        return self.ser.read()
 
     def UdcIsoPlaneTest(self, rw):
-        payload_size    = self.size_to_hex(1 + 2)
+        payload_size    = self.size_to_hex(2)
         hex_rw          = self.double_to_hex(rw)
-        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('UdcIsoPlaneTest'))+hex_rw
-        send_msg        = self.checksum(self.SlaveAdd+send_packet)
-        self.ser.write(send_msg.encode('ISO-8859-1'))
-        return self.ser.read(6)
+        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcIsoPlaneTest'))+hex_rw[0]
+        self.ser.write(send_packet.encode('ISO-8859-1'))
+        return self.ser.read()
 
     def UdcLoopBackTest(self, rw, channel):
-        payload_size    = self.size_to_hex(1 + 2 + 2)
+        payload_size    = self.size_to_hex(3)
         hex_rw          = self.double_to_hex(rw)
         hex_channel     = self.double_to_hex(channel)
-        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('UdcLoopBackTest'))+hex_rw+hex_channel
-        send_msg        = self.checksum(self.SlaveAdd+send_packet)
-        self.ser.write(send_msg.encode('ISO-8859-1'))
-        return self.ser.read(6)
+        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcLoopBackTest'))+hex_rw[0]+hex_channel[0]
+        self.ser.write(send_packet.encode('ISO-8859-1'))
+        return self.ser.read()
 
     def UdcLedTest(self, rw):
-        payload_size    = self.size_to_hex(1 + 2)
+        payload_size    = self.size_to_hex(2)
         hex_rw          = self.double_to_hex(rw)
-        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('UdcLedTest'))+hex_rw
-        send_msg        = self.checksum(self.SlaveAdd+send_packet)
-        self.ser.write(send_msg.encode('ISO-8859-1'))
-        return self.ser.read(6)
+        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcLedTest'))+hex_rw[0]
+        self.ser.write(send_packet.encode('ISO-8859-1'))
+        return self.ser.read()
 
     def UdcBuzzerTest(self, rw):
-        payload_size    = self.size_to_hex(1 + 2)
+        payload_size    = self.size_to_hex(2)
         hex_rw          = self.double_to_hex(rw)
-        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('UdcBuzzerTest'))+hex_rw
-        send_msg        = self.checksum(self.SlaveAdd+send_packet)
-        self.ser.write(send_msg.encode('ISO-8859-1'))
-        return self.ser.read(6)
+        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcBuzzerTest'))+hex_rw[0]
+        self.ser.write(send_packet.encode('ISO-8859-1'))
+        return self.ser.read()
+
 
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     ======================================================================
