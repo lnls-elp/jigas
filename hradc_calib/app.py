@@ -172,9 +172,13 @@ class HRADCWindow(QWizard, Ui_Class):
 
     def _validate_page_serial_number(self):
         serial_list = []
+        variant_list = []
+        scan = Scanner()
+
         try:
             #self._test_thread.serial_mod0 = int(self.leSerialNumber0.text())
             serial_list.append(int(self.leSerialNumber0.text()))
+            variant_list.append(scan.get_material_name(self.leMaterialCode0.text()))
         except ValueError:
             #self._test_thread.serial_mod0 = None
             serial_list.append(None)
@@ -184,6 +188,7 @@ class HRADCWindow(QWizard, Ui_Class):
         try:
             #self._test_thread.serial_mod1 = int(self.leSerialNumber1.text())
             serial_list.append(int(self.leSerialNumber1.text()))
+            variant_list.append(scan.get_material_name(self.leMaterialCode1.text()))
         except ValueError:
             #self._test_thread.serial_mod1 = None
             serial_list.append(None)
@@ -193,6 +198,7 @@ class HRADCWindow(QWizard, Ui_Class):
         try:
             #self._test_thread.serial_mod2 = int(self.leSerialNumber2.text())
             serial_list.append(int(self.leSerialNumber2.text()))
+            variant_list.append(scan.get_material_name(self.leMaterialCode2.text()))
         except ValueError:
             #self._test_thread.serial_mod2 = None
             serial_list.append(None)
@@ -202,6 +208,7 @@ class HRADCWindow(QWizard, Ui_Class):
         try:
             #self._test_thread.serial_mod3 = int(self.leSerialNumber3.text())
             serial_list.append(int(self.leSerialNumber3.text()))
+            variant_list.append(scan.get_material_name(self.leMaterialCode3.text()))
         except ValueError:
             #self._test_thread.serial_mod3 = None
             serial_list.append(None)
@@ -209,7 +216,9 @@ class HRADCWindow(QWizard, Ui_Class):
                 return False
 
         self._test_thread.serial_list = serial_list[:]
+        self._test_thread.variant_list = variant_list[:]
         print(serial_list)
+        print(variant_list)
 
         if self.cbDisableModuleReadSerial0.isChecked() and \
             self.cbDisableModuleReadSerial1.isChecked() and \
@@ -228,7 +237,7 @@ class HRADCWindow(QWizard, Ui_Class):
     def _validate_page_start_test(self):
         self._initialize_widgets()
         self._restart_variables()
-        self._restart_test_thread()
+        #self._restart_test_thread()
         while self.currentId() is not self.num_serial_number:
             self.back()
         return False
@@ -415,7 +424,7 @@ class HRADCWindow(QWizard, Ui_Class):
             self.lbStatusComunicacao.setText("<p color:'green'>OK</p>")
         else:
             self.lbStatusComunicacao.setText("<p color:'red'>Falha</p>")
-        self._test_serial_port_status = True
+        self._test_serial_port_status = result
 
 
     @pyqtSlot()
@@ -434,6 +443,7 @@ class HRADCWindow(QWizard, Ui_Class):
             self.lbTestResult.setText("Sucesso")
         else:
             self.lbTestResult.setText("Erro")
+        self._restart_test_thread()
 
     @pyqtSlot(str)
     def _update_test_log(self, value):

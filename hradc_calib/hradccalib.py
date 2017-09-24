@@ -39,10 +39,10 @@ class HRADCCalib(QThread):
     settlingTime = 2
 
     vin_lsb = 20/pow(2,18)
-    vin_step = vin_lsb/5
+    vin_step = vin_lsb/1
 
     iin_lsb = 0.1/pow(2,18)
-    iin_step = iin_lsb/4
+    iin_step = iin_lsb/1
 
     def __init__(self):
         QThread.__init__(self)
@@ -55,6 +55,8 @@ class HRADCCalib(QThread):
         self._serial_mod2 = None
         self._serial_mod3 = None
         self._serial_list = []
+
+        self._variant_list = []
 
         self._nHRADC = None
 
@@ -87,6 +89,14 @@ class HRADCCalib(QThread):
     @serial_list.setter
     def serial_list(self, value_list):
         self._serial_list = value_list
+
+    @property
+    def variant_list(self):
+        return self._variant_list
+
+    @variant_list.setter
+    def variant_list(self, value_list):
+        self._variant_list = value_list
 
     @property
     def serial_mod0(self):
@@ -169,16 +179,16 @@ class HRADCCalib(QThread):
 
     def _calib_sequence(self):
 
-        print('\n  Valeeendoooo!! \n')
+        print('\n\n\n\n**********************************************************************************************************')
+        print('                                            Valeeendoooo!!!')
+        print('**********************************************************************************************************\n')
 
-        time.clock()
+        t0 = time.perf_counter()
 
         print(self.serial_list)
+        print(self.variant_list)
 
-        #######################
-        # Plot initialization #
-        #######################
-
+        """
         fig = plt.figure()
 
         # HRADC samples
@@ -195,21 +205,38 @@ class HRADCCalib(QThread):
         ax3_2 = ax3.twinx()
         ax4   = fig.add_subplot(2,2,4)    # HRADC std Vs DMM std
         ax4_2 = ax4.twinx()
+        """
+
+        print('\nInicializando equipamentos...\n')
+        self.update_gui.emit('Inicializando equipamentos...')
+        self.source.DisableOutput()
+        self.source.LOFloatChassis('F')
+        self.source.OutputTermination(0)
+        self.source.SetVoltageLimit(2)
+        self.source.SetOutput(0,'V')
+
+        self.dmm.InitDefault()
+        self.dmm.SetMeasurementType('DCV',10)
+        self.dmm.SetMultipointMeas(self.dmmSampleCount)
 
         self.nHRADC = 4 - self.serial_list.count(None)
-        print('\n*** ' + str(self.nHRADC) + ' placas HRADC serão calibradas ***\n')
 
-        print('Configurando nHRADC...\n')
-        self.update_gui.emit('Configurando nHRADC...')
+        t = ' placas' if self.nHRADC > 1 else ' placa'
+        t2 = 'Inicializando calibracao de ' + str(self.nHRADC) +  t + ' HRADC...'
+        print(t2 + '\n')
+        self.update_gui.emit(t2)
+
         self.drs.Config_nHRADC(self.nHRADC)
         time.sleep(1)
 
-        print('Resetando HRADC...\n')
-        self.update_gui.emit('Resetando nHRADC...')
+        print('Resetando' + t + '...\n')
+        self.update_gui.emit('Resetando' + t + '...')
         self.drs.ResetHRADCBoards(1)
         time.sleep(1)
         self.drs.ResetHRADCBoards(0)
         time.sleep(1)
+        self.drs.OpMode(1)  # Para enviar amostras sem conversao
+        time.sleep(0.5)
 
         print('Configurando backplane...\n')
         self.update_gui.emit('Configurando backplane...')
@@ -218,17 +245,17 @@ class HRADCCalib(QThread):
         self.drs.SelectTestSource('Vin_bipolar')
         time.sleep(0.5)
 
-        print('Configurando placas em Vref_bipolar_p...\n')
-        self.update_gui.emit('Configurando placas em Vref_bipolar_p...')
+        print('Configurando'+ t + ' em Vref_bipolar_p...\n')
+        self.update_gui.emit('Configurando' + t + ' em Vref_bipolar_p...')
         for slot in range(self.nHRADC):
             self.drs.ConfigHRADC(slot, 100000, 'Vref_bipolar_p', 0, 0)
             time.sleep(1)
 
         print('Iniciando warm-up...\n')
-        self.update_gui.emit('Iniciando warm-up...')
+        self.update_gui.emit('Iniciando warm-up...\n')
         self.drs.EnableHRADCSampling()
 
-        t = Timer(10,self._timeout)
+        t = Timer(2,self._timeout)
         t.start()
 
         while(t.is_alive()):
@@ -241,280 +268,328 @@ class HRADCCalib(QThread):
         #### ITERAR AQUI!!! #####
         #########################
 
-        slot = 0
+        for slot in range(self.nHRADC):
+            #slot = 0
 
-        print('************ SLOT ' + str(slot) + ' ************\n')
+            log = HRADCLogCalib()
+            ufmdata_16 = []
+            emptyBuff = np.array([])
 
-        log = HRADCLogCalib()
-        ufmdata_16 = []
-        emptyBuff = np.array([])
+            log.serial_number_hradc = self.serial_list[slot]
+            variant = self.variant_list[slot]
 
-        log.serial_number_hradc = self.serial_list[slot]
+            print('************ Iniciando a calibracao do slot #' + str(slot) + ' ( S/N: ' + str(log.serial_number_hradc) + ' / ' + variant + ') ************\n')
+            self.update_gui.emit('*** INICIANDO CALIBRACAO DO SLOT #' + str(slot) + ' ( S/N: ' + str(log.serial_number_hradc) + ' / ' + variant + ') ***')
 
-        self.drs.SelectHRADCBoard(slot)
-        time.sleep(0.5)
-        self.drs.SelectTestSource('Vin_bipolar')
-        time.sleep(0.5)
-
-        print('Medindo +Vref...\n')
-        self.drs.EnableHRADCSampling()
-        time.sleep(0.5)
-        self.drs.EnableSamplesBuffer()
-        time.sleep(0.5)
-        self.drs.DisableSamplesBuffer()
-        time.sleep(0.5)
-        self.drs.DisableHRADCSampling()
-        time.sleep(0.5)
-
-        sampHRADC = np.array(self.drs.Recv_samplesBuffer_blocks(0))
-        print(sampHRADC)
-
-        if np.array_equal(sampHRADC,emptyBuff):
-            print('\n************** FALHA SAMPLES BUFFER **************\n')
             self.source.DisableOutput()
-            self.DisableHRADCSampling()
-            return
+            self.source.SetOutput(0,'V')
+            self.dmm.SetMeasurementType('DCV',10)
 
-        log.vref_p = self._convertVinSample(sampHRADC.mean())
-        print('\n+Vref = ' + str(log.vref_p) + ' V\n')
+            self.drs.SelectTestSource('Vin_bipolar')
+            time.sleep(0.5)
+            self.drs.SelectHRADCBoard(slot)
+            time.sleep(0.5)
 
-        print('Medindo -Vref...\n')
-        self.drs.ConfigHRADC(slot,100000,'Vref_bipolar_n',0,0)
-        time.sleep(1)
-        self.drs.EnableHRADCSampling()
-        time.sleep(0.5)
-        self.drs.EnableSamplesBuffer()
-        time.sleep(0.5)
-        self.drs.DisableSamplesBuffer()
-        time.sleep(0.5)
-        self.drs.DisableHRADCSampling()
-        time.sleep(0.5)
+            print('*****************************************')
+            print('****** Iniciando calibracao Vin... ******')
+            print('*****************************************\n')
 
-        sampHRADC = np.array(self.drs.Recv_samplesBuffer_blocks(0))
-        print(sampHRADC)
+            self.drs.ConfigHRADC(slot,100000,'Vin_bipolar',0,0)
+            time.sleep(1)
+            self.drs.EnableHRADCSampling()
+            time.sleep(0.5)
 
-        if np.array_equal(sampHRADC,emptyBuff):
-            print('\n************** FALHA SAMPLES BUFFER **************\n')
+            ################################################
+            print('     *** Configurando Vin -FS ... ***\n')
+            ################################################
+            self.update_gui.emit('  Encontrando fundo de escala -Vin...')
+
+            sourceOut = -9.9
+            self.source.EnableOutput()
+
+            while True:
+                sourceOut = self._saturate(sourceOut,-10.2,10.2)
+
+                # if any HRADC samples != 0, set source lower
+                print('sourceOut = ' + str(sourceOut) + ' V\n')
+                self.source.SetOutput(sourceOut,'V')
+                time.sleep(self.settlingTime)
+
+                self.drs.EnableSamplesBuffer()
+                time.sleep(1)
+                self.drs.DisableSamplesBuffer()
+                time.sleep(1)
+
+                sampHRADC = np.array(self.drs.Recv_samplesBuffer_blocks(0))
+                print(sampHRADC)
+
+                if np.array_equal(sampHRADC,emptyBuff):
+                    print('\n************** FALHA SAMPLES BUFFER **************\n')
+                    self.source.DisableOutput()
+                    self.DisableHRADCSampling()
+                    return
+
+                meanHRADC = sampHRADC.mean()
+                stdHRADC = sampHRADC.std()
+
+                deltaFS = meanHRADC*self.vin_lsb
+                inc = deltaFS if deltaFS > self.vin_lsb else self.vin_lsb
+
+                print('\nmax    meanHRADC   stdHRADC    inc')
+                print(str(sampHRADC.max()) + '    ' + str(meanHRADC) + '    ' + str(stdHRADC) + '    ' + str(inc) + '\n')
+
+                if((sampHRADC == 0).all()):
+                    break
+
+                sourceOut -= inc
+
+            vin_negFS = np.array(self.dmm.ReadMeasurementPoints()).mean()
+            print('Vin -FS: ' + str(vin_negFS) + ' V\n')
+
+            #################################################
+            print('\n     *** Procurando Vin T[1] ... ***\n')
+            #################################################
+            self.update_gui.emit('  Procurando Vin T[1]...')
+
+            sumNonFSCodes = 0
+            T_1 = vin_negFS
+
+            while True:
+
+                # Increment source output
+                sourceOut += self.vin_step
+                sourceOut = self._saturate(sourceOut,-10.2,10.2)
+                print('sourceOut = ' + str(sourceOut) + ' V\n')
+                self.source.SetOutput(sourceOut,'V')
+                time.sleep(self.settlingTime)
+
+                # Start measurements
+                self.dmm.TrigMultipointMeas()
+                self.drs.EnableSamplesBuffer()
+                time.sleep(1)
+                self.drs.DisableSamplesBuffer()
+                time.sleep(1)
+
+                sampHRADC = np.array(self.drs.Recv_samplesBuffer_allblocks())
+                print(sampHRADC)
+
+                meanHRADC = sampHRADC.mean()
+                stdHRADC = sampHRADC.std()
+
+                print('\nmax    meanHRADC   stdHRADC')
+                print(str(sampHRADC.max()) + '    ' + str(meanHRADC) + '    ' + str(stdHRADC) + '\n')
+
+
+                if np.array_equal(sampHRADC,emptyBuff):
+                    print('\n************** FALHA SAMPLES BUFFER **************\n')
+                    self.source.DisableOutput()
+                    self.DisableHRADCSampling()
+                    return
+
+                #T_1 = np.array(DMM.ReadMeasurementPoints()).mean()
+                old_T_1 = T_1
+                T_1 = np.array(self.dmm.GetMultipointMeas()).mean()
+
+                # Repeat if more than 50% HRADC samples == 0
+                old_sumNonFSCodes = sumNonFSCodes
+                sumNonFSCodes = sum(sampHRADC > 0)
+                print('DMM T[1]     "non-FS codes"')
+                print(str(T_1) + '      ' + str(sumNonFSCodes) + '\n')
+                if(sumNonFSCodes >= len(sampHRADC)/2):
+                    break
+
+            T_1 = (old_T_1*old_sumNonFSCodes + T_1*sumNonFSCodes)/(old_sumNonFSCodes + sumNonFSCodes)
+
+            print('*** Vin T[1]: ' + str(T_1) + ' V ***\n\n')
+
+
+            ################################################
+            print('     *** Configurando Vin +FS ... ***\n')
+            ################################################
+            self.update_gui.emit('  Encontrando fundo de escala +Vin...')
+
+            sourceOut = 9.9
+
+            while True:
+                sourceOut = self._saturate(sourceOut,-10.2,10.2)
+
+                # if any HRADC samples != 0, set source lower
+                print('sourceOut = ' + str(sourceOut) + ' V\n')
+                self.source.SetOutput(sourceOut,'V')
+                time.sleep(self.settlingTime)
+
+                self.drs.EnableSamplesBuffer()
+                time.sleep(1)
+                self.drs.DisableSamplesBuffer()
+                time.sleep(1)
+
+                sampHRADC = np.array(self.drs.Recv_samplesBuffer_blocks(0))
+                print(sampHRADC)
+
+                if np.array_equal(sampHRADC,emptyBuff):
+                    print('\n************** FALHA SAMPLES BUFFER **************\n')
+                    self.source.DisableOutput()
+                    self.DisableHRADCSampling()
+                    return
+
+                meanHRADC = sampHRADC.mean()
+                stdHRADC = sampHRADC.std()
+
+                deltaFS = 20-meanHRADC*self.vin_lsb
+                inc = deltaFS if deltaFS > self.vin_lsb else self.vin_lsb
+
+                print('\nmin    meanHRADC   stdHRADC    inc')
+                print(str(sampHRADC.min()) + '    ' + str(meanHRADC) + '    ' + str(stdHRADC) + '    ' + str(inc) + '\n')
+
+                if((sampHRADC == 0x3FFFF).all()):
+                    break
+
+                sourceOut += inc
+
+            vin_posFS = np.array(self.dmm.ReadMeasurementPoints()).mean()
+            print('Vin +FS: ' + str(vin_posFS) + ' V\n')
+
+            ###################################################
+            print('\n     *** Procurando Vin T[end] ... ***\n')
+            ###################################################
+            self.update_gui.emit('  Procurando Vin T[end]...')
+
+            sumNonFSCodes = 0
+            T_end = vin_posFS
+
+            while True:
+
+                # Decrement source output
+                sourceOut -= self.vin_step
+                sourceOut = self._saturate(sourceOut,-10.2,10.2)
+                print('sourceOut = ' + str(sourceOut) + ' V\n')
+                self.source.SetOutput(sourceOut,'V')
+                time.sleep(self.settlingTime)
+
+                # Start measurements
+                self.dmm.TrigMultipointMeas()
+                self.drs.EnableSamplesBuffer()
+                time.sleep(1)
+                self.drs.DisableSamplesBuffer()
+                time.sleep(1)
+
+                sampHRADC = np.array(self.drs.Recv_samplesBuffer_allblocks())
+                print(sampHRADC)
+
+                meanHRADC = sampHRADC.mean()
+                stdHRADC = sampHRADC.std()
+
+                print('\nmin    meanHRADC   stdHRADC')
+                print(str(sampHRADC.min()) + '    ' + str(meanHRADC) + '    ' + str(stdHRADC) + '\n')
+
+
+                if np.array_equal(sampHRADC,emptyBuff):
+                    print('\n************** FALHA SAMPLES BUFFER **************\n')
+                    self.source.DisableOutput()
+                    self.DisableHRADCSampling()
+                    return
+
+                #T_end = np.array(DMM.ReadMeasurementPoints()).mean()
+                old_T_end = T_end
+                T_end = np.array(self.dmm.GetMultipointMeas()).mean()
+
+                # Repeat if more than 50% HRADC samples == 0
+                old_sumNonFSCodes = sumNonFSCodes
+                sumNonFSCodes = sum(sampHRADC < 0x3FFFF)
+                print('DMM T[end]     "non-FS codes"')
+                print(str(T_end) + '      ' + str(sumNonFSCodes) + '\n')
+                if(sumNonFSCodes >= len(sampHRADC)/2):
+                    break
+
+            T_end = (old_T_end*old_sumNonFSCodes + T_end*sumNonFSCodes)/(old_sumNonFSCodes + sumNonFSCodes)
+
+            print('*** Vin T[end]: ' + str(T_end) + ' V ***')
+            print('*** Vin T[1]: ' + str(T_1) + ' V ***\n')
+
+            log.vin_gain = (T_end - T_1)/(20 - self.vin_lsb)
+            log.vin_offset = T_1 - log.vin_gain*(-10 + self.vin_lsb/2)
+
+            print('  Vin Gain: ' + str(log.vin_gain))
+            print('  Vin Offset: ' + str(log.vin_offset))
+            print('\nTempo de execucao: ' + str((time.perf_counter()-t0)/60) + ' min\n\n')
+
+            self.source.SetOutput(0,'V')
             self.source.DisableOutput()
-            self.DisableHRADCSampling()
-            return
+            self.drs.DisableHRADCSampling()
+            time.sleep(1)
 
-        log.vref_n = self._convertVinSample(sampHRADC.mean())
-        print('\n-Vref = ' + str(log.vref_n) + ' V\n')
+            print('*********************************')
+            print('****** Medindo referencias ******')
+            print('*********************************\n')
 
-        print('Medindo GND...\n')
-        self.drs.ConfigHRADC(slot,100000,'GND',0,0)
-        time.sleep(1)
-        self.drs.EnableHRADCSampling()
-        time.sleep(0.5)
-        self.drs.EnableSamplesBuffer()
-        time.sleep(0.5)
-        self.drs.DisableSamplesBuffer()
-        time.sleep(0.5)
-        self.drs.DisableHRADCSampling()
-        time.sleep(0.5)
+            print('  Medindo +Vref...\n')
+            self.update_gui.emit('  Medindo +Vref...')
 
-        sampHRADC = np.array(self.drs.Recv_samplesBuffer_blocks(0))
-        print(sampHRADC)
-
-        if np.array_equal(sampHRADC,emptyBuff):
-            print('\n************** FALHA SAMPLES BUFFER **************\n')
-            self.source.DisableOutput()
-            self.DisableHRADCSampling()
-            return
-
-        log.gnd = self._convertVinSample(sampHRADC.mean())
-        print('\nGND = ' + str(log.gnd) + ' V\n')
-
-
-        print('*****************************************')
-        print('****** Iniciando calibração Vin... ******')
-        print('*****************************************\n')
-
-        self.drs.ConfigHRADC(slot,100000,'Vin_bipolar',0,0)
-        time.sleep(1)
-        self.drs.EnableHRADCSampling()
-        time.sleep(0.5)
-
-        ################################################
-        print('     *** Configurando Vin -FS ... ***\n')
-        ################################################
-
-        sourceOut = -10
-        self.source.EnableOutput()
-
-        while True:
-            sourceOut = self._saturate(sourceOut,-10.2,10.2)
-
-            # if any HRADC samples != 0, set source lower
-            print('sourceOut = ' + str(sourceOut) + ' V\n')
-            self.source.SetOutput(sourceOut,'V')
-            time.sleep(self.settlingTime)
-
+            self.drs.ConfigHRADC(slot,100000,'Vref_bipolar_p',0,0)
+            time.sleep(1)
+            self.drs.EnableHRADCSampling()
+            time.sleep(0.5)
             self.drs.EnableSamplesBuffer()
-            time.sleep(1)
+            time.sleep(0.5)
             self.drs.DisableSamplesBuffer()
-            time.sleep(1)
-
-            sampHRADC = np.array(self.drs.Recv_samplesBuffer_blocks(0))
-            print(sampHRADC)
-
-            if np.array_equal(sampHRADC,emptyBuff):
-                print('\n************** FALHA SAMPLES BUFFER **************\n')
-                self.source.DisableOutput()
-                self.DisableHRADCSampling()
-                return
-
-            meanHRADC = sampHRADC.mean()
-            stdHRADC = sampHRADC.std()
-
-            deltaFS = meanHRADC*self.vin_lsb
-            inc = deltaFS if deltaFS > self.vin_lsb else self.vin_lsb
-
-            print('\nmax    meanHRADC   stdHRADC    inc')
-            print(str(sampHRADC.max()) + '    ' + str(meanHRADC) + '    ' + str(stdHRADC) + '    ' + str(inc) + '\n')
-
-            if((sampHRADC == 0).all()):
-                break
-
-            sourceOut -= inc
-
-        vin_negFS = np.array(self.dmm.ReadMeasurementPoints()).mean()
-        print('Vin -FS: ' + str(vin_negFS) + ' V\n')
-
-        #################################################
-        print('\n     *** Procurando Vin T[1] ... ***\n')
-        #################################################
-
-        sumNonFSCodes = 0
-        T_1 = vin_negFS
-
-        while True:
-
-            # Increment source output
-            sourceOut += self.vin_step
-            sourceOut = self._saturate(sourceOut,-10.2,10.2)
-            print('sourceOut = ' + str(sourceOut) + ' V\n')
-            self.source.SetOutput(sourceOut,'V')
-            time.sleep(self.settlingTime)
-
-            # Start measurements
-            self.dmm.TrigMultipointMeas()
-            self.drs.EnableSamplesBuffer()
-            time.sleep(1)
-            self.drs.DisableSamplesBuffer()
-            time.sleep(1)
+            time.sleep(0.5)
+            self.drs.DisableHRADCSampling()
+            time.sleep(0.5)
 
             sampHRADC = np.array(self.drs.Recv_samplesBuffer_allblocks())
             print(sampHRADC)
 
-            meanHRADC = sampHRADC.mean()
-            stdHRADC = sampHRADC.std()
-
-            print('\nmax    meanHRADC   stdHRADC')
-            print(str(sampHRADC.max()) + '    ' + str(meanHRADC) + '    ' + str(stdHRADC) + '\n')
-
-
             if np.array_equal(sampHRADC,emptyBuff):
                 print('\n************** FALHA SAMPLES BUFFER **************\n')
                 self.source.DisableOutput()
                 self.DisableHRADCSampling()
                 return
 
-            #T_1 = np.array(DMM.ReadMeasurementPoints()).mean()
-            old_T_1 = T_1
-            T_1 = np.array(self.dmm.GetMultipointMeas()).mean()
+            log.vref_p = self._convertVinSample(sampHRADC.mean())
+            print('\n+Vref = ' + str(log.vref_p) + ' V\n')
 
-            # Repeat if more than 50% HRADC samples == 0
-            old_sumNonFSCodes = sumNonFSCodes
-            sumNonFSCodes = sum(sampHRADC > 0)
-            print('DMM T[1]     "non-FS codes"')
-            print(str(T_1) + '      ' + str(sumNonFSCodes) + '\n')
-            if(sumNonFSCodes >= len(sampHRADC)/2):
-                break
+            print('  Medindo -Vref...\n')
+            self.update_gui.emit('  Medindo -Vref...')
 
-        T_1 = (old_T_1*old_sumNonFSCodes + T_1*sumNonFSCodes)/(old_sumNonFSCodes + sumNonFSCodes)
-
-        print('*** Vin T[1]: ' + str(T_1) + ' V ***\n\n')
-
-
-        ################################################
-        print('     *** Configurando Vin +FS ... ***\n')
-        ################################################
-
-        sourceOut = 10
-
-        while True:
-            sourceOut = self._saturate(sourceOut,-10.2,10.2)
-
-            # if any HRADC samples != 0, set source lower
-            print('sourceOut = ' + str(sourceOut) + ' V\n')
-            self.source.SetOutput(sourceOut,'V')
-            time.sleep(self.settlingTime)
-
+            self.drs.ConfigHRADC(slot,100000,'Vref_bipolar_n',0,0)
+            time.sleep(1)
+            self.drs.EnableHRADCSampling()
+            time.sleep(0.5)
             self.drs.EnableSamplesBuffer()
-            time.sleep(1)
+            time.sleep(0.5)
             self.drs.DisableSamplesBuffer()
-            time.sleep(1)
-
-            sampHRADC = np.array(self.drs.Recv_samplesBuffer_blocks(0))
-            print(sampHRADC)
-
-            if np.array_equal(sampHRADC,emptyBuff):
-                print('\n************** FALHA SAMPLES BUFFER **************\n')
-                self.source.DisableOutput()
-                self.DisableHRADCSampling()
-                return
-
-            meanHRADC = sampHRADC.mean()
-            stdHRADC = sampHRADC.std()
-
-            deltaFS = 20-meanHRADC*self.vin_lsb
-            inc = deltaFS if deltaFS > self.vin_lsb else self.vin_lsb
-
-            print('\nmin    meanHRADC   stdHRADC    inc')
-            print(str(sampHRADC.min()) + '    ' + str(meanHRADC) + '    ' + str(stdHRADC) + '    ' + str(inc) + '\n')
-
-            if((sampHRADC == 0x3FFFF).all()):
-                break
-
-            sourceOut += inc
-
-        vin_posFS = np.array(self.dmm.ReadMeasurementPoints()).mean()
-        print('Vin +FS: ' + str(vin_posFS) + ' V\n')
-
-        ###################################################
-        print('\n     *** Procurando Vin T[end] ... ***\n')
-        ###################################################
-
-        sumNonFSCodes = 0
-        T_end = vin_posFS
-
-        while True:
-
-            # Decrement source output
-            sourceOut -= self.vin_step
-            sourceOut = self._saturate(sourceOut,-10.2,10.2)
-            print('sourceOut = ' + str(sourceOut) + ' V\n')
-            self.source.SetOutput(sourceOut,'V')
-            time.sleep(self.settlingTime)
-
-            # Start measurements
-            self.dmm.TrigMultipointMeas()
-            self.drs.EnableSamplesBuffer()
-            time.sleep(1)
-            self.drs.DisableSamplesBuffer()
-            time.sleep(1)
+            time.sleep(0.5)
+            self.drs.DisableHRADCSampling()
+            time.sleep(0.5)
 
             sampHRADC = np.array(self.drs.Recv_samplesBuffer_allblocks())
             print(sampHRADC)
 
-            meanHRADC = sampHRADC.mean()
-            stdHRADC = sampHRADC.std()
+            if np.array_equal(sampHRADC,emptyBuff):
+                print('\n************** FALHA SAMPLES BUFFER **************\n')
+                self.source.DisableOutput()
+                self.DisableHRADCSampling()
+                return
 
-            print('\nmin    meanHRADC   stdHRADC')
-            print(str(sampHRADC.min()) + '    ' + str(meanHRADC) + '    ' + str(stdHRADC) + '\n')
+            log.vref_n = self._convertVinSample(sampHRADC.mean())
+            print('\n-Vref = ' + str(log.vref_n) + ' V\n')
 
+            print('  Medindo GND...\n')
+            self.update_gui.emit('  Medindo GND...')
+
+            self.drs.ConfigHRADC(slot,100000,'GND',0,0)
+            time.sleep(1)
+            self.drs.EnableHRADCSampling()
+            time.sleep(0.5)
+            self.drs.EnableSamplesBuffer()
+            time.sleep(0.5)
+            self.drs.DisableSamplesBuffer()
+            time.sleep(0.5)
+            self.drs.DisableHRADCSampling()
+            time.sleep(0.5)
+
+            sampHRADC = np.array(self.drs.Recv_samplesBuffer_allblocks())
+            print(sampHRADC)
 
             if np.array_equal(sampHRADC,emptyBuff):
                 print('\n************** FALHA SAMPLES BUFFER **************\n')
@@ -522,308 +597,412 @@ class HRADCCalib(QThread):
                 self.DisableHRADCSampling()
                 return
 
-            #T_end = np.array(DMM.ReadMeasurementPoints()).mean()
-            old_T_end = T_end
-            T_end = np.array(self.dmm.GetMultipointMeas()).mean()
+            log.gnd = self._convertVinSample(sampHRADC.mean())
+            print('\nGND = ' + str(log.gnd) + ' V\n\n')
 
-            # Repeat if more than 50% HRADC samples == 0
-            old_sumNonFSCodes = sumNonFSCodes
-            sumNonFSCodes = sum(sampHRADC < 0x3FFFF)
-            print('DMM T[end]     "non-FS codes"')
-            print(str(T_end) + '      ' + str(sumNonFSCodes) + '\n')
-            if(sumNonFSCodes >= len(sampHRADC)/2):
-                break
+            print('**********************************')
+            print('****** Medindo temperaturas ******')
+            print('**********************************\n')
 
-        T_end = (old_T_end*old_sumNonFSCodes + T_end*sumNonFSCodes)/(old_sumNonFSCodes + sumNonFSCodes)
+            self.update_gui.emit('  Medindo temperaturas...')
 
-        print('*** Vin T[end]: ' + str(T_end) + ' V ***')
-        print('*** Vin T[1]: ' + str(T_1) + ' V ***\n')
+            self.drs.ConfigHRADC(slot,100000,'Temp',0,0)
+            time.sleep(1)
+            self.drs.EnableHRADCSampling()
+            time.sleep(0.5)
+            self.drs.EnableSamplesBuffer()
+            time.sleep(0.5)
+            self.drs.DisableSamplesBuffer()
+            time.sleep(0.5)
+            self.drs.DisableHRADCSampling()
+            time.sleep(0.5)
 
-        log.vin_gain = (T_end - T_1)/(20 - self.vin_lsb)
-        log.vin_offset = T_1 - log.vin_gain*(-10 + self.vin_lsb/2)
+            sampHRADC = np.array(self.drs.Recv_samplesBuffer_blocks(0))
 
-        print('  Vin Gain: ' + str(log.vin_gain))
-        print('  Vin Offset: ' + str(log.vin_offset))
-        print('\nTempo de execução: ' + str(time.clock()/60) + ' min\n\n')
+            if np.array_equal(sampHRADC,emptyBuff):
+                print('\n************** FALHA SAMPLES BUFFER **************\n')
+                self.source.DisableOutput()
+                self.DisableHRADCSampling()
+                return
 
-        self.source.SetOutput(0,'V')
-        self.source.DisableOutput()
-        self.drs.DisableHRADCSampling()
-        time.sleep(1)
+            log.temperature_hradc = -100*self._convertVinSample(sampHRADC.mean())
+            log.temperature_power_supply = self.source.GetTemperature()
+            log.temperature_dmm = self.dmm.GetTemperature()
 
-        print('**********************************')
-        print('****** Medindo temperaturas ******')
-        print('**********************************\n')
+            print('HRADC Temp = ' + str(log.temperature_hradc) + ' oC')
+            print('Source Temp = ' + str(log.temperature_power_supply) + ' oC')
+            print('DMM Temp = ' + str(log.temperature_dmm) + ' oC\n')
 
-        self.update_gui.emit('Medindo temperaturas...')
+            if variant == 'HRADC-FBP':
 
-        self.drs.ConfigHRADC(slot,100000,'Temp',0,0)
-        time.sleep(1)
-        self.drs.EnableHRADCSampling()
-        time.sleep(0.5)
-        self.drs.EnableSamplesBuffer()
-        time.sleep(0.5)
-        self.drs.DisableSamplesBuffer()
-        time.sleep(0.5)
-        self.drs.DisableHRADCSampling()
-        time.sleep(0.5)
+                print('*****************************************')
+                print('****** Iniciando calibracao Iin... ******')
+                print('*****************************************\n')
 
-        sampHRADC = np.array(self.drs.Recv_samplesBuffer_blocks(0))
+                self.dmm.SetMeasurementType('DCI',0.05)
+                self.source.SetOutput(0,'I')
+                self.drs.SelectTestSource('Iin_bipolar')
+                time.sleep(0.5)
+                self.drs.ConfigHRADC(slot,100000,'Iin_bipolar',0,0)
+                time.sleep(1)
+                self.drs.EnableHRADCSampling()
+                time.sleep(0.5)
 
-        if np.array_equal(sampHRADC,emptyBuff):
-            print('\n************** FALHA SAMPLES BUFFER **************\n')
+                ################################################
+                print('     *** Configurando Iin -FS ... ***\n')
+                ################################################
+                self.update_gui.emit('  Encontrando fundo de escala -Iin...')
+
+                sourceOut = -0.0495
+                self.source.EnableOutput()
+
+                while True:
+                    sourceOut = self._saturate(sourceOut,-0.051,0.05)
+
+                    # if any HRADC samples != 0, set source lower
+                    print('sourceOut = ' + str(sourceOut) + ' A\n')
+                    self.source.SetOutput(sourceOut,'I')
+                    time.sleep(self.settlingTime)
+
+                    self.drs.EnableSamplesBuffer()
+                    time.sleep(1)
+                    self.drs.DisableSamplesBuffer()
+                    time.sleep(1)
+
+                    sampHRADC = np.array(self.drs.Recv_samplesBuffer_blocks(0))
+                    print(sampHRADC)
+
+                    if np.array_equal(sampHRADC,emptyBuff):
+                        print('\n************** FALHA SAMPLES BUFFER **************\n')
+                        self.source.DisableOutput()
+                        self.DisableHRADCSampling()
+                        return
+
+                    meanHRADC = sampHRADC.mean()
+                    stdHRADC = sampHRADC.std()
+
+                    deltaFS = meanHRADC*self.iin_lsb
+                    inc = deltaFS if deltaFS > self.iin_lsb else self.iin_lsb
+
+                    print('\nmax    meanHRADC   stdHRADC    inc')
+                    print(str(sampHRADC.max()) + '    ' + str(meanHRADC) + '    ' + str(stdHRADC) + '    ' + str(inc) + '\n')
+
+                    if((sampHRADC == 0).all()):
+                        break
+
+                    sourceOut -= inc
+
+                iin_negFS = np.array(self.dmm.ReadMeasurementPoints()).mean()
+                print('Iin -FS: ' + str(iin_negFS) + ' A\n')
+
+                #################################################
+                print('\n     *** Procurando Iin T[1] ... ***\n')
+                #################################################
+                self.update_gui.emit('  Procurando Iin T[1]...')
+
+                sumNonFSCodes = 0
+                T_1 = iin_negFS
+
+                while True:
+
+                    # Increment source output
+                    sourceOut += self.iin_step
+                    sourceOut = self._saturate(sourceOut,-0.051,0.05)
+                    print('sourceOut = ' + str(sourceOut) + ' A\n')
+                    self.source.SetOutput(sourceOut,'I')
+                    time.sleep(self.settlingTime)
+
+                    # Start measurements
+                    self.dmm.TrigMultipointMeas()
+                    self.drs.EnableSamplesBuffer()
+                    time.sleep(1)
+                    self.drs.DisableSamplesBuffer()
+                    time.sleep(1)
+
+                    sampHRADC = np.array(self.drs.Recv_samplesBuffer_allblocks())
+                    print(sampHRADC)
+
+                    meanHRADC = sampHRADC.mean()
+                    stdHRADC = sampHRADC.std()
+
+                    print('\nmax    meanHRADC   stdHRADC')
+                    print(str(sampHRADC.max()) + '    ' + str(meanHRADC) + '    ' + str(stdHRADC) + '\n')
+
+
+                    if np.array_equal(sampHRADC,emptyBuff):
+                        print('\n************** FALHA SAMPLES BUFFER **************\n')
+                        self.source.DisableOutput()
+                        self.DisableHRADCSampling()
+                        return
+
+                    #T_1 = np.array(DMM.ReadMeasurementPoints()).mean()
+                    old_T_1 = T_1
+                    T_1 = np.array(self.dmm.GetMultipointMeas()).mean()
+
+                    # Repeat if more than 50% HRADC samples == 0
+                    old_sumNonFSCodes = sumNonFSCodes
+                    sumNonFSCodes = sum(sampHRADC > 0)
+                    print('DMM T[1]     "non-FS codes"')
+                    print(str(T_1) + '      ' + str(sumNonFSCodes) + '\n')
+                    if(sumNonFSCodes >= len(sampHRADC)/2):
+                        break
+
+                T_1 = (old_T_1*old_sumNonFSCodes + T_1*sumNonFSCodes)/(old_sumNonFSCodes + sumNonFSCodes)
+
+                print('*** Iin T[1]: ' + str(T_1) + ' A ***\n\n')
+
+
+                ################################################
+                print('     *** Configurando Iin +FS ... ***\n')
+                ################################################
+                self.update_gui.emit('  Encontrando fundo de escala +Iin...')
+
+                sourceOut = 0.0495
+
+                while True:
+                    sourceOut = self._saturate(sourceOut,-0.051,0.05)
+
+                    # if any HRADC samples != 0, set source lower
+                    print('sourceOut = ' + str(sourceOut) + ' A\n')
+                    self.source.SetOutput(sourceOut,'I')
+                    time.sleep(self.settlingTime)
+
+                    self.drs.EnableSamplesBuffer()
+                    time.sleep(1)
+                    self.drs.DisableSamplesBuffer()
+                    time.sleep(1)
+
+                    sampHRADC = np.array(self.drs.Recv_samplesBuffer_blocks(0))
+                    print(sampHRADC)
+
+                    if np.array_equal(sampHRADC,emptyBuff):
+                        print('\n************** FALHA SAMPLES BUFFER **************\n')
+                        self.source.DisableOutput()
+                        self.DisableHRADCSampling()
+                        return
+
+                    meanHRADC = sampHRADC.mean()
+                    stdHRADC = sampHRADC.std()
+
+                    deltaFS = 0.1-meanHRADC*self.iin_lsb
+                    inc = deltaFS if deltaFS > self.iin_lsb else self.iin_lsb
+
+                    print('\nmin    meanHRADC   stdHRADC    inc')
+                    print(str(sampHRADC.min()) + '    ' + str(meanHRADC) + '    ' + str(stdHRADC) + '    ' + str(inc) + '\n')
+
+                    if((sampHRADC == 0x3FFFF).all()):
+                        break
+
+                    sourceOut += inc
+
+                iin_posFS = np.array(self.dmm.ReadMeasurementPoints()).mean()
+                print('Iin +FS: ' + str(iin_posFS) + ' A\n')
+
+                ###################################################
+                print('\n     *** Procurando Iin T[end] ... ***\n')
+                ###################################################
+                self.update_gui.emit('  Procurando Iin T[end]...')
+
+                sumNonFSCodes = 0
+                T_end = iin_posFS
+
+                while True:
+
+                    # Decrement source output
+                    sourceOut -= self.iin_step
+                    sourceOut = self._saturate(sourceOut,-0.051,0.05)
+                    print('sourceOut = ' + str(sourceOut) + ' A\n')
+                    self.source.SetOutput(sourceOut,'I')
+                    time.sleep(self.settlingTime)
+
+                    # Start measurements
+                    self.dmm.TrigMultipointMeas()
+                    self.drs.EnableSamplesBuffer()
+                    time.sleep(1)
+                    self.drs.DisableSamplesBuffer()
+                    time.sleep(1)
+
+                    sampHRADC = np.array(self.drs.Recv_samplesBuffer_allblocks())
+                    print(sampHRADC)
+
+                    meanHRADC = sampHRADC.mean()
+                    stdHRADC = sampHRADC.std()
+
+                    print('\nmin    meanHRADC   stdHRADC')
+                    print(str(sampHRADC.min()) + '    ' + str(meanHRADC) + '    ' + str(stdHRADC) + '\n')
+
+
+                    if np.array_equal(sampHRADC,emptyBuff):
+                        print('\n************** FALHA SAMPLES BUFFER **************\n')
+                        self.source.DisableOutput()
+                        self.DisableHRADCSampling()
+                        return
+
+                    #T_end = np.array(DMM.ReadMeasurementPoints()).mean()
+                    old_T_end = T_end
+                    T_end = np.array(self.dmm.GetMultipointMeas()).mean()
+
+                    # Repeat if more than 50% HRADC samples == 0
+                    old_sumNonFSCodes = sumNonFSCodes
+                    sumNonFSCodes = sum(sampHRADC < 0x3FFFF)
+                    print('DMM T[end]     "non-FS codes"')
+                    print(str(T_end) + '      ' + str(sumNonFSCodes) + '\n')
+                    if(sumNonFSCodes >= len(sampHRADC)/2):
+                        break
+
+                T_end = (old_T_end*old_sumNonFSCodes + T_end*sumNonFSCodes)/(old_sumNonFSCodes + sumNonFSCodes)
+
+                print('*** Iin T[end]: ' + str(T_end) + ' A ***')
+                print('*** Iin T[1]: ' + str(T_1) + ' A ***\n')
+
+                log.iin_gain = (T_end - T_1)/(0.1 - self.iin_lsb)
+                log.iin_offset = T_1 - log.iin_gain*(-0.05 + self.iin_lsb/2)
+
+            else:
+                log.iin_gain = 0
+                log.iin_offset = 0
+
+            self.source.SetOutput(0,'V')
             self.source.DisableOutput()
-            self.DisableHRADCSampling()
-            return
-
-        log.temperature_hradc = -100*self._convertVinSample(sampHRADC.mean())
-        log.temperature_power_supply = self.source.GetTemperature()
-        log.temperature_dmm = self.dmm.GetTemperature()
-
-        print('HRADC Temp = ' + str(log.temperature_hradc) + ' oC\n')
-        print('Source Temp = ' + str(log.temperature_power_supply) + ' oC\n')
-        print('DMM Temp = ' + str(log.temperature_dmm) + ' oC\n')
-
-
-        print('*****************************************')
-        print('****** Iniciando calibração Iin... ******')
-        print('*****************************************\n')
-
-        self.dmm.SetMeasurementType('DCI',0.05)
-        self.source.SetOutput(0,'I')
-        self.drs.SelectTestSource('Iin_bipolar')
-        time.sleep(0.5)
-        self.drs.ConfigHRADC(slot,100000,'Iin_bipolar',0,0)
-        time.sleep(1)
-        self.drs.EnableHRADCSampling()
-        time.sleep(0.5)
-
-        ################################################
-        print('     *** Configurando Iin -FS ... ***\n')
-        ################################################
-
-        sourceOut = -0.0495
-        self.source.EnableOutput()
-
-        while True:
-            sourceOut = self._saturate(sourceOut,-0.051,0.05)
-
-            # if any HRADC samples != 0, set source lower
-            print('sourceOut = ' + str(sourceOut) + ' A\n')
-            self.source.SetOutput(sourceOut,'I')
-            time.sleep(self.settlingTime)
-
-            self.drs.EnableSamplesBuffer()
-            time.sleep(1)
-            self.drs.DisableSamplesBuffer()
+            self.drs.DisableHRADCSampling()
             time.sleep(1)
 
-            sampHRADC = np.array(self.drs.Recv_samplesBuffer_blocks(0))
-            print(sampHRADC)
+            print('************************************')
+            print('****** Salvando resultados... ******')
+            print('************************************\n')
 
-            if np.array_equal(sampHRADC,emptyBuff):
-                print('\n************** FALHA SAMPLES BUFFER **************\n')
-                self.source.DisableOutput()
-                self.DisableHRADCSampling()
-                return
+            print('Configurando placa em modo UFM...')
+            self.update_gui.emit('  Configurando placa em modo UFM...')
+            #slot = slot - 1
+            self.drs.ConfigHRADCOpMode(slot,1)
+            time.sleep(0.5)
 
-            meanHRADC = sampHRADC.mean()
-            stdHRADC = sampHRADC.std()
+            print('\Salvando resultados da calibracao na placa HRADC...')
+            self.update_gui.emit('  Salvando resultados da calibracao na placa HRADC...')
+            data = time.localtime()
+            # Day
+            ufmdata_16 = self._convertToUint16List(data.tm_mday,'Uint16')
+            for i in range(len(ufmdata_16)):
+                self.drs.WriteHRADC_UFM(slot,i+self.ufmOffset['calibdate'],ufmdata_16[i])
+                time.sleep(0.1)
+            # Month
+            ufmdata_16 = self._convertToUint16List(data.tm_mon,'Uint16')
+            for i in range(len(ufmdata_16)):
+                self.drs.WriteHRADC_UFM(slot,i+self.ufmOffset['calibdate']+1,ufmdata_16[i])
+                time.sleep(0.1)
+            # Year
+            ufmdata_16 = self._convertToUint16List(data.tm_year,'Uint16')
+            for i in range(len(ufmdata_16)):
+                self.drs.WriteHRADC_UFM(slot,i+self.ufmOffset['calibdate']+2,ufmdata_16[i])
+                time.sleep(0.1)
+            # Hour
+            ufmdata_16 = self._convertToUint16List(data.tm_hour,'Uint16')
+            for i in range(len(ufmdata_16)):
+                self.drs.WriteHRADC_UFM(slot,i+self.ufmOffset['calibdate']+3,ufmdata_16[i])
+                time.sleep(0.1)
+            # Minutes
+            ufmdata_16 = self._convertToUint16List(data.tm_min,'Uint16')
+            for i in range(len(ufmdata_16)):
+                self.drs.WriteHRADC_UFM(slot,i+self.ufmOffset['calibdate']+4,ufmdata_16[i])
+                time.sleep(0.1)
+            # HRADC Temperature
+            ufmdata_16 = self._convertToUint16List(log.temperature_hradc,'float')
+            for i in range(len(ufmdata_16)):
+                self.drs.WriteHRADC_UFM(slot,i+self.ufmOffset['calibtemp'],ufmdata_16[i])
+                time.sleep(0.1)
+            # Vin gain
+            ufmdata_16 = self._convertToUint16List(log.vin_gain,'float')
+            for i in range(len(ufmdata_16)):
+                self.drs.WriteHRADC_UFM(slot,i+self.ufmOffset['vin_gain'],ufmdata_16[i])
+                time.sleep(0.1)
+            # Vin offset
+            ufmdata_16 = self._convertToUint16List(log.vin_offset,'float')
+            for i in range(len(ufmdata_16)):
+                self.drs.WriteHRADC_UFM(slot,i+self.ufmOffset['vin_offset'],ufmdata_16[i])
+                time.sleep(0.1)
+            # Iin gain
+            ufmdata_16 = self._convertToUint16List(log.iin_gain,'float')
+            for i in range(len(ufmdata_16)):
+                self.drs.WriteHRADC_UFM(slot,i+self.ufmOffset['iin_gain'],ufmdata_16[i])
+                time.sleep(0.1)
+            # Iin offset
+            ufmdata_16 = self._convertToUint16List(log.iin_offset,'float')
+            for i in range(len(ufmdata_16)):
+                self.drs.WriteHRADC_UFM(slot,i+self.ufmOffset['iin_offset'],ufmdata_16[i])
+                time.sleep(0.1)
+            # +Vref
+            ufmdata_16 = self._convertToUint16List(log.vref_p,'float')
+            for i in range(len(ufmdata_16)):
+                self.drs.WriteHRADC_UFM(slot,i+self.ufmOffset['vref_p'],ufmdata_16[i])
+                time.sleep(0.1)
+            # -Vref
+            ufmdata_16 = self._convertToUint16List(log.vref_n,'float')
+            for i in range(len(ufmdata_16)):
+                self.drs.WriteHRADC_UFM(slot,i+self.ufmOffset['vref_n'],ufmdata_16[i])
+                time.sleep(0.1)
+            # GND
+            ufmdata_16 = self._convertToUint16List(log.gnd,'float')
+            for i in range(len(ufmdata_16)):
+                self.drs.WriteHRADC_UFM(slot,i+self.ufmOffset['gnd'],ufmdata_16[i])
+                time.sleep(0.1)
 
-            deltaFS = meanHRADC*self.iin_lsb
-            inc = deltaFS if deltaFS > self.iin_lsb else self.iin_lsb
-
-            print('\nmax    meanHRADC   stdHRADC    inc')
-            print(str(sampHRADC.max()) + '    ' + str(meanHRADC) + '    ' + str(stdHRADC) + '    ' + str(inc) + '\n')
-
-            if((sampHRADC == 0).all()):
-                break
-
-            sourceOut -= inc
-
-        iin_negFS = np.array(self.dmm.ReadMeasurementPoints()).mean()
-        print('Iin -FS: ' + str(iin_negFS) + ' A\n')
-
-        #################################################
-        print('\n     *** Procurando Iin T[1] ... ***\n')
-        #################################################
-
-        sumNonFSCodes = 0
-        T_1 = iin_negFS
-
-        while True:
-
-            # Increment source output
-            sourceOut += self.iin_step
-            sourceOut = self._saturate(sourceOut,-0.051,0.05)
-            print('sourceOut = ' + str(sourceOut) + ' A\n')
-            self.source.SetOutput(sourceOut,'I')
-            time.sleep(self.settlingTime)
-
-            # Start measurements
-            self.dmm.TrigMultipointMeas()
-            self.drs.EnableSamplesBuffer()
-            time.sleep(1)
-            self.drs.DisableSamplesBuffer()
-            time.sleep(1)
-
-            sampHRADC = np.array(self.drs.Recv_samplesBuffer_allblocks())
-            print(sampHRADC)
-
-            meanHRADC = sampHRADC.mean()
-            stdHRADC = sampHRADC.std()
-
-            print('\nmax    meanHRADC   stdHRADC')
-            print(str(sampHRADC.max()) + '    ' + str(meanHRADC) + '    ' + str(stdHRADC) + '\n')
-
-
-            if np.array_equal(sampHRADC,emptyBuff):
-                print('\n************** FALHA SAMPLES BUFFER **************\n')
-                self.source.DisableOutput()
-                self.DisableHRADCSampling()
-                return
-
-            #T_1 = np.array(DMM.ReadMeasurementPoints()).mean()
-            old_T_1 = T_1
-            T_1 = np.array(self.dmm.GetMultipointMeas()).mean()
-
-            # Repeat if more than 50% HRADC samples == 0
-            old_sumNonFSCodes = sumNonFSCodes
-            sumNonFSCodes = sum(sampHRADC > 0)
-            print('DMM T[1]     "non-FS codes"')
-            print(str(T_1) + '      ' + str(sumNonFSCodes) + '\n')
-            if(sumNonFSCodes >= len(sampHRADC)/2):
-                break
-
-        T_1 = (old_T_1*old_sumNonFSCodes + T_1*sumNonFSCodes)/(old_sumNonFSCodes + sumNonFSCodes)
-
-        print('*** Iin T[1]: ' + str(T_1) + ' A ***\n\n')
-
-
-        ################################################
-        print('     *** Configurando Iin +FS ... ***\n')
-        ################################################
-
-        sourceOut = 0.0495
-
-        while True:
-            sourceOut = self._saturate(sourceOut,-0.051,0.05)
-
-            # if any HRADC samples != 0, set source lower
-            print('sourceOut = ' + str(sourceOut) + ' A\n')
-            self.source.SetOutput(sourceOut,'I')
-            time.sleep(self.settlingTime)
-
-            self.drs.EnableSamplesBuffer()
-            time.sleep(1)
-            self.drs.DisableSamplesBuffer()
+            self.drs.ReadHRADC_BoardData(slot)
             time.sleep(1)
 
-            sampHRADC = np.array(self.drs.Recv_samplesBuffer_blocks(0))
-            print(sampHRADC)
+            print('Configurando placa em modo Sampling...')
+            self.update_gui.emit('  Configurando placa em modo Sampling...')
+            self.drs.ConfigHRADCOpMode(slot,0)
+            time.sleep(0.5)
 
-            if np.array_equal(sampHRADC,emptyBuff):
-                print('\n************** FALHA SAMPLES BUFFER **************\n')
-                self.source.DisableOutput()
-                self.DisableHRADCSampling()
-                return
+            print('Enviando dados ao servidor...\n')
+            self.update_gui.emit('  Enviando dados ao servidor...')
+            log_res = self._send_to_server(log)
 
-            meanHRADC = sampHRADC.mean()
-            stdHRADC = sampHRADC.std()
+            print('\n\n*****************************************')
+            print('******         RESULTADOS          ******')
+            print('*****************************************\n')
 
-            deltaFS = 0.1-meanHRADC*self.iin_lsb
-            inc = deltaFS if deltaFS > self.iin_lsb else self.iin_lsb
+            print('  Vin Gain: ' + str(log.vin_gain))
+            print('  Vin Offset: ' + str(log.vin_offset))
 
-            print('\nmin    meanHRADC   stdHRADC    inc')
-            print(str(sampHRADC.min()) + '    ' + str(meanHRADC) + '    ' + str(stdHRADC) + '    ' + str(inc) + '\n')
+            print('  Iin Gain: ' + str(log.iin_gain))
+            print('  Iin Offset: ' + str(log.iin_offset))
 
-            if((sampHRADC == 0x3FFFF).all()):
-                break
+            print('  +Vref = ' + str(log.vref_p) + ' V')
+            print('  -Vref = ' + str(log.vref_n) + ' V')
+            print('  GND = ' + str(log.gnd) + ' V\n')
 
-            sourceOut += inc
+            print('  HRADC Temp = ' + str(log.temperature_hradc) + ' oC')
+            print('  Source Temp = ' + str(log.temperature_power_supply) + ' oC')
+            print('  DMM Temp = ' + str(log.temperature_dmm) + ' oC\n')
 
-        iin_posFS = np.array(self.dmm.ReadMeasurementPoints()).mean()
-        print('Iin +FS: ' + str(iin_posFS) + ' A\n')
+            deltaT = time.perf_counter()-t0
+            print('  Tempo de execucao: ' + str(deltaT/60) + ' min\n\n')
 
-        ###################################################
-        print('\n     *** Procurando Iin T[end] ... ***\n')
-        ###################################################
+            self.update_gui.emit('\n  Resultados:\n')
+            self.update_gui.emit('    Vin Gain: ' + str(log.vin_gain))
+            self.update_gui.emit('    Vin Offset: ' + str(log.vin_offset))
+            self.update_gui.emit('')
+            self.update_gui.emit('    Iin Gain: ' + str(log.iin_gain))
+            self.update_gui.emit('    Iin Offset: ' + str(log.iin_offset))
+            self.update_gui.emit('')
+            self.update_gui.emit('    +Vref = ' + str(log.vref_p) + ' V')
+            self.update_gui.emit('    -Vref = ' + str(log.vref_n) + ' V')
+            self.update_gui.emit('    GND = ' + str(log.gnd) + ' V')
+            self.update_gui.emit('')
+            self.update_gui.emit('    HRADC Temp = ' + str(log.temperature_hradc) + ' oC')
+            self.update_gui.emit('    Source Temp = ' + str(log.temperature_power_supply) + ' oC')
+            self.update_gui.emit('    DMM Temp = ' + str(log.temperature_dmm) + ' oC')
+            self.update_gui.emit('')
+            self.update_gui.emit('    Tempo de execucao: ' + str(deltaT/60) + ' min')
+            self.update_gui.emit('*** CALIBRACAO DO SLOT #' + str(slot) + ' ENCERRADA! ***\n\n')
 
-        sumNonFSCodes = 0
-        T_end = iin_posFS
-
-        while True:
-
-            # Decrement source output
-            sourceOut -= self.iin_step
-            sourceOut = self._saturate(sourceOut,-0.051,0.05)
-            print('sourceOut = ' + str(sourceOut) + ' A\n')
-            self.source.SetOutput(sourceOut,'I')
-            time.sleep(self.settlingTime)
-
-            # Start measurements
-            self.dmm.TrigMultipointMeas()
-            self.drs.EnableSamplesBuffer()
-            time.sleep(1)
-            self.drs.DisableSamplesBuffer()
-            time.sleep(1)
-
-            sampHRADC = np.array(self.drs.Recv_samplesBuffer_allblocks())
-            print(sampHRADC)
-
-            meanHRADC = sampHRADC.mean()
-            stdHRADC = sampHRADC.std()
-
-            print('\nmin    meanHRADC   stdHRADC')
-            print(str(sampHRADC.min()) + '    ' + str(meanHRADC) + '    ' + str(stdHRADC) + '\n')
-
-
-            if np.array_equal(sampHRADC,emptyBuff):
-                print('\n************** FALHA SAMPLES BUFFER **************\n')
-                self.source.DisableOutput()
-                self.DisableHRADCSampling()
-                return
-
-            #T_end = np.array(DMM.ReadMeasurementPoints()).mean()
-            old_T_end = T_end
-            T_end = np.array(self.dmm.GetMultipointMeas()).mean()
-
-            # Repeat if more than 50% HRADC samples == 0
-            old_sumNonFSCodes = sumNonFSCodes
-            sumNonFSCodes = sum(sampHRADC < 0x3FFFF)
-            print('DMM T[end]     "non-FS codes"')
-            print(str(T_end) + '      ' + str(sumNonFSCodes) + '\n')
-            if(sumNonFSCodes >= len(sampHRADC)/2):
-                break
-
-        T_end = (old_T_end*old_sumNonFSCodes + T_end*sumNonFSCodes)/(old_sumNonFSCodes + sumNonFSCodes)
-
-        print('*** Iin T[end]: ' + str(T_end) + ' A ***')
-        print('*** Iin T[1]: ' + str(T_1) + ' A ***\n')
-
-        log.iin_gain = (T_end - T_1)/(0.1 - self.iin_lsb)
-        log.iin_offset = T_1 - log.iin_gain*(-0.05 + self.iin_lsb/2)
-
-        print('  Iin Gain: ' + str(log.iin_gain))
-        print('  Iin Offset: ' + str(log.iin_offset))
-        print('\nTempo de execução: ' + str(time.clock()/60) + ' min\n\n')
-
-        self.source.SetOutput(0,'V')
-        self.source.DisableOutput()
-        self.drs.DisableHRADCSampling()
-        time.sleep(1)
-
-        log_res = self._send_to_server(log)
-
-        # Quando o teste terminar emitir o resultado em uma lista de objetos
-        # do tipo PowerModuleLog
-
+        self.update_gui.emit('Fim do procedimento de calibração\n\n')
         self.calib_complete.emit(log_res)
 
     def _send_to_server(self, item):
         client = ElpWebClient()
         client_data = item.data
-        print('client_data:\n')
         print(client_data)
         client_method = item.method
         client_response = client.do_request(client_method, client_data)
