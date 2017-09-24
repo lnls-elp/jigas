@@ -201,6 +201,8 @@ class HRADCTest(QThread):
             print('\nEnviando ao servidor dados desta placa...\n')
             res = self._send_to_server(hradc)
 
+            print('\nInicializando equipamentos...\n')
+            #self.update_gui.emit('Inicializando equipamentos...')
             self.source.DisableOutput()
             self.source.Reset()
             self.source.LOFloatChassis('F')
@@ -276,8 +278,6 @@ class HRADCTest(QThread):
 
                         unit = ' V'
 
-                        print('\n - ' + signalType + ' -')
-
                         if(signalType == 'Vin_bipolar_p')|(signalType == 'Vin_bipolar_n'):
                             inputType = 'Vin_bipolar'
                         elif(signalType == 'Iin_bipolar_p')|(signalType == 'Iin_bipolar_n'):
@@ -286,70 +286,78 @@ class HRADCTest(QThread):
                         else:
                             inputType = signalType
 
-                        self.drs.ConfigHRADC(slot,100000,inputType,0,0)
-                        time.sleep(0.1)
+                        if not (hradc.variant == 'HRADC-FAX' and inputType == 'Iin_bipolar'):
 
-                        self.drs.SelectTestSource(inputType)
-                        time.sleep(0.1)
+                            print('\n - ' + signalType + ' -')
 
-                        if signalType == 'Vin_bipolar_p':
-                            self.source.SetOutput(10,'V')
-                            self.source.EnableOutput()
-                        elif signalType == 'Vin_bipolar_n':
-                            self.source.SetOutput(-10,'V')
-                            self.source.EnableOutput()
-                        elif signalType == 'Iin_bipolar_p':
-                            self.dmm.SetMeasurementType('DCI',0.05)
-                            self.source.SetOutput(0.05,'I')
-                            self.source.EnableOutput()
-                        elif signalType == 'Iin_bipolar_n':
-                            self.dmm.SetMeasurementType('DCI',0.05)
-                            self.source.SetOutput(-0.05,'I')
-                            self.source.EnableOutput()
+                            self.drs.ConfigHRADC(slot,100000,inputType,0,0)
+                            time.sleep(0.1)
+
+                            self.drs.SelectTestSource(inputType)
+                            time.sleep(0.1)
+
+                            if signalType == 'Vin_bipolar_p':
+                                self.source.SetOutput(10,'V')
+                                self.source.EnableOutput()
+                            elif signalType == 'Vin_bipolar_n':
+                                self.source.SetOutput(-10,'V')
+                                self.source.EnableOutput()
+                            elif signalType == 'Iin_bipolar_p':
+                                self.dmm.SetMeasurementType('DCI',0.05)
+                                self.source.SetOutput(0.05,'I')
+                                self.source.EnableOutput()
+                            elif signalType == 'Iin_bipolar_n':
+                                self.dmm.SetMeasurementType('DCI',0.05)
+                                self.source.SetOutput(-0.05,'I')
+                                self.source.EnableOutput()
+                            else:
+                                self.source.DisableOutput()
+                                self.source.SetOutput(0,'V')
+
+                            self.drs.EnableSamplesBuffer()
+                            time.sleep(1)
+
+                            self.drs.EnableHRADCSampling()
+                            time.sleep(1)
+
+                            self.drs.DisableSamplesBuffer()
+                            time.sleep(0.5)
+
+                            buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
+                            if np.array_equal(buff,emptyBuff):
+                                print('\n************** FALHA SAMPLES BUFFER **************\n')
+                                self.source.DisableOutput()
+                                return
+                            #log_hradc.gnd = buff.mean()
+                            log_hradc_list.append(buff.mean())
+
+                            buff = np.array(self.dmm.ReadMeasurementPoints())
+                            if np.array_equal(buff,emptyBuff):
+                                print('\n************** FALHA DMM SAMPLES **************\n')
+                                self.source.DisableOutput()
+                                return
+                            #log_dm.gnd = buff.mean()
+                            log_dm_list.append(buff.mean())
+
+                            self.drs.DisableHRADCSampling()
+                            time.sleep(0.1)
+
+                            self.source.DisableOutput()
+
+                            print('HRADC: ' + str(log_hradc_list[-1]) + unit)
+                            print('DMM: ' + str(log_dm_list[-1]) + unit + '\n')
+
+                            if abs(log_hradc_list[-1] - self.refVal[signalType]) > self.refTol[signalType]:
+                                log_hradc.test_result = "Reprovado"
+                                print('HRADC Reprovado: ' + signalType)
+
+                            if abs(log_dm_list[-1] - self.refVal[signalType]) > self.refTol[signalType]:
+                                log_dm.test_result = "Reprovado"
+                                print('DMM Reprovado:' + signalType)
+
                         else:
-                            self.source.DisableOutput()
-                            self.source.SetOutput(0,'V')
-
-                        self.drs.EnableSamplesBuffer()
-                        time.sleep(1)
-
-                        self.drs.EnableHRADCSampling()
-                        time.sleep(1)
-
-                        self.drs.DisableSamplesBuffer()
-                        time.sleep(0.5)
-
-                        buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
-                        if np.array_equal(buff,emptyBuff):
-                            print('\n************** FALHA SAMPLES BUFFER **************\n')
-                            self.source.DisableOutput()
-                            return
-                        #log_hradc.gnd = buff.mean()
-                        log_hradc_list.append(buff.mean())
-
-                        buff = np.array(self.dmm.ReadMeasurementPoints())
-                        if np.array_equal(buff,emptyBuff):
-                            print('\n************** FALHA DMM SAMPLES **************\n')
-                            self.source.DisableOutput()
-                            return
-                        #log_dm.gnd = buff.mean()
-                        log_dm_list.append(buff.mean())
-
-                        self.drs.DisableHRADCSampling()
-                        time.sleep(0.1)
-
-                        self.source.DisableOutput()
-
-                        print('HRADC: ' + str(log_hradc_list[-1]) + unit)
-                        print('DMM: ' + str(log_dm_list[-1]) + unit + '\n')
-
-                        if abs(log_hradc_list[-1] - self.refVal[signalType]) > self.refTol[signalType]:
-                            log_hradc.test_result = "Reprovado"
-                            print('HRADC Reprovado: ' + signalType)
-
-                        if abs(log_dm_list[-1] - self.refVal[signalType]) > self.refTol[signalType]:
-                            log_dm.test_result = "Reprovado"
-                            print('DMM Reprovado:' + signalType)
+                            log_hradc_list.append(0)
+                            log_dm_list.append(0)
 
                     print('\nSalvando log e enviando ao servidor...')
 
