@@ -381,8 +381,7 @@ class SerialDRS(object):
                                 hex_byte_0[0] + hex_byte_1[0] + hex_byte_2[0] + hex_byte_3[0] + hex_byte_4[0] + hex_byte_5[0]+ \
                                 hex_byte_6[0] + hex_byte_7[0] + hex_byte_8[0] + hex_byte_9[0]
             self.ser.write(send_packet.encode('ISO-8859-1'))
-            return self.ser.read(10)
-
+            return self.ser.read(15)
 
     def UdcFlashTest(self, rw):
         payload_size    = self.size_to_hex(2)
