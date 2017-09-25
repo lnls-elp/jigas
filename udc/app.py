@@ -64,7 +64,6 @@ class UDCWindow(QWizard, Ui_Class):
         self.rbLedsNok.setChecked(False)
         self.rbBuzzerOk.setChecked(False)
         self.rbBuzzerNok.setChecked(False)
-        self.lbTestStatus.setText("Iniciar...")
         self.lbTestResult.setText("Aguarde...")
         self.lbEeprom.setText("...")
         self.lbFlash.setText("...")
@@ -82,9 +81,10 @@ class UDCWindow(QWizard, Ui_Class):
         self.lbRs485.setText("...")
         self.lbAlimPlanoIsolado.setText("...")
         self.lbExpansorIO.setText("...")
-        self.lbEthernetInit.setText("...")
         self.lbEthernetPing.setText("...")
+        self.lbLoopback.setText("...")
         self.teTestReport.clear()
+        self.teTestReport.setReadOnly(True)
         self.pbTestLeds.setEnabled(True)
         self.pbTestLeds.setText("Testar")
         self.pbTestBuzzer.setEnabled(True)
@@ -96,6 +96,10 @@ class UDCWindow(QWizard, Ui_Class):
         self.lbStatusLoadingFinalFirmware.setText("Clique para gravar.")
         self.pbConnectSerialPort.setText("Conectar")
         self.pbConnectSerialPort.setEnabled(True)
+        self.teTestFirmwareLog.clear()
+        self.teTestFirmwareLog.setReadOnly(True)
+        self.teFinalFirmwareLog.clear()
+        self.teFinalFirmwareLog.setReadOnly(True)
 
     def _initialize_signals(self):
         """ Configure basic signals """
@@ -168,7 +172,7 @@ class UDCWindow(QWizard, Ui_Class):
         self._test_thread.isol_plane.connect(self._update_isol_plane_label)
         self._test_thread.io_expander.connect(self._update_io_expander_label)
         self._test_thread.ethernet_ping.connect(self._update_ethernet_ping_label)
-        self._test_thread.ethernet_init.connect(self._update_ethernet_init_label)
+        self._test_thread.loopback.connect(self._update_loopback_label)
 
     def _disconnect_test_signals(self):
         self._test_thread.test_complete.disconnect()
@@ -183,7 +187,7 @@ class UDCWindow(QWizard, Ui_Class):
         self._test_thread.isol_plane.disconnect()
         self._test_thread.io_expander.disconnect()
         self._test_thread.ethernet_ping.disconnect()
-        self._test_thread.ethernet_init.disconnect()
+        self._test_thread.loopback.disconnect()
 
     def _restart_variables(self):
         self._load_test_firmware_status = False
@@ -455,6 +459,7 @@ class UDCWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _start_test_sequence(self):
+        self.teTestReport.clear()
         if (self.rbLedsOk.isChecked() or self.rbLedsNok.isChecked()) and \
         (self.rbBuzzerOk.isChecked() or self.rbBuzzerNok.isChecked()) and \
         (self._test_leds and self._test_buzzer):
@@ -489,8 +494,7 @@ class UDCWindow(QWizard, Ui_Class):
     def _test_finished(self, result):
         self._test_finished_status = True
         self.pbStartTests.setEnabled(True)
-        self.pbStartTests.setText("Novo Teste!")
-        self.lbTestStatus.setText("Finalizado")
+        self.pbStartTests.setText("Repetir Teste")
         if result:
             self.lbTestResult.setText("Aprovado")
         else:
@@ -542,10 +546,6 @@ class UDCWindow(QWizard, Ui_Class):
     @pyqtSlot(str)
     def _update_io_expander_label(self, value):
         self.lbExpansorIO.setText(value)
-
-    @pyqtSlot(str)
-    def _update_ethernet_init_label(self, value):
-        self.lbEthernetInit.setText(value)
 
     @pyqtSlot(str)
     def _update_ethernet_ping_label(self, value):
