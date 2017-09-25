@@ -84,6 +84,7 @@ class UDCWindow(QWizard, Ui_Class):
         self.lbEthernetPing.setText("...")
         self.lbLoopback.setText("...")
         self.teTestReport.clear()
+        self.teTestReport.setReadOnly(True)
         self.pbTestLeds.setEnabled(True)
         self.pbTestLeds.setText("Testar")
         self.pbTestBuzzer.setEnabled(True)
@@ -95,6 +96,10 @@ class UDCWindow(QWizard, Ui_Class):
         self.lbStatusLoadingFinalFirmware.setText("Clique para gravar.")
         self.pbConnectSerialPort.setText("Conectar")
         self.pbConnectSerialPort.setEnabled(True)
+        self.teTestFirmwareLog.clear()
+        self.teTestFirmwareLog.setReadOnly(True)
+        self.teFinalFirmwareLog.clear()
+        self.teFinalFirmwareLog.setReadOnly(True)
 
     def _initialize_signals(self):
         """ Configure basic signals """

@@ -45,6 +45,7 @@ class UDCTest(QThread):
         self._buzzer = None
         self._details = ""
         self._loopback_fail = "\n"
+        self._index_res_ok = 3
 
         self._send_partial_data = False
 
@@ -132,9 +133,13 @@ class UDCTest(QThread):
         self._udc.UdcLedTest(self.START_TEST)
         time.sleep(self.SLEEP_TIME)
         response = self._udc.UdcLedTest(self.READ_RESULT)
-        if (response is self.SUCESS):
-            result = self.APPROVED
-            self._test_res_led = True
+        if (response is not None) and (len(response) > 3):
+            if (response[self._index_res_ok] is self.SUCESS):
+                result = self.APPROVED
+                self._test_res_led = True
+            else:
+                result = self.DISAPPROVED
+                self._test_res_led = False
         else:
             result = self.DISAPPROVED
             self._test_res_led = False
@@ -148,9 +153,13 @@ class UDCTest(QThread):
         self._udc.UdcBuzzerTest(self.START_TEST)
         time.sleep(self.SLEEP_TIME)
         response = self._udc.UdcBuzzerTest(self.READ_RESULT)
-        if (response is self.SUCESS):
-            result = self.APPROVED
-            self._test_res_buzzer = True
+        if (response is not None) and (len(response) > 3):
+            if (response[self._index_res_ok] is self.SUCESS):
+                result = self.APPROVED
+                self._test_res_buzzer = True
+            else:
+                result = self.DISAPPROVED
+                self._test_res_buzzer = False
         else:
             result = self.DISAPPROVED
             self._test_res_buzzer = False
@@ -166,7 +175,7 @@ class UDCTest(QThread):
         time.sleep(self.SLEEP_TIME)
         response = self._udc.UdcEepromTest(self.READ_RESULT)
 
-        if response is not None:
+        if (response is not None) and (len(response) > 3):
             for item in response:
                 serial_str += str(item)
             if serial_str is self._serial_number:
@@ -189,8 +198,11 @@ class UDCTest(QThread):
         self._udc.UdcFlashTest(self.START_TEST)
         time.sleep(self.SLEEP_TIME)
         response = self._udc.UdcFlashTest(self.READ_RESULT)
-        if response is self.SUCESS:
-            result = self.APPROVED
+        if (response is not None) and (len(response) > 3):
+            if response[self._index_res_ok] is self.SUCESS:
+                result = self.APPROVED
+            else:
+                result = self.DISAPPROVED
         else:
             result = self.DISAPPROVED
         self.flash.emit(result)
@@ -203,8 +215,11 @@ class UDCTest(QThread):
         self._udc.UdcRamTest(self.START_TEST)
         time.sleep(self.SLEEP_TIME)
         response = self._udc.UdcRamTest(self.READ_RESULT)
-        if response is self.SUCESS:
-            result = self.APPROVED
+        if (response is not None) and (len(response) > 3):
+            if response[self._index_res_ok] is self.SUCESS:
+                result = self.APPROVED
+            else:
+                result = self.DISAPPROVED
         else:
             result = self.DISAPPROVED
         self.ram.emit(result)
@@ -219,8 +234,11 @@ class UDCTest(QThread):
             self._udc.UdcAdcTest(self.START_TEST, i)
             time.sleep(self.SLEEP_TIME)
             response = self._udc.UdcAdcTest(self.READ_RESULT, i)
-            if response is self.SUCESS:
-                result[i - 1] = self.APPROVED
+            if (response is not None) and (len(response) > 3):
+                if response[self._index_res_ok] is self.SUCESS:
+                    result[i - 1] = self.APPROVED
+                else:
+                    result[i - 1] = self.DISAPPROVED
             else:
                 result[i - 1] = self.DISAPPROVED
             self.update_gui.emit(result[i - 1])
@@ -236,8 +254,11 @@ class UDCTest(QThread):
         self._udc.UdcRtcTest(self.START_TEST)
         time.sleep(self.SLEEP_TIME)
         response = self._udc.UdcRtcTest(self.READ_RESULT)
-        if response is self.SUCESS:
-            result = self.APPROVED
+        if (response is not None) and (len(response) > 3):
+            if response[self._index_res_ok] is self.SUCESS:
+                result = self.APPROVED
+            else:
+                result = self.DISAPPROVED
         else:
             result = self.DISAPPROVED
         self.rtc.emit(result)
@@ -250,8 +271,11 @@ class UDCTest(QThread):
         self._udc.UdcSensorTempTest(self.START_TEST)
         time.sleep(self.SLEEP_TIME)
         response = self._udc.UdcSensorTempTest(self.READ_RESULT)
-        if response is self.SUCESS:
-            result = self.APPROVED
+        if (response is not None) and (len(response) > 3):
+            if response[self._index_res_ok] is self.SUCESS:
+                result = self.APPROVED
+            else:
+                result = self.DISAPPROVED
         else:
             result = self.DISAPPROVED
         self.sensor_temp.emit(result)
@@ -264,8 +288,11 @@ class UDCTest(QThread):
         self._udc.UdcUartTest(self.START_TEST)
         time.sleep(self.SLEEP_TIME)
         response = self._udc.UdcUartTest(self.READ_RESULT)
-        if response is self.SUCESS:
-            result = self.APPROVED
+        if (response is not None) and (len(response) > 3):
+            if response[self._index_res_ok] is self.SUCESS:
+                result = self.APPROVED
+            else:
+                result = self.DISAPPROVED
         else:
             result = self.DISAPPROVED
         self.rs485.emit(result)
@@ -278,8 +305,11 @@ class UDCTest(QThread):
         self._udc.UdcIsoPlaneTest(self.START_TEST)
         time.sleep(self.SLEEP_TIME)
         response = self._udc.UdcIsoPlaneTest(self.READ_RESULT)
-        if response is self.SUCESS:
-            result = self.APPROVED
+        if (response is not None) and (len(response) > 3):
+            if response[self._index_res_ok] is self.SUCESS:
+                result = self.APPROVED
+            else:
+                result = self.DISAPPROVED
         else:
             result = self.DISAPPROVED
         self.isol_plane.emit(result)
@@ -292,8 +322,11 @@ class UDCTest(QThread):
         self._udc.UdcIoExpanderTest(self.START_TEST)
         time.sleep(self.SLEEP_TIME)
         response = self._udc.UdcIoExpanderTest(self.READ_RESULT)
-        if response is self.SUCESS:
-            result = self.APPROVED
+        if (response is not None) and (len(response) > 3):
+            if response[self._index_res_ok] is self.SUCESS:
+                result = self.APPROVED
+            else:
+                result = self.DISAPPROVED
         else:
             result = self.DISAPPROVED
         self.io_expander.emit(result)
@@ -329,9 +362,14 @@ class UDCTest(QThread):
             self._udc.UdcLoopBackTest(self.START_TEST, i)
             time.sleep(self.SLEEP_TIME)
             response = self._udc.UdcLoopBackTest(self.READ_RESULT, i)
-            if response is self.SUCESS:
-                result_bool[i - 1] = True
-                self.update_gui.emit(self.APPROVED)
+            if (response is not None) and (len(response) > 3):
+                if response[self._index_res_ok] is self.SUCESS:
+                    result_bool[i - 1] = True
+                    self.update_gui.emit(self.APPROVED)
+                else:
+                    result_bool[i - 1] = False
+                    self._loopback_fail += "Erro Canal " + str(i) + '\n'
+                    self.update_gui.emit(self.DISAPPROVED)
             else:
                 result_bool[i - 1] = False
                 self._loopback_fail += "Erro Canal " + str(i) + '\n'
