@@ -116,17 +116,15 @@ class UDCTest(QThread):
             return self._udc.Connect(self._comport, self._baudrate)
 
     def test_communication(self):
-        #result = False     # Result for communication test and aux power supply
-        #try:
-        #    self._udc.Write_sigGen_Aux(1)
-        #    test_package = self._udc.Read_ps_Model()
-        #    if (test_package[0] == 0) and (test_package[1] == 17) and (test_package[2] == 512) \
-        #        and (test_package[3] == 14) and (test_package[4] == 223):
-        #        result = True
-        #except:
-        #    pass
-        result = True #Remove this
-        return result
+        test_val = 99
+        res = self._udc.UdcComTest(0, test_val)
+        if len(res) > 0:
+            if res[3]  is test_val:
+                return True
+            else:
+                return False
+        else:
+            return False
 
     def test_led(self):
         result = self.DISAPPROVED
@@ -253,16 +251,9 @@ class UDCTest(QThread):
     def _test_rtc(self):
         self.update_gui.emit("Testando RTC...")
         result = self.DISAPPROVED
-        #self._udc.UdcRtcTest(self.START_TEST)
+        self._udc.UdcRtcTest(self.START_TEST)
         time.sleep(self.SLEEP_TIME)
-        #response = self._udc.UdcRtcTest(self.READ_RESULT)
-        """
-            Simulate Value
-        """
-        response = self._get_randon()
-        """
-            End Simulation
-        """
+        response = self._udc.UdcRtcTest(self.READ_RESULT)
         if response is self.SUCESS:
             result = self.APPROVED
         else:
@@ -272,39 +263,33 @@ class UDCTest(QThread):
         return (result is self.APPROVED)
 
     def _test_temperature_sensor(self):
-        self.update_gui.emit("Testando Sensor de Temperatura...")
-        result = self.DISAPPROVED
-        #self._udc.UdcSensorTempTest(self.START_TEST)
-        time.sleep(self.SLEEP_TIME)
-        #response = self._udc.UdcSensorTempTest(self.READ_RESULT)
-        """
-            Simulate Value
-        """
-        response = self._get_randon()
-        """
-            End Simulation
-        """
-        if response is self.SUCESS:
-            result = self.APPROVED
-        else:
-            result = self.DISAPPROVED
-        self.sensor_temp.emit(result)
-        self.update_gui.emit(result)
-        return (result is self.APPROVED)
+        return True
+#        self.update_gui.emit("Testando Sensor de Temperatura...")
+#        result = self.DISAPPROVED
+#        #self._udc.UdcSensorTempTest(self.START_TEST)
+#        time.sleep(self.SLEEP_TIME)
+#        #response = self._udc.UdcSensorTempTest(self.READ_RESULT)
+#        """
+#            Simulate Value
+#        """
+#        response = self._get_randon()
+#        """
+#            End Simulation
+#        """
+#        if response is self.SUCESS:
+#            result = self.APPROVED
+#        else:
+#            result = self.DISAPPROVED
+#        self.sensor_temp.emit(result)
+#        self.update_gui.emit(result)
+#        return (result is self.APPROVED)
 
     def _test_rs485(self):
         self.update_gui.emit("Testando UART/RS485...")
         result = self.DISAPPROVED
-        #self._udc.UdcUartTest(self.START_TEST)
+        self._udc.UdcUartTest(self.START_TEST)
         time.sleep(self.SLEEP_TIME)
-        #response = self._udc.UdcUartTest(self.READ_RESULT)
-        """
-            Simulate Value
-        """
-        response = self._get_randon()
-        """
-            End Simulation
-        """
+        response = self._udc.UdcUartTest(self.READ_RESULT)
         if response is self.SUCESS:
             result = self.APPROVED
         else:
@@ -316,16 +301,9 @@ class UDCTest(QThread):
     def _test_alim_isol_plane(self):
         self.update_gui.emit("Testando Alimentação Plano Isolado...")
         result = self.DISAPPROVED
-        #self._udc.UdcIsoPlaneTest(self.START_TEST)
+        self._udc.UdcIsoPlaneTest(self.START_TEST)
         time.sleep(self.SLEEP_TIME)
-        #response = self._udc.UdcIsoPlaneTest(self.READ_RESULT)
-        """
-            Simulate Value
-        """
-        response = self._get_randon()
-        """
-            End Simulation
-        """
+        response = self._udc.UdcIsoPlaneTest(self.READ_RESULT)
         if response is self.SUCESS:
             result = self.APPROVED
         else:
@@ -337,16 +315,9 @@ class UDCTest(QThread):
     def _test_io_expander(self):
         self.update_gui.emit("Testando Expansor de I/O...")
         result = self.DISAPPROVED
-        #self._udc.UdcIoExpanderTest(self.START_TEST)
+        self._udc.UdcIoExpanderTest(self.START_TEST)
         time.sleep(self.SLEEP_TIME)
-        #response = self._udc.UdcIoExpanderTest(self.READ_RESULT)
-        """
-            Simulate Value
-        """
-        response = self._get_randon()
-        """
-            End Simulation
-        """
+        response = self._udc.UdcIoExpanderTest(self.READ_RESULT)
         if response is self.SUCESS:
             result = self.APPROVED
         else:
@@ -358,16 +329,9 @@ class UDCTest(QThread):
     def _test_ethernet_init(self):
         self.update_gui.emit("Testando Inicialização Ethernet...")
         result = self.DISAPPROVED
-        #self._udc.UdcEthernetTest(self.START_TEST)
+        self._udc.UdcEthernetTest(self.START_TEST)
         time.sleep(self.SLEEP_TIME)
-        #response = self._udc.UdcEthernetTest(self.READ_RESULT)
-        """
-            Simulate Value
-        """
-        response = self._get_randon()
-        """
-            End Simulation
-        """
+        response = self._udc.UdcEthernetTest(self.READ_RESULT)
         if response is self.SUCESS:
             result = self.APPROVED
         else:
@@ -377,21 +341,22 @@ class UDCTest(QThread):
         return (result is self.APPROVED)
 
     def _test_ethernet_ping(self):
-        self.update_gui.emit("Testando Ping Ethernet...")
-        host = "127.0.0.1"
-        if  platform.system().lower()=="windows":
-            ping_str = "-n 1"
-        else:
-            ping_str = "-c 1"
-        resposta = os.system("ping " + ping_str + " " + host)
-        if resposta is 0:
-            self.ethernet_ping.emit(self.APPROVED)
-            self.update_gui.emit(self.APPROVED)
-            return True
-        else:
-            self.ethernet_ping.emit(self.DISAPPROVED)
-            self.update_gui.emit(self.DISAPPROVED)
-            return False
+        return True
+#        self.update_gui.emit("Testando Ping Ethernet...")
+#        host = "127.0.0.1"
+#        if  platform.system().lower()=="windows":
+#            ping_str = "-n 1"
+#        else:
+#            ping_str = "-c 1"
+#        resposta = os.system("ping " + ping_str + " " + host)
+#        if resposta is 0:
+#            self.ethernet_ping.emit(self.APPROVED)
+#            self.update_gui.emit(self.APPROVED)
+#            return True
+#        else:
+#            self.ethernet_ping.emit(self.DISAPPROVED)
+#            self.update_gui.emit(self.DISAPPROVED)
+#            return False
 
     def _test_periph_loopback(self):
         self.update_gui.emit("Testando Loopbacks...")
@@ -399,16 +364,9 @@ class UDCTest(QThread):
         result_bool = [False for i in range(32)]
         for i in range(1, 33):
             self.update_gui.emit("Testando Loopback canal " + str(i))
-            #self._udc.UdcLoopBackTest(self.START_TEST, i)
+            self._udc.UdcLoopBackTest(self.START_TEST, i)
             time.sleep(self.SLEEP_TIME)
-            #response = self._udc.UdcLoopBackTest(self.READ_RESULT)
-            """
-                Simulate Value
-            """
-            response = self._get_randon()
-            """
-                End Simulation
-            """
+            response = self._udc.UdcLoopBackTest(self.READ_RESULT)
             if response is self.SUCESS:
                 result_bool[i - 1] = True
                 self.update_gui.emit(self.APPROVED)

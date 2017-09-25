@@ -37,7 +37,8 @@ ListFunc = ['TurnOn','TurnOff','OpenLoop','ClosedLoop','OpMode','RemoteInterface
             'SetRSAddress','EnableSamplesBuffer','DisableSamplesBuffer','SelectHRADCBoard','SelectTestSource',
             'ResetHRADCBoards','Config_nHRADC','ReadHRADC_UFM','WriteHRADC_UFM','EraseHRADC_UFM','ReadHRADC_BoardData']
 ListTestFunc = ['UdcIoExpanderTest', 'UdcLedTest', 'UdcBuzzerTest', 'UdcEepromTest', 'UdcFlashTest', 'UdcRamTest',
-                'UdcRtcTest', 'UdcSensorTempTest', 'UdcIsoPlaneTest', 'UdcAdcTest', 'UdcUartTest', 'UdcLoopBackTest']
+                'UdcRtcTest', 'UdcSensorTempTest', 'UdcIsoPlaneTest', 'UdcAdcTest', 'UdcUartTest', 'UdcLoopBackTest',
+                'UdcComTest']
 ListHRADCInputType = ['Vin_bipolar','Vin_unipolar_p','Vin_unipolar_n','Iin_bipolar','Iin_unipolar_p',
                       'Iin_unipolar_n','Vref_bipolar_p','Vref_bipolar_n','GND','Vref_unipolar_p',
                       'Vref_unipolar_n','GND_unipolar','Temp','Reserved0','Reserved1','Reserved2']
@@ -388,14 +389,14 @@ class SerialDRS(object):
         hex_rw          = self.double_to_hex(rw)
         send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcFlashTest'))+hex_rw[0]
         self.ser.write(send_packet.encode('ISO-8859-1'))
-        return self.ser.read()
+        return self.ser.read(6)
 
     def UdcRamTest(self, rw):
         payload_size    = self.size_to_hex(2)
         hex_rw          = self.double_to_hex(rw)
         send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcRamTest'))+hex_rw[0]
         self.ser.write(send_packet.encode('ISO-8859-1'))
-        return self.ser.read()
+        return self.ser.read(6)
 
     def UdcAdcTest(self, rw, channel):
         payload_size    = self.size_to_hex(3)
@@ -403,35 +404,35 @@ class SerialDRS(object):
         hex_channel     = self.double_to_hex(channel)
         send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcAdcTest'))+hex_rw[0]+hex_channel[0]
         self.ser.write(send_packet.encode('ISO-8859-1'))
-        return self.ser.read()
+        return self.ser.read(6)
 
     def UdcSensorTempTest(self, rw):
         payload_size    = self.size_to_hex(2)
         hex_rw          = self.double_to_hex(rw)
         send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcSensorTempTest'))+hex_rw[0]
         self.ser.write(send_packet.encode('ISO-8859-1'))
-        return self.ser.read()
+        return self.ser.read(6)
 
     def UdcRtcTest(self, rw):
         payload_size    = self.size_to_hex(2)
         hex_rw          = self.double_to_hex(rw)
         send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcRtcTest'))+hex_rw[0]
         self.ser.write(send_packet.encode('ISO-8859-1'))
-        return self.ser.read()
+        return self.ser.read(6)
 
     def UdcUartTest(self, rw):
         payload_size    = self.size_to_hex(2)
         hex_rw          = self.double_to_hex(rw)
         send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcUartTest'))+hex_rw[0]
         self.ser.write(send_packet.encode('ISO-8859-1'))
-        return self.ser.read()
+        return self.ser.read(6)
 
     def UdcIoExpanderTest(self, rw):
         payload_size    = self.size_to_hex(2)
         hex_rw          = self.double_to_hex(rw)
         send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcIoExpanderTest'))+hex_rw[0]
         self.ser.write(send_packet.encode('ISO-8859-1'))
-        return self.ser.read()
+        return self.ser.read(6)
 
 #    def UdcEthernetTest(self, rw):
 #        payload_size    = self.size_to_hex(2)
@@ -445,7 +446,7 @@ class SerialDRS(object):
         hex_rw          = self.double_to_hex(rw)
         send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcIsoPlaneTest'))+hex_rw[0]
         self.ser.write(send_packet.encode('ISO-8859-1'))
-        return self.ser.read()
+        return self.ser.read(6)
 
     def UdcLoopBackTest(self, rw, channel):
         payload_size    = self.size_to_hex(3)
@@ -453,21 +454,29 @@ class SerialDRS(object):
         hex_channel     = self.double_to_hex(channel)
         send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcLoopBackTest'))+hex_rw[0]+hex_channel[0]
         self.ser.write(send_packet.encode('ISO-8859-1'))
-        return self.ser.read()
+        return self.ser.read(6)
 
     def UdcLedTest(self, rw):
         payload_size    = self.size_to_hex(2)
         hex_rw          = self.double_to_hex(rw)
         send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcLedTest'))+hex_rw[0]
         self.ser.write(send_packet.encode('ISO-8859-1'))
-        return self.ser.read()
+        return self.ser.read(6)
 
     def UdcBuzzerTest(self, rw):
         payload_size    = self.size_to_hex(2)
         hex_rw          = self.double_to_hex(rw)
         send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcBuzzerTest'))+hex_rw[0]
         self.ser.write(send_packet.encode('ISO-8859-1'))
-        return self.ser.read()
+        return self.ser.read(6)
+
+    def UdcComTest(self, rw, val):
+        payload_size    = self.size_to_hex(3)
+        hex_rw          = self.double_to_hex(rw)
+        hex_value       = self.double_to_hex(val)
+        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcComTest'))+hex_rw[0]+hex_channel[0]
+        self.ser.write(send_packet.encode('ISO-8859-1'))
+        return self.ser.read(6)
 
 
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
