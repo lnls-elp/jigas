@@ -39,10 +39,14 @@ class HRADCCalib(QThread):
     settlingTime = 2
 
     vin_lsb = 20/pow(2,18)
-    vin_step = vin_lsb/1
+    vin_step = vin_lsb/4
+    vin_max =  10.2
 
     iin_lsb = 0.1/pow(2,18)
-    iin_step = iin_lsb/1
+    iin_step = iin_lsb/3
+    iin_max = 0.051
+
+    warmup_min = 20 # 0.084 # 20 minutes
 
     def __init__(self):
         QThread.__init__(self)
@@ -255,7 +259,7 @@ class HRADCCalib(QThread):
         self.update_gui.emit('Iniciando warm-up...\n')
         self.drs.EnableHRADCSampling()
 
-        t = Timer(2,self._timeout)
+        t = Timer(self.warmup_min*60,self._timeout)
         t.start()
 
         while(t.is_alive()):
@@ -308,7 +312,7 @@ class HRADCCalib(QThread):
             self.source.EnableOutput()
 
             while True:
-                sourceOut = self._saturate(sourceOut,-10.2,10.2)
+                sourceOut = self._saturate(sourceOut,-self.vin_max,self.vin_max)
 
                 # if any HRADC samples != 0, set source lower
                 print('sourceOut = ' + str(sourceOut) + ' V\n')
@@ -358,7 +362,7 @@ class HRADCCalib(QThread):
 
                 # Increment source output
                 sourceOut += self.vin_step
-                sourceOut = self._saturate(sourceOut,-10.2,10.2)
+                sourceOut = self._saturate(sourceOut,-self.vin_max,self.vin_max)
                 print('sourceOut = ' + str(sourceOut) + ' V\n')
                 self.source.SetOutput(sourceOut,'V')
                 time.sleep(self.settlingTime)
@@ -411,7 +415,7 @@ class HRADCCalib(QThread):
             sourceOut = 9.9
 
             while True:
-                sourceOut = self._saturate(sourceOut,-10.2,10.2)
+                sourceOut = self._saturate(sourceOut,-self.vin_max,self.vin_max)
 
                 # if any HRADC samples != 0, set source lower
                 print('sourceOut = ' + str(sourceOut) + ' V\n')
@@ -461,7 +465,7 @@ class HRADCCalib(QThread):
 
                 # Decrement source output
                 sourceOut -= self.vin_step
-                sourceOut = self._saturate(sourceOut,-10.2,10.2)
+                sourceOut = self._saturate(sourceOut,-self.vin_max,self.vin_max)
                 print('sourceOut = ' + str(sourceOut) + ' V\n')
                 self.source.SetOutput(sourceOut,'V')
                 time.sleep(self.settlingTime)
@@ -657,7 +661,7 @@ class HRADCCalib(QThread):
                 self.source.EnableOutput()
 
                 while True:
-                    sourceOut = self._saturate(sourceOut,-0.051,0.05)
+                    sourceOut = self._saturate(sourceOut,-self.iin_max,self.iin_max)
 
                     # if any HRADC samples != 0, set source lower
                     print('sourceOut = ' + str(sourceOut) + ' A\n')
@@ -687,7 +691,8 @@ class HRADCCalib(QThread):
                     print('\nmax    meanHRADC   stdHRADC    inc')
                     print(str(sampHRADC.max()) + '    ' + str(meanHRADC) + '    ' + str(stdHRADC) + '    ' + str(inc) + '\n')
 
-                    if((sampHRADC == 0).all()):
+                    #if((sampHRADC == 0).all()):
+                    if(sum(sampHRADC == 0) >= len(sampHRADC)*0.9):
                         break
 
                     sourceOut -= inc
@@ -707,7 +712,7 @@ class HRADCCalib(QThread):
 
                     # Increment source output
                     sourceOut += self.iin_step
-                    sourceOut = self._saturate(sourceOut,-0.051,0.05)
+                    sourceOut = self._saturate(sourceOut,-self.iin_max,self.iin_max)
                     print('sourceOut = ' + str(sourceOut) + ' A\n')
                     self.source.SetOutput(sourceOut,'I')
                     time.sleep(self.settlingTime)
@@ -760,7 +765,7 @@ class HRADCCalib(QThread):
                 sourceOut = 0.0495
 
                 while True:
-                    sourceOut = self._saturate(sourceOut,-0.051,0.05)
+                    sourceOut = self._saturate(sourceOut,-self.iin_max,self.iin_max)
 
                     # if any HRADC samples != 0, set source lower
                     print('sourceOut = ' + str(sourceOut) + ' A\n')
@@ -790,7 +795,8 @@ class HRADCCalib(QThread):
                     print('\nmin    meanHRADC   stdHRADC    inc')
                     print(str(sampHRADC.min()) + '    ' + str(meanHRADC) + '    ' + str(stdHRADC) + '    ' + str(inc) + '\n')
 
-                    if((sampHRADC == 0x3FFFF).all()):
+                    #if((sampHRADC == 0x3FFFF).all()):
+                    if(sum(sampHRADC == 0x3FFFF) >= len(sampHRADC)*0.9):
                         break
 
                     sourceOut += inc
@@ -810,7 +816,7 @@ class HRADCCalib(QThread):
 
                     # Decrement source output
                     sourceOut -= self.iin_step
-                    sourceOut = self._saturate(sourceOut,-0.051,0.05)
+                    sourceOut = self._saturate(sourceOut,-self.iin_max,self.iin_max)
                     print('sourceOut = ' + str(sourceOut) + ' A\n')
                     self.source.SetOutput(sourceOut,'I')
                     time.sleep(self.settlingTime)
