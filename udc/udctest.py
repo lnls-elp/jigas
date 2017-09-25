@@ -12,8 +12,8 @@ class UDCTest(QThread):
     APPROVED                = "OK"
     START_TEST              = 0
     READ_RESULT             = 1
-    SUCESS                  = b'\x00'
-    FAIL                    = b'\x01'
+    SUCESS                  = 0
+    FAIL                    = 1
     SLEEP_TIME              = 0.2
 
     test_complete           = pyqtSignal(bool)
@@ -301,23 +301,21 @@ class UDCTest(QThread):
         return (result is self.APPROVED)
 
     def _test_ethernet_ping(self):
-        self.ethernet_ping.emit(self.APPROVED)
-        return True
-#        self.update_gui.emit("Testando Ping Ethernet...")
-#        host = "127.0.0.1"
-#        if  platform.system().lower()=="windows":
-#            ping_str = "-n 1"
-#        else:
-#            ping_str = "-c 1"
-#        resposta = os.system("ping " + ping_str + " " + host)
-#        if resposta is 0:
-#            self.ethernet_ping.emit(self.APPROVED)
-#            self.update_gui.emit(self.APPROVED)
-#            return True
-#        else:
-#            self.ethernet_ping.emit(self.DISAPPROVED)
-#            self.update_gui.emit(self.DISAPPROVED)
-#            return False
+        self.update_gui.emit("Testando Ping Ethernet...")
+        host = "127.0.0.1"
+        if  platform.system().lower()=="windows":
+            ping_str = "-n 1"
+        else:
+            ping_str = "-c 1"
+        resposta = os.system("ping " + ping_str + " " + host)
+        if resposta is 0:
+            self.ethernet_ping.emit(self.APPROVED)
+            self.update_gui.emit(self.APPROVED)
+            return True
+        else:
+            self.ethernet_ping.emit(self.DISAPPROVED)
+            self.update_gui.emit(self.DISAPPROVED)
+            return False
 
     def _test_periph_loopback(self):
         self._loopback_fail = "\n"
