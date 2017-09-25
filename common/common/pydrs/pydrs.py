@@ -474,7 +474,7 @@ class SerialDRS(object):
         payload_size    = self.size_to_hex(3)
         hex_rw          = self.double_to_hex(rw)
         hex_value       = self.double_to_hex(val)
-        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcComTest'))+hex_rw[0]+hex_channel[0]
+        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcComTest'))+hex_rw[0]+hex_value[0]
         self.ser.write(send_packet.encode('ISO-8859-1'))
         return self.ser.read(6)
 
