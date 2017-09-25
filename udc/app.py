@@ -250,6 +250,7 @@ class UDCWindow(QWizard, Ui_Class):
         return True
 
     def _validate_page_load_test_firmware(self):
+        return True #TODO: Remove this
         if self.cbReprove.isChecked():
             if self._load_test_firmware_status:
                 if not self._communication_status:
@@ -280,7 +281,7 @@ class UDCWindow(QWizard, Ui_Class):
             return False
 
     def _validate_page_start_test(self):
-        return True
+        return True #TODO: Remove this
         if self._leds_status and self._buzzer_status and self._test_finished_status:
             if self._test_result:
                 return True

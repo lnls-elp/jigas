@@ -161,88 +161,84 @@ class UDCTest(QThread):
         return (result is self.APPROVED)
 
     def _test_eeprom(self):
-        self.update_gui.emit("Testando EEPROM...")
-        serial_str = ""
-        result = self.DISAPPROVED
-        #self._udc.UdcEepromTest(self.START_TEST)
-        time.sleep(self.SLEEP_TIME)
-        #response = self._udc.UdcEepromTest(self.READ_RESULT)
-        """
-            Simulate Value
-        """
-        #response = self._get_randon()
-        response = [5, 9, 9 ,9, 5, 9, 9 ,9, 9, 9]
-        """
-            End Simulation
-        """
-        for item in response:
-            serial_str += str(item)
-        if serial_str is self._serial_number:
-            result = self.APPROVED
-        else:
-            result = self.DISAPPROVED
-        self.eeprom.emit(result)
-        self.update_gui.emit("Serial Lido: " + serial_str)
-        self.update_gui.emit(result)
-        return (result is self.APPROVED)
+        return True #TODO: Remove this
+#        self.update_gui.emit("Testando EEPROM...")
+#        serial_str = ""
+#        result = self.DISAPPROVED
+#        #self._udc.UdcEepromTest(self.START_TEST)
+#        time.sleep(self.SLEEP_TIME)
+#        #response = self._udc.UdcEepromTest(self.READ_RESULT)
+#        """
+#            Simulate Value
+#        """
+#        #response = self._get_randon()
+#        response = [5, 9, 9 ,9, 5, 9, 9 ,9, 9, 9]
+#        """
+#            End Simulation
+#        """
+#        for item in response:
+#            serial_str += str(item)
+#        if serial_str is self._serial_number:
+#            result = self.APPROVED
+#        else:
+#            result = self.DISAPPROVED
+#        self.eeprom.emit(result)
+#        self.update_gui.emit("Serial Lido: " + serial_str)
+#        self.update_gui.emit(result)
+#        return (result is self.APPROVED)
 
     def _test_flash(self):
-        self.update_gui.emit("Testando Flash...")
-        result = self.DISAPPROVED
-        #self._udc.UdcFlashTest(self.START_TEST)
-        time.sleep(self.SLEEP_TIME)
-        #response = self._udc.UdcFlashTest(self.READ_RESULT)
-        """
-            Simulate Value
-        """
-        response = self._get_randon()
-        """
-            End Simulation
-        """
-        if response is self.SUCESS:
-            result = self.APPROVED
-        else:
-            result = self.DISAPPROVED
-        self.flash.emit(result)
-        self.update_gui.emit(result)
-        return (result is self.APPROVED)
+        return True #TODO: Remove this
+#        self.update_gui.emit("Testando Flash...")
+#        result = self.DISAPPROVED
+#        #self._udc.UdcFlashTest(self.START_TEST)
+#        time.sleep(self.SLEEP_TIME)
+#        #response = self._udc.UdcFlashTest(self.READ_RESULT)
+#        """
+#            Simulate Value
+#        """
+#        response = self._get_randon()
+#        """
+#            End Simulation
+#        """
+#        if response is self.SUCESS:
+#            result = self.APPROVED
+#        else:
+#            result = self.DISAPPROVED
+#        self.flash.emit(result)
+#        self.update_gui.emit(result)
+#        return (result is self.APPROVED)
 
     def _test_ram(self):
-        self.update_gui.emit("Testando RAM...")
-        result = self.DISAPPROVED
-        #self._udc.UdcRamTest(self.START_TEST)
-        time.sleep(self.SLEEP_TIME)
-        #response = self._udc.UdcRamTest(self.READ_RESULT)
-        """
-            Simulate Value
-        """
-        response = self._get_randon()
-        """
-            End Simulation
-        """
-        if response is self.SUCESS:
-            result = self.APPROVED
-        else:
-            result = self.DISAPPROVED
-        self.ram.emit(result)
-        self.update_gui.emit(result)
-        return (result is self.APPROVED)
+        return True #TODO: Remove This
+#        self.update_gui.emit("Testando RAM...")
+#        result = self.DISAPPROVED
+#        #self._udc.UdcRamTest(self.START_TEST)
+#        time.sleep(self.SLEEP_TIME)
+#        #response = self._udc.UdcRamTest(self.READ_RESULT)
+#        """
+#            Simulate Value
+#        """
+#        response = self._get_randon()
+#        """
+#            End Simulation
+#        """
+#        if response is self.SUCESS:
+#            result = self.APPROVED
+#        else:
+#            result = self.DISAPPROVED
+#        self.ram.emit(result)
+#        self.update_gui.emit(result)
+#        return (result is self.APPROVED)
 
     def _test_adc(self):
         result = [self.DISAPPROVED for i in range(8)]
         result_bool = [False for i in range(8)]
         for i in range(1, 9):
             self.update_gui.emit("Testando ADC Canal " + str(i))
-            #self._udc.UdcAdcTest(self.START_TEST, i)
+            self._udc.UdcAdcTest(self.START_TEST, i)
             time.sleep(self.SLEEP_TIME)
-            #response = self._udc.UdcAdcTest(self.READ_RESULT, i)
-            """
-                Simulate Value
-            """
-            response = self._get_randon()
-            """
-                End Simulation
-            """
+            response = self._udc.UdcAdcTest(self.READ_RESULT, i)
             if response is self.SUCESS:
                 result[i - 1] = self.APPROVED
             else:
