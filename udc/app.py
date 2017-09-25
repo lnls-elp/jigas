@@ -466,10 +466,10 @@ class UDCWindow(QWizard, Ui_Class):
             if self.rbLedsOk.isChecked():
                 self._test_thread.led = True
             else:
-                self._test_thread.led = True
+                self._test_thread.led = False
 
             if self.rbBuzzerOk.isChecked():
-                self._test_thread.buzzer = False
+                self._test_thread.buzzer = True
             else:
                 self._test_thread.buzzer = False
             self._disconnect_test_signals()

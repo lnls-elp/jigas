@@ -49,9 +49,6 @@ class UDCTest(QThread):
 
         self._send_partial_data = False
 
-        self._test_res_leds = False
-        self._test_res_buzzer = False
-
         self._udc = SerialDRS()
 
     @property
@@ -128,44 +125,14 @@ class UDCTest(QThread):
             return False
 
     def test_led(self):
-        result = self.DISAPPROVED
         self.update_gui.emit("Testando Leds...")
         self._udc.UdcLedTest(self.START_TEST)
-        time.sleep(self.SLEEP_TIME)
-        response = self._udc.UdcLedTest(self.READ_RESULT)
-        if (response is not None) and (len(response) > 3):
-            if (response[self._index_res_ok] is self.SUCESS):
-                result = self.APPROVED
-                self._test_res_led = True
-            else:
-                result = self.DISAPPROVED
-                self._test_res_led = False
-        else:
-            result = self.DISAPPROVED
-            self._test_res_led = False
-        self.led_signal.emit(result)
         self.update_gui.emit("Leds Testados")
-        return (result is self.APPROVED)
 
     def test_buzzer(self):
-        result = self.DISAPPROVED
         self.update_gui.emit("Testando Buzzer...")
         self._udc.UdcBuzzerTest(self.START_TEST)
-        time.sleep(self.SLEEP_TIME)
-        response = self._udc.UdcBuzzerTest(self.READ_RESULT)
-        if (response is not None) and (len(response) > 3):
-            if (response[self._index_res_ok] is self.SUCESS):
-                result = self.APPROVED
-                self._test_res_buzzer = True
-            else:
-                result = self.DISAPPROVED
-                self._test_res_buzzer = False
-        else:
-            result = self.DISAPPROVED
-            self._test_res_buzzer = False
-        self.buzzer_signal.emit(result)
         self.update_gui.emit("Buzzer Testado")
-        return (result is self.APPROVED)
 
     def _test_eeprom(self):
         self.update_gui.emit("Testando EEPROM...")
@@ -414,12 +381,12 @@ class UDCTest(QThread):
             else:
                 log.io_expander = self.DISAPPROVED
 
-            if self._test_res_leds:
+            if self._led:
                 log.leds = self.APPROVED
             else:
                 log.leds = self.DISAPPROVED
 
-            if self._test_res_buzzer:
+            if self._buzzer:
                 log.buzzer = self.APPROVED
             else:
                 log.buzzer = self.DISAPPROVED
