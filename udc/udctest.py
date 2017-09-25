@@ -134,7 +134,6 @@ class UDCTest(QThread):
         self._udc.UdcLedTest(self.START_TEST)
         time.sleep(self.SLEEP_TIME)
         response = self._udc.UdcLedTest(self.READ_RESULT)
-        print("Resposta UDC: " + str(response.decode()))
         if (response is self.SUCESS):
             result = self.APPROVED
             self._test_res_led = True
@@ -146,24 +145,17 @@ class UDCTest(QThread):
         return (result is self.APPROVED)
 
     def test_buzzer(self):
-        self.update_gui.emit("Testando Buzzer...")
         result = self.DISAPPROVED
-        #self._udc.UdcBuzzerTest(self.START_TEST)
+        self.update_gui.emit("Testando Buzzer...")
+        self._udc.UdcBuzzerTest(self.START_TEST)
         time.sleep(self.SLEEP_TIME)
-        #response = self._udc.UdcBuzzerTest(self.READ_RESULT)
-        """
-            Simulate Value
-        """
-        response = self._get_randon()
-        """
-            End Simulation
-        """
+        response = self._udc.UdcBuzzerTest(self.READ_RESULT)
         if (response is self.SUCESS):
             result = self.APPROVED
-            self._test_res_led = True
+            self._test_res_buzzer = True
         else:
             result = self.DISAPPROVED
-            self._test_res_led = False
+            self._test_res_buzzer = False
         self.buzzer_signal.emit(result)
         self.update_gui.emit(result)
         return (result is self.APPROVED)

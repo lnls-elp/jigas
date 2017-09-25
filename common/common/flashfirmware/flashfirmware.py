@@ -94,7 +94,7 @@ class LoadFirmware(QThread):
             Loading C28
         """
         self.update_final_firmware_log.emit("Gravando Núcleo C28...")
-        flashcommand = self.C28_COMMAND + self.C28_TEST_FWR
+        flashcommand = self.C28_COMMAND + self.C28_FINAL_FWR
         proc = subprocess.Popen(flashcommand.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         (out, err) = proc.communicate()
 
