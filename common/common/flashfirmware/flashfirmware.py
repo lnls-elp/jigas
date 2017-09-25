@@ -5,7 +5,7 @@ import os
 class LoadFirmware(QThread):
 
     ARM_COMMAND = " CMD /C ..\\common\\common\\flashfirmware\\ccs_base\\DebugServer\\bin\\DSLite flash -c ../common/common/flashfirmware/user_files/configs/f28m36p63c2.ccxml -l user_files/settings/generated.ufsettings  -f -v "
-    DSP_COMMAND = " CMD /C ..\\common\\common\\flashfirmware\\ccs_base\\DebugServer\\bin\\DSLite flash -c ../common/common/flashfirmware/user_files/configs/f28m36p63c2.ccxml -l user_files/settings/generated.ufsettings --core=1 -f -v "
+    C28_COMMAND = " CMD /C ..\\common\\common\\flashfirmware\\ccs_base\\DebugServer\\bin\\DSLite flash -c ../common/common/flashfirmware/user_files/configs/f28m36p63c2.ccxml -l user_files/settings/generated.ufsettings --core=1 -f -v "
 
     ARM_TEST_FWR = '..\\common\\common\\flashfirmware\\udc_firmware\\test\\arm_test.out'
     C28_TEST_FWR = '..\\common\\common\\flashfirmware\\udc_firmware\\test\\dsp_test.out'
@@ -14,10 +14,10 @@ class LoadFirmware(QThread):
     C28_FINAL_FWR = '..\\common\\common\\flashfirmware\\udc_firmware\\final\\dsp_final.out'
 
     load_test_finished       = pyqtSignal(bool)
-    update_test_firmare_log  = pyqtSignal(str)
+    update_test_firmware_log  = pyqtSignal(str)
 
     load_final_finished      = pyqtSignal(bool)
-    update_final_firmare_log = pyqtSignal(str)
+    update_final_firmware_log = pyqtSignal(str)
 
     def __init__(self):
         QThread.__init__(self)
@@ -40,49 +40,46 @@ class LoadFirmware(QThread):
     def status(self, value):
         self._status = value
 
-    def _load_test_firmware(self):
-        self.update_test_firmare_log
-
-    def flash_firmware(self, core):
+    def _load_final_firmware(self):
         self._status = False
         arm_result = ""
         c28_result = ""
 
-        self.update_test_firmare_log.emit("Gravando Firmware de Teste")
+        self.update_final_firmware_log.emit("Gravando Firmware Final")
 
         """
             Loading ARM
         """
-        self.update_test_firmare_log.emit("Gravando Núcleo ARM")
-        flashcommand = self.ARM_COMMAND + self.ARM_TEST_FWR
+        self.update_final_firmware_log.emit("Gravando Núcleo ARM...")
+        flashcommand = self.ARM_COMMAND + self.ARM_FINAL_FWR
         proc = subprocess.Popen(flashcommand.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         (out, err) = proc.communicate()
 
         if err:
-            self.update_test_firmare_log.emit("Erro!")
+            self.update_final_firmware_log.emit("Erro!")
             out = out.decode("ISO-8859-1")
             err = err.decode("ISO-8859-1")
-            self.update_test_firmare_log.emit("out: " + out)
-            self.update_test_firmare_log.emit("err: " + err)
+            self.update_final_firmware_log.emit("out: " + out)
+            self.update_final_firmware_log.emit("err: " + err)
             if "problem loading file" in err:
                 if "Could not open file" in err:
-                    self.update_test_firmare_log.emit("Arquivo Não Encontrado")
+                    self.update_final_firmware_log.emit("Arquivo Não Encontrado")
                     arm_result = "file not found fault"
                 elif "Could not determine target type of file" in err:
-                    self.update_test_firmare_log.emit("Arquivo Incompatível ou Corrompido")
+                    self.update_final_firmware_log.emit("Arquivo Incompatível ou Corrompido")
                     arm_result = "file extension fault"
                 else:
-                    self.update_test_firmare_log.emit("Erro com o arquivo.")
+                    self.update_final_firmware_log.emit("Erro com o arquivo.")
                     arm_result = "file unknown error"
             elif "Operation was aborted" in err:
                 if "FTDI driver" in out:
-                    self.update_test_firmare_log.emit("Cabo desconectado")
+                    self.update_final_firmware_log.emit("Cabo desconectado")
                     arm_result = "cable fault"
                 elif "power loss" in out:
-                    self.update_test_firmare_log.emit("Problema de Alimentação")
+                    self.update_final_firmware_log.emit("Problema de Alimentação")
                     arm_result = "power fault"
                 else:
-                    self.update_test_firmare_log.emit("Problema desconhecido")
+                    self.update_final_firmware_log.emit("Problema desconhecido")
                     arm_result = "aborted unknown error"
             elif "Does not match the target type" in err:
                 arm_result = "target file error"
@@ -92,40 +89,40 @@ class LoadFirmware(QThread):
                 arm_result = "unknown error"
         else:
             arm_result = "success"
-            self.update_test_firmare_log.emit("ARM gravado com Sucesso!")
+            self.update_final_firmware_log.emit("ARM gravado com Sucesso!")
         """
             Loading C28
         """
-        self.update_test_firmare_log.emit("Gravando Núcleo C28")
+        self.update_final_firmware_log.emit("Gravando Núcleo C28...")
         flashcommand = self.C28_COMMAND + self.C28_TEST_FWR
         proc = subprocess.Popen(flashcommand.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         (out, err) = proc.communicate()
 
         if err:
-            self.update_test_firmare_log.emit("Erro!")
+            self.update_final_firmware_log.emit("Erro!")
             out = out.decode("ISO-8859-1")
             err = err.decode("ISO-8859-1")
-            self.update_test_firmare_log.emit("out: " + out)
-            self.update_test_firmare_log.emit("err: " + err)
+            self.update_final_firmware_log.emit("out: " + out)
+            self.update_final_firmware_log.emit("err: " + err)
             if "problem loading file" in err:
                 if "Could not open file" in err:
-                    self.update_test_firmare_log.emit("Arquivo Não Encontrado")
+                    self.update_final_firmware_log.emit("Arquivo Não Encontrado")
                     c28_result = "file not found fault"
                 elif "Could not determine target type of file" in err:
-                    self.update_test_firmare_log.emit("Arquivo Incompatível ou Corrompido")
+                    self.update_final_firmware_log.emit("Arquivo Incompatível ou Corrompido")
                     c28_result = "file extension fault"
                 else:
-                    self.update_test_firmare_log.emit("Erro com o arquivo.")
+                    self.update_final_firmware_log.emit("Erro com o arquivo.")
                     c28_result = "file unknown error"
             elif "Operation was aborted" in err:
                 if "FTDI driver" in out:
-                    self.update_test_firmare_log.emit("Cabo desconectado")
+                    self.update_final_firmware_log.emit("Cabo desconectado")
                     c28_result = "cable fault"
                 elif "power loss" in out:
-                    self.update_test_firmare_log.emit("Problema de Alimentação")
+                    self.update_final_firmware_log.emit("Problema de Alimentação")
                     c28_result = "power fault"
                 else:
-                    self.update_test_firmare_log.emit("Problema desconhecido")
+                    self.update_final_firmware_log.emit("Problema desconhecido")
                     c28_result = "aborted unknown error"
             elif "Does not match the target type" in err:
                 c28_result = "target file error"
@@ -135,9 +132,110 @@ class LoadFirmware(QThread):
                 c28_result = "unknown error"
         else:
             c28_result = "success"
-            self.update_test_firmare_log.emit("C28 gravado com Sucesso!")
+            self.update_final_firmware_log.emit("C28 gravado com Sucesso!")
 
-        if arm_result is 'success' and c28_result is success:
+        if arm_result is 'success' and c28_result is 'success':
+            self._status = True
+        else:
+            self._status = False
+
+        self.load_final_finished.emit(self._status)
+
+    def _load_test_firmware(self):
+        self._status = False
+        arm_result = ""
+        c28_result = ""
+
+        self.update_test_firmware_log.emit("Gravando Firmware de Teste")
+
+        """
+            Loading ARM
+        """
+        self.update_test_firmware_log.emit("Gravando Núcleo ARM...")
+        flashcommand = self.ARM_COMMAND + self.ARM_TEST_FWR
+        proc = subprocess.Popen(flashcommand.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        (out, err) = proc.communicate()
+
+        if err:
+            self.update_test_firmware_log.emit("Erro!")
+            out = out.decode("ISO-8859-1")
+            err = err.decode("ISO-8859-1")
+            self.update_test_firmware_log.emit("out: " + out)
+            self.update_test_firmware_log.emit("err: " + err)
+            if "problem loading file" in err:
+                if "Could not open file" in err:
+                    self.update_test_firmware_log.emit("Arquivo Não Encontrado")
+                    arm_result = "file not found fault"
+                elif "Could not determine target type of file" in err:
+                    self.update_test_firmware_log.emit("Arquivo Incompatível ou Corrompido")
+                    arm_result = "file extension fault"
+                else:
+                    self.update_test_firmware_log.emit("Erro com o arquivo.")
+                    arm_result = "file unknown error"
+            elif "Operation was aborted" in err:
+                if "FTDI driver" in out:
+                    self.update_test_firmware_log.emit("Cabo desconectado")
+                    arm_result = "cable fault"
+                elif "power loss" in out:
+                    self.update_test_firmware_log.emit("Problema de Alimentação")
+                    arm_result = "power fault"
+                else:
+                    self.update_test_firmware_log.emit("Problema desconhecido")
+                    arm_result = "aborted unknown error"
+            elif "Does not match the target type" in err:
+                arm_result = "target file error"
+            elif "nothing to do" in err:
+                arm_result = "missing file error"
+            else:
+                arm_result = "unknown error"
+        else:
+            arm_result = "success"
+            self.update_test_firmware_log.emit("ARM gravado com Sucesso!")
+        """
+            Loading C28
+        """
+        self.update_test_firmware_log.emit("Gravando Núcleo C28...")
+        flashcommand = self.C28_COMMAND + self.C28_TEST_FWR
+        proc = subprocess.Popen(flashcommand.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        (out, err) = proc.communicate()
+
+        if err:
+            self.update_test_firmware_log.emit("Erro!")
+            out = out.decode("ISO-8859-1")
+            err = err.decode("ISO-8859-1")
+            self.update_test_firmware_log.emit("out: " + out)
+            self.update_test_firmware_log.emit("err: " + err)
+            if "problem loading file" in err:
+                if "Could not open file" in err:
+                    self.update_test_firmware_log.emit("Arquivo Não Encontrado")
+                    c28_result = "file not found fault"
+                elif "Could not determine target type of file" in err:
+                    self.update_test_firmware_log.emit("Arquivo Incompatível ou Corrompido")
+                    c28_result = "file extension fault"
+                else:
+                    self.update_test_firmware_log.emit("Erro com o arquivo.")
+                    c28_result = "file unknown error"
+            elif "Operation was aborted" in err:
+                if "FTDI driver" in out:
+                    self.update_test_firmware_log.emit("Cabo desconectado")
+                    c28_result = "cable fault"
+                elif "power loss" in out:
+                    self.update_test_firmware_log.emit("Problema de Alimentação")
+                    c28_result = "power fault"
+                else:
+                    self.update_test_firmware_log.emit("Problema desconhecido")
+                    c28_result = "aborted unknown error"
+            elif "Does not match the target type" in err:
+                c28_result = "target file error"
+            elif "nothing to do" in err:
+                c28_result = "missing file error"
+            else:
+                c28_result = "unknown error"
+        else:
+            c28_result = "success"
+            self.update_test_firmware_log.emit("C28 gravado com Sucesso!")
+
+        if arm_result is 'success' and c28_result is 'success':
             self._status = True
         else:
             self._status = False
