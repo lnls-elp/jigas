@@ -14,7 +14,7 @@ class UDCTest(QThread):
     READ_RESULT             = 1
     SUCESS                  = 0
     FAIL                    = 1
-    SLEEP_TIME              = 0.2
+    SLEEP_TIME              = 1
 
     test_complete           = pyqtSignal(bool)
     update_gui              = pyqtSignal(str)
@@ -136,11 +136,14 @@ class UDCTest(QThread):
 
     def _test_eeprom(self):
         self.update_gui.emit("Testando EEPROM...")
-        serial = list(str(self._serial_number))
+        serial_str_list = list(str(self._serial_number))
+        serial_int_list = []
+        for item in serial_str_list:
+            serial_int_list.append(int(item))
         result = self.DISAPPROVED
-        self._udc.UdcEepromTest(self.START_TEST, self.START_TEST, serial)
+        self._udc.UdcEepromTest(self.START_TEST, serial_int_list)
         time.sleep(self.SLEEP_TIME)
-        response = self._udc.UdcEepromTest(self.READ_RESULT)
+        response = self._udc.UdcEepromTest(self.READ_RESULT, serial_int_list)
 
         if (response is not None) and (len(response) > 3):
             if response[self._index_res_ok] is self.SUCESS:
@@ -297,7 +300,7 @@ class UDCTest(QThread):
 
     def _test_ethernet_ping(self):
         self.update_gui.emit("Testando Ping Ethernet...")
-        host = "127.0.0.1"
+        host = "192.168.1.4"
         if  platform.system().lower()=="windows":
             ping_str = "-n 1"
         else:

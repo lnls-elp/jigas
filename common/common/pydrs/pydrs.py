@@ -380,6 +380,8 @@ class SerialDRS(object):
             send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcEepromTest'))+hex_rw[0]+ \
                                 hex_byte_0[0] + hex_byte_1[0] + hex_byte_2[0] + hex_byte_3[0] + hex_byte_4[0] + hex_byte_5[0]+ \
                                 hex_byte_6[0] + hex_byte_7[0] + hex_byte_8[0] + hex_byte_9[0]
+
+            print(send_packet.encode('ISO-8859-1'))
             self.ser.write(send_packet.encode('ISO-8859-1'))
             return self.ser.read(15)
 

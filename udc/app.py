@@ -254,6 +254,7 @@ class UDCWindow(QWizard, Ui_Class):
         return True
 
     def _validate_page_load_test_firmware(self):
+        return True
         if self.cbReprove.isChecked():
             if self._load_test_firmware_status:
                 if not self._communication_status:
