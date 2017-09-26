@@ -240,6 +240,7 @@ class LoadFirmware(QThread):
         else:
             self._status = False
 
+        self.update_test_firmware_log.emit('\n\nCicle a energia do UDC')
         self.load_test_finished.emit(self._status)
 
 

@@ -254,12 +254,10 @@ class UDCWindow(QWizard, Ui_Class):
         return True
 
     def _validate_page_load_test_firmware(self):
-        return True #TODO: Remove this
         if self.cbReprove.isChecked():
             if self._load_test_firmware_status:
                 if not self._communication_status:
                     self._test_thread.details = "\t Falha comunicao com PC"
-                    #TODO: Envia dados para o servidor
                     self._test_thread.send_partial_data = True
                     self._test_thread.send_partial_complete.connect(self._send_partial_complete)
                     self._test_thread.start()
@@ -271,7 +269,6 @@ class UDCWindow(QWizard, Ui_Class):
                     return False
             else:
                 self._test_thread.details = "\t Falha de gravacao firmware de testes"
-                #TODO: Envia dados para o servidor
                 self._test_thread.send_partial_data = True
                 self._test_thread.send_partial_complete.connect(self._send_partial_complete)
                 self._test_thread.start()
@@ -285,7 +282,6 @@ class UDCWindow(QWizard, Ui_Class):
             return False
 
     def _validate_page_start_test(self):
-        return True #TODO: Remove this
         if self._leds_status and self._buzzer_status and self._test_finished_status:
             if self._test_result:
                 return True

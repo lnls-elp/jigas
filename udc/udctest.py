@@ -533,4 +533,5 @@ class UDCTest(QThread):
             self._send_partial()
         else:
             self._test_sequence()
+        self._udc.Disconnect()
         #pass
