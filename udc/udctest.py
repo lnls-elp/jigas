@@ -136,25 +136,20 @@ class UDCTest(QThread):
 
     def _test_eeprom(self):
         self.update_gui.emit("Testando EEPROM...")
-        serial_str = ""
+        serial = list(str(self._serial_number))
         result = self.DISAPPROVED
-        self._udc.UdcEepromTest(self.START_TEST)
+        self._udc.UdcEepromTest(self.START_TEST, self.START_TEST, serial)
         time.sleep(self.SLEEP_TIME)
         response = self._udc.UdcEepromTest(self.READ_RESULT)
 
         if (response is not None) and (len(response) > 3):
-            for item in response:
-                serial_str += str(item)
-            if serial_str is self._serial_number:
+            if response[self._index_res_ok] is self.SUCESS:
                 result = self.APPROVED
             else:
                 result = self.DISAPPROVED
-            self.eeprom.emit(result)
-            self.update_gui.emit("Serial Lido: " + serial_str)
-            self.update_gui.emit(result)
         else:
             result = self.DISAPPROVED
-            self.update_gui.emit("Erro leitura!")
+
         self.eeprom.emit(result)
         self.update_gui.emit(result)
         return (result is self.APPROVED)
