@@ -108,6 +108,9 @@ class SerialDRS(object):
         send_msg = self.checksum(self.SlaveAdd+self.ComReadVar+var_id)
         self.ser.write(send_msg.encode('ISO-8859-1'))
 
+    def is_open(self):
+        return self.ser.isOpen()
+
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     ======================================================================
                 Métodos de Chamada de Entidades Funções BSMP

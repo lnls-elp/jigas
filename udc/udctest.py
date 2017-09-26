@@ -113,6 +113,10 @@ class UDCTest(QThread):
         else:
             return self._udc.Connect(self._comport, self._baudrate)
 
+    def close_serial_port(self):
+        if self._udc.is_open():
+            self._udc.Disconnect()
+
     def test_communication(self):
         test_val = 99
         res = self._udc.UdcComTest(0, test_val)

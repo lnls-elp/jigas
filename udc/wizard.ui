@@ -489,22 +489,67 @@
      <string>Reprovar</string>
     </property>
    </widget>
-   <widget class="QWidget" name="layoutWidget">
+  </widget>
+  <widget class="QWizardPage" name="PageCyclePower">
+   <widget class="QLabel" name="label_45">
     <property name="geometry">
      <rect>
-      <x>380</x>
-      <y>180</y>
+      <x>0</x>
+      <y>0</y>
+      <width>70</width>
+      <height>70</height>
+     </rect>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>70</width>
+      <height>70</height>
+     </size>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>images/sirius_logo.jpeg</pixmap>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_56">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>200</y>
+      <width>541</width>
+      <height>69</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;10. Cicle a energia do UDC (Desligue e ligue novamente).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QWizardPage" name="PageCommunicationTest">
+   <widget class="QWidget" name="layoutWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>170</y>
       <width>250</width>
       <height>91</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="verticalLayout_4">
+    <layout class="QVBoxLayout" name="verticalLayout_6">
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_19">
+      <layout class="QHBoxLayout" name="horizontalLayout_21">
        <item>
-        <layout class="QGridLayout" name="gridLayout_7">
+        <layout class="QGridLayout" name="gridLayout_8">
          <item row="0" column="0">
-          <widget class="QLabel" name="label_48">
+          <widget class="QLabel" name="label_59">
            <property name="text">
             <string>Porta COM</string>
            </property>
@@ -527,7 +572,7 @@
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QLabel" name="label_50">
+          <widget class="QLabel" name="label_60">
            <property name="text">
             <string>Baudrate</string>
            </property>
@@ -573,9 +618,9 @@
       </layout>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_7">
+      <layout class="QHBoxLayout" name="horizontalLayout_8">
        <item>
-        <widget class="QLabel" name="label_52">
+        <widget class="QLabel" name="label_64">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -627,6 +672,47 @@
       </layout>
      </item>
     </layout>
+   </widget>
+   <widget class="QLabel" name="label_66">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>70</width>
+      <height>70</height>
+     </rect>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>70</width>
+      <height>70</height>
+     </size>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>images/sirius_logo.jpeg</pixmap>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_68">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>80</y>
+      <width>516</width>
+      <height>69</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>11. Connecte na porta COM do UDC e verifique a comunicação.</string>
+    </property>
    </widget>
   </widget>
   <widget class="QWizardPage" name="PageStartTest">
@@ -760,7 +846,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>430</x>
@@ -830,7 +916,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>15</x>

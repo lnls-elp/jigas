@@ -19,7 +19,8 @@ class UDCWindow(QWizard, Ui_Class):
 
     # Page numbers
     (num_serial_number, num_connect_udc, num_load_test_firmware,
-    num_start_test, num_load_final_firmware, num_test_finished) = range(6)
+    num_cycle_power, num_communication_test, num_start_test,
+    num_load_final_firmware, num_test_finished) = range(8)
 
     def __init__(self, parent=None):
         QWizard.__init__(self, parent)
@@ -39,7 +40,8 @@ class UDCWindow(QWizard, Ui_Class):
         self._initialize_wizard_buttons()
 
         #test status
-        self._load_test_firmware_status = False
+        self._test_firmware_loaded = False
+        self._test_firmware_loaded_sucess = False
         self._load_final_firmware_status = False
         self._leds_status = False
         self._buzzer_status = False
@@ -125,6 +127,14 @@ class UDCWindow(QWizard, Ui_Class):
         self.PageLoadTestFirmware.setButtonText(self.BackButton, "Anterior")
         self.PageLoadTestFirmware.setButtonText(self.CancelButton, "Cancelar")
 
+        self.PageCyclePower.setButtonText(self.NextButton, "Próximo")
+        self.PageCyclePower.setButtonText(self.BackButton, "Anterior")
+        self.PageCyclePower.setButtonText(self.CancelButton, "Cancelar")
+
+        self.PageCommunicationTest.setButtonText(self.NextButton, "Próximo")
+        self.PageCommunicationTest.setButtonText(self.BackButton, "Anterior")
+        self.PageCommunicationTest.setButtonText(self.CancelButton, "Cancelar")
+
         self.PageStartTest.setButtonText(self.NextButton, "Próximo")
         self.PageStartTest.setButtonText(self.BackButton, "Anterior")
         self.PageStartTest.setButtonText(self.CancelButton, "Cancelar")
@@ -190,7 +200,8 @@ class UDCWindow(QWizard, Ui_Class):
         self._test_thread.loopback.disconnect()
 
     def _restart_variables(self):
-        self._load_test_firmware_status = False
+        self._test_firmware_loaded = False
+        self._test_firmware_loaded_sucess = False
         self._load_final_firmware_status = False
         self._leds_status = False
         self._buzzer_status = False
@@ -225,6 +236,12 @@ class UDCWindow(QWizard, Ui_Class):
     def _initialize_page_load_test_firmware(self):
         pass
 
+    def _initialize_page_cycle_power(self):
+        pass
+
+    def _initialize_page_communication_test(self):
+        pass
+
     def _initialize_page_start_test(self):
         self.teTestReport.clear()
 
@@ -254,9 +271,26 @@ class UDCWindow(QWizard, Ui_Class):
         return True
 
     def _validate_page_load_test_firmware(self):
+        if self._test_firmware_loaded:
+            self._test_firmware_loaded = False
+            if self._test_firmware_loaded_sucess:
+                self._test_firmware_loaded_sucess = False
+                return True
+            else:
+                self._test_thread.details = "\t Falha de gravacao firmware de testes"
+                self._test_thread.send_partial_data = True
+                self._test_thread.send_partial_complete.connect(self._send_partial_complete)
+                self._test_thread.start()
+                self._restart_variables()
+                self._initialize_widgets()
+                self._jump_to(self.num_serial_number)
+                return False
+        else:
+            return False
+
         return True
         if self.cbReprove.isChecked():
-            if self._load_test_firmware_status:
+            if self._test_firmware_loaded:
                 if not self._communication_status:
                     self._test_thread.details = "\t Falha comunicao com PC"
                     self._test_thread.send_partial_data = True
@@ -268,18 +302,22 @@ class UDCWindow(QWizard, Ui_Class):
                     return False
                 else:
                     return False
-            else:
-                self._test_thread.details = "\t Falha de gravacao firmware de testes"
-                self._test_thread.send_partial_data = True
-                self._test_thread.send_partial_complete.connect(self._send_partial_complete)
-                self._test_thread.start()
-                self._restart_variables()
-                self._initialize_widgets()
-                self._jump_to(self.num_serial_number)
-                return False
+
+    def _validate_page_cycle_power(self):
+        return True
+
+    def _validate_page_communication_test(self):
+        if self._communication_status:
+            self._communication_status = False
+            return True
         else:
-            if self._load_test_firmware_status and self._communication_status:
-                return True
+            self._test_thread.details = "\t Falha comunicao com PC"
+            self._test_thread.send_partial_data = True
+            self._test_thread.send_partial_complete.connect(self._send_partial_complete)
+            self._test_thread.start()
+            self._restart_variables()
+            self._initialize_widgets()
+            self._jump_to(self.num_serial_number)
             return False
 
     def _validate_page_start_test(self):
@@ -320,6 +358,12 @@ class UDCWindow(QWizard, Ui_Class):
         elif page == self.num_load_test_firmware:
             self._initialize_page_load_test_firmware()
 
+        elif page == self.num_cycle_power:
+            self._initialize_page_cycle_power()
+
+        elif page == self.num_communication_test:
+            self._initialize_page_communication_test()
+
         elif page == self.num_start_test:
             self._initialize_page_start_test()
 
@@ -341,6 +385,12 @@ class UDCWindow(QWizard, Ui_Class):
 
         elif current_id == self.num_load_test_firmware:
             return self._validate_page_load_test_firmware()
+
+        elif current_id == self.num_cycle_power:
+            return self._validate_page_cycle_power()
+
+        elif current_id == self.num_communication_test:
+            return self._validate_page_communication_test()
 
         elif current_id == self.num_start_test:
             return self._validate_page_start_test()
@@ -385,7 +435,12 @@ class UDCWindow(QWizard, Ui_Class):
 
     @pyqtSlot(bool)
     def _test_fwr_loaded(self, value):
-        self._load_test_firmware_status = True
+        self._test_firmware_loaded = True
+        if value:
+            self._test_firmware_loaded_sucess = True
+        else:
+            self._test_firmware_loaded_sucess = False
+
         self.pbLoadTestFirmware.setEnabled(True)
         self.pbLoadTestFirmware.setText("Gravar \n Firmware")
         self.lbStatusLoadingTestFirmware.setText("Concluido!")
