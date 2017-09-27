@@ -118,10 +118,9 @@ class UDCTest(QThread):
             self._udc.Disconnect()
 
     def test_communication(self):
-        test_val = 99
-        res = self._udc.UdcComTest(0, test_val)
+        res = self._udc.UdcComTest(self.START_TEST, self.START_TEST)
         if len(res) > 0:
-            if res[3]  is test_val:
+            if res[3]  is self.START_TEST:
                 return True
             else:
                 return False

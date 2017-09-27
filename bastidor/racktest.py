@@ -47,7 +47,7 @@ class RackTest(QThread):
         if self._comport is None or self._baudrate is None:
             return False
         else:
-            self.FBP.SetSlaveAdd(5)
+            self.FBP.SetSlaveAdd(1)
             return self.FBP.Connect(self._comport, self._baudrate)
 
     def test_communication(self):

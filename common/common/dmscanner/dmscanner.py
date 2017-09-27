@@ -7,7 +7,8 @@ class Scanner(QWidget):
                 '14024290': 'HRADC-FAX',
                 '14024291': 'UDC-FBP',
                 '14024292': 'DCCT-CONF-A',
-                '14024295': 'DCCT-CONF-B'}
+                '14024295': 'DCCT-CONF-B',
+                '14026758': 'Bastidor'}
 
     def parse_code(self, code):
         data = {}
