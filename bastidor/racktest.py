@@ -66,7 +66,7 @@ class RackTest(QThread):
         return result
 
     def _test_sequence(self):
-        result     = False
+        result     = True
         test_setup = False
         list_iout0 = []
         list_iout1 = []
@@ -105,13 +105,14 @@ class RackTest(QThread):
 
             if test_setup:
                 for j in range(0, 10):
-                    if (round(list_iout0[j])==-2) and (round(list_iout1[j])==1) and (round(list_iout2[j])==3) and (round(list_iout3[j])==-3):
-                        log.test_result = 'Aprovado'
-                        result = True
+                    if (round(list_iout0[j])==-2) and (round(list_iout1[j])==1) and (round(list_iout2[j])==-3) and (round(list_iout3[j])==3):
+                        if result:
+                            log.test_result = 'Aprovado'
+                            result = True
                     else:
                         log.test_result = 'Reprovado'
                         result = False
-                        break
+
                 if result:
                     self.update_gui.emit('Aprovado')
                 else:

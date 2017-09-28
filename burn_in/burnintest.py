@@ -58,11 +58,12 @@ class BurnInTest(QThread):
     def test_communication(self, ps_address):
         result = False     # Result for communication test and aux power supply
         self.FBP.SetSlaveAdd(ps_address)
-        time.sleep(1)
+        time.sleep(2)
 
         try:
             self.FBP.Write_sigGen_Aux(4)
             test_package = self.FBP.Read_ps_Model()
+            time.sleep(2)
 
             if (test_package[0] ==   0) and \
                (test_package[1] ==  17) and \
@@ -91,13 +92,15 @@ class BurnInTest(QThread):
     def set_address(self):
         write_gui  = []
         ps_address = self.find_address()
+
         self.FBP.SetSlaveAdd(ps_address)
-        write_gui.append(str(self._ps_address))
 
         if self.test_communication(ps_address):
-            self.FBP.SetRSAddress(self.write_address)
+            self.FBP.SetRSAddress(self._ps_address)
+            time.sleep(1)
 
             if self.test_communication(self._ps_address):
+                write_gui.append(str(self._ps_address))
                 write_gui.append('endereço ' + str(self._ps_address) + ' gravado com sucesso')
                 print('endereço ' + str(self._ps_address) + ' gravado com sucesso')
                 self._ps_address = self._ps_address + 1
@@ -113,6 +116,7 @@ class BurnInTest(QThread):
         ps = PowerSupply()
         ps.serial_number = self._serial_number
         res = self._send_to_server(ps)
+        self.update_gui.emit(str(self._serial_number))
 
         if res:
             #TODO: Sequencia de Testes
