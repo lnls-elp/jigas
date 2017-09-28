@@ -211,6 +211,7 @@ class UDCWindow(QWizard, Ui_Class):
         self._communication_status = False
         self._test_result = False
         self._test_finished_status = False
+        self._test_result = False
 
     def _restart_test_thread(self):
         self._test_thread.test_complete.disconnect()
@@ -497,7 +498,11 @@ class UDCWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _refresh_com_port(self):
+        self.comboComPort.setEnabled(False)
+        self.pbRefreshCom.setEnabled(False)
         self._list_serial_ports()
+        self.comboComPort.setEnabled(True)
+        self.pbRefreshCom.setEnabled(True)
 
     @pyqtSlot()
     def _communication_test(self):
@@ -552,8 +557,10 @@ class UDCWindow(QWizard, Ui_Class):
         self.pbStartTests.setText("Repetir Teste")
         if result:
             self.lbTestResult.setText("Aprovado")
+            self._test_result = True
         else:
             self.lbTestResult.setText("Reprovado")
+            self._test_result = False
 
     @pyqtSlot(str)
     def _update_test_log(self, value):
