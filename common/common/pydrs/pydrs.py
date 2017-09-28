@@ -631,13 +631,13 @@ class SerialDRS(object):
     def Read_ps_SoftInterlocks(self):
         self.read_var(self.index_to_hex(ListVar.index('ps_SoftInterlocks')))
         reply_msg = self.ser.read(9)
-        val = struct.unpack('BBHLB',reply_msg)
+        val = struct.unpack('BBHIB',reply_msg)
         return val[3]
 
     def Read_ps_HardInterlocks(self):
         self.read_var(self.index_to_hex(ListVar.index('ps_HardInterlocks')))
         reply_msg = self.ser.read(9)
-        val = struct.unpack('BBHLB',reply_msg)
+        val = struct.unpack('BBHIB',reply_msg)
         return val[3]
 
     def Read_iRef(self):
@@ -739,19 +739,19 @@ class SerialDRS(object):
     def Read_wfmRef_PtrBufferStart(self):
         self.read_var(self.index_to_hex(ListVar.index('wfmRef_PtrBufferStart')))
         reply_msg = self.ser.read(9)
-        val = struct.unpack('BBHLB',reply_msg)
+        val = struct.unpack('BBHIB',reply_msg)
         return val[3]
 
     def Read_wfmRef_PtrBufferEnd(self):
         self.read_var(self.index_to_hex(ListVar.index('wfmRef_PtrBufferEnd')))
         reply_msg = self.ser.read(9)
-        val = struct.unpack('BBHLB',reply_msg)
+        val = struct.unpack('BBHIB',reply_msg)
         return val[3]
 
     def Read_wfmRef_PtrBufferK(self):
         self.read_var(self.index_to_hex(ListVar.index('wfmRef_PtrBufferK')))
         reply_msg = self.ser.read(9)
-        val = struct.unpack('BBHLB',reply_msg)
+        val = struct.unpack('BBHIB',reply_msg)
         return val[3]
 
     def Read_wfmRef_SyncMode(self):
