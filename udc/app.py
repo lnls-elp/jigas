@@ -62,6 +62,7 @@ class UDCWindow(QWizard, Ui_Class):
         self.leMaterialCode.setReadOnly(True)
         self.leMaterialCode.clear()
         self.lbStatusComunicacao.setText("...")
+        self.pbDisconnectSerialPort.setEnabled(False)
         self.rbLedsOk.setChecked(False)
         self.rbLedsNok.setChecked(False)
         self.rbBuzzerOk.setChecked(False)
@@ -91,7 +92,6 @@ class UDCWindow(QWizard, Ui_Class):
         self.pbTestLeds.setText("Testar")
         self.pbTestBuzzer.setEnabled(True)
         self.pbTestBuzzer.setText("Testar")
-        self.cbReprove.setChecked(False)
         self.pbStartTests.setEnabled(True)
         self.pbStartTests.setText("Iniciar Testes")
         self.lbStatusLoadingTestFirmware.setText("Clique para gravar.")
@@ -107,6 +107,8 @@ class UDCWindow(QWizard, Ui_Class):
         """ Configure basic signals """
         self.leDmCode.editingFinished.connect(self._treat_dmcode)
         self.pbConnectSerialPort.clicked.connect(self._connect_serial_port)
+        self.pbDisconnectSerialPort.clicked.connect(self._disconnect_com_port)
+        self.pbRefreshCom.clicked.connect(self._refresh_com_port)
         self.pbTestLeds.clicked.connect(self._test_leds)
         self.pbTestBuzzer.clicked.connect(self._test_buzzer)
         self.pbStartTests.clicked.connect(self._start_test_sequence)
@@ -161,6 +163,7 @@ class UDCWindow(QWizard, Ui_Class):
         else:
             raise EnvironmentError('Unsuported platform')
 
+        self.comboComPort.clear()
         for port in ports:
             try:
                 s = serial.Serial(port)
@@ -288,21 +291,6 @@ class UDCWindow(QWizard, Ui_Class):
         else:
             return False
 
-        return True
-        if self.cbReprove.isChecked():
-            if self._test_firmware_loaded:
-                if not self._communication_status:
-                    self._test_thread.details = "\t Falha comunicao com PC"
-                    self._test_thread.send_partial_data = True
-                    self._test_thread.send_partial_complete.connect(self._send_partial_complete)
-                    self._test_thread.start()
-                    self._restart_variables()
-                    self._initialize_widgets()
-                    self._jump_to(self.num_serial_number)
-                    return False
-                else:
-                    return False
-
     def _validate_page_cycle_power(self):
         return True
 
@@ -321,6 +309,11 @@ class UDCWindow(QWizard, Ui_Class):
             return False
 
     def _validate_page_start_test(self):
+        self.rbLedsOk.setChecked(False)
+        self.rbLedsNok.setChecked(False)
+        self.rbBuzzerOk.setChecked(False)
+        self.rbBuzzerNok.setChecked(False)
+
         if self._leds_status and self._buzzer_status and self._test_finished_status:
             if self._test_result:
                 return True
@@ -481,6 +474,7 @@ class UDCWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _connect_serial_port(self):
+        self.pbDisconnectSerialPort.setEnabled(True)
         com = str(self.comboComPort.currentText())
         baud = int(self.leBaudrate.text())
         self._test_thread.baudrate = baud
@@ -495,6 +489,15 @@ class UDCWindow(QWizard, Ui_Class):
         else:
             self.lbStatusComunicacao.setText("Falha")
 
+    @pyqtSlot()
+    def _disconnect_com_port(self):
+        self._test_thread.close_serial_port()
+        self.pbConnectSerialPort.setEnabled(True)
+        self.pbDisconnectSerialPort.setEnabled(False)
+
+    @pyqtSlot()
+    def _refresh_com_port(self):
+        self._list_serial_ports()
 
     @pyqtSlot()
     def _communication_test(self):
