@@ -82,7 +82,7 @@ class PowerModuleTest(QThread):
             return self.FBP.Connect(self._comport, self._baudrate)
 
     def test_communication(self):
-        # Resultado teste de comunicação para os 4 módulos
+        # Resultado teste de comunicação para os 4 modulos
         n_mod  = 0
         result = ''
         serial = [self._serial_mod0, self._serial_mod1, self._serial_mod2,
@@ -127,7 +127,7 @@ class PowerModuleTest(QThread):
             #TODO: Encerra testes
 
         '''###########################################################'''
-        '''Número de módulos conectados para inicializar o controlador'''
+        '''Número de modulos conectados para inicializar o controlador'''
         '''###########################################################'''
         n_mod = 0
         for o in range(0, len(serial)):
@@ -152,61 +152,81 @@ class PowerModuleTest(QThread):
         for set_current in load_current:
             if set_current == 'turnedOff':
                 self.FBP.TurnOff(sum_mod)
-                self.update_gui.emit('Iniciando medições com módulos desligados')
-                time.sleep(120) # Alterar para 2 min
+                self.update_gui.emit('Iniciando medições com modulos desligados')
+                time.sleep(5) # Alterar para 2 min
             else:
                 self.FBP.TurnOn(sum_mod)
                 time.sleep(1)
                 self.FBP.OpenLoop(sum_mod)
                 time.sleep(1)
-                self.update_gui.emit('Iniciando medições com módulos ligados a '\
+                self.update_gui.emit('Iniciando medições com modulos ligados a '\
                                     + str(compare_current[load_current.index(set_current)]) + 'A')
                 self.FBP.SetISlowRef(0.25 * set_current)
                 time.sleep(0.5)
                 self.FBP.SetISlowRef(0.5 * set_current)
                 time.sleep(0.5)
                 self.FBP.SetISlowRef(set_current)
-                time.sleep(120) # Alterar para 2 min
+                time.sleep(5) # Alterar para 2 min
 
             if serial[0] != None:
                 mod_result1[0].append(self.FBP.Read_iMod1())
+                self.update_gui.emit('       corrente de saída do módulo 1: ' + str(mod_result1[0][load_current.index(set_current)]))
                 time.sleep(0.1)
                 mod_result2[0].append(self.FBP.Read_vOutMod1())
+                self.update_gui.emit('       tensão de saída do módulo 1:   ' + str(mod_result2[0][load_current.index(set_current)]))
                 time.sleep(0.1)
                 mod_result3[0].append(self.FBP.Read_temp1())
+                self.update_gui.emit('       temperatura do módulo 1:         ' + str(mod_result3[0][load_current.index(set_current)]))
                 time.sleep(0.1)
                 mod_result4[0].append(self.FBP.Read_vDCMod1())
+                self.update_gui.emit('       tensão de entrada do módulo 1: ' + str(mod_result4[0][load_current.index(set_current)]))
                 time.sleep(0.1)
+                self.update_gui.emit('')
 
             if serial[1] != None:
                 mod_result1[1].append(self.FBP.Read_iMod2())
+                self.update_gui.emit('       corrente de saída do módulo 2: ' + str(mod_result1[1][load_current.index(set_current)]))
                 time.sleep(0.1)
                 mod_result2[1].append(self.FBP.Read_vOutMod2())
+                self.update_gui.emit('       tensão de saída do módulo 2:   ' + str(mod_result2[1][load_current.index(set_current)]))
                 time.sleep(0.1)
                 mod_result3[1].append(self.FBP.Read_temp2())
+                self.update_gui.emit('       temperatura do módulo 2:         ' + str(mod_result3[1][load_current.index(set_current)]))
                 time.sleep(0.1)
                 mod_result4[1].append(self.FBP.Read_vDCMod2())
+                self.update_gui.emit('       tensão de entrada do módulo 2: ' + str(mod_result4[1][load_current.index(set_current)]))
                 time.sleep(0.1)
+                self.update_gui.emit('')
 
             if serial[2] != None:
                 mod_result1[2].append(self.FBP.Read_iMod3())
+                self.update_gui.emit('       corrente de saída do módulo 3: ' + str(mod_result1[2][load_current.index(set_current)]))
                 time.sleep(0.1)
                 mod_result2[2].append(self.FBP.Read_vOutMod3())
+                self.update_gui.emit('       tensão de saída do módulo 3:   ' + str(mod_result2[2][load_current.index(set_current)]))
                 time.sleep(0.1)
                 mod_result3[2].append(self.FBP.Read_temp3())
+                self.update_gui.emit('       temperatura do módulo 3:         ' + str(mod_result3[2][load_current.index(set_current)]))
                 time.sleep(0.1)
                 mod_result4[2].append(self.FBP.Read_vDCMod3())
+                self.update_gui.emit('       tensão de entrada do módulo 3: ' + str(mod_result4[2][load_current.index(set_current)]))
                 time.sleep(0.1)
+                self.update_gui.emit('')
 
             if serial[3] != None:
                 mod_result1[3].append(self.FBP.Read_iMod4())
+                self.update_gui.emit('       corrente de saída do módulo 4: ' + str(mod_result1[3][load_current.index(set_current)]))
                 time.sleep(0.1)
                 mod_result2[3].append(self.FBP.Read_vOutMod4())
+                self.update_gui.emit('       tensão de saída do módulo 4:   ' + str(mod_result2[3][load_current.index(set_current)]))
                 time.sleep(0.1)
                 mod_result3[3].append(self.FBP.Read_temp4())
+                self.update_gui.emit('       temperatura do módulo 4:         ' + str(mod_result3[3][load_current.index(set_current)]))
                 time.sleep(0.1)
                 mod_result4[3].append(self.FBP.Read_vDCMod4())
+                self.update_gui.emit('       tensão de entrada do módulo 4: ' + str(mod_result4[3][load_current.index(set_current)]))
                 time.sleep(0.1)
+                self.update_gui.emit('')
 
         self.FBP.TurnOff(sum_mod)
         '''###############################################################################'''
@@ -223,7 +243,7 @@ class PowerModuleTest(QThread):
 
                 if res:
                     self.update_gui.emit('')
-                    self.update_gui.emit('Verificando resultados do módulo '\
+                    self.update_gui.emit('Verificando resultados do modulo '\
                                         + str(serial.index(item)+1) + '...')
                     log = PowerModuleLog()
                     log.serial_number_power_module = item
@@ -280,10 +300,13 @@ class PowerModuleTest(QThread):
                     if test == [True for t in range(4)]:
                         log.test_result = 'Aprovado'
                         response[serial.index(item)] = True
+                        print('chegou aqui1')
                     else:
                         log.test_result = 'Reprovado'
                         response[serial.index(item)] = False
+                        print('chegou aqui2')
 
+                    print('chegou aqui3')
 
                     log.iload0 = mod_result1[serial.index(item)][0]
                     log.iload1 = mod_result1[serial.index(item)][1]
@@ -313,11 +336,22 @@ class PowerModuleTest(QThread):
                     log.temperatura4 = mod_result3[serial.index(item)][4]
                     log.temperatura5 = mod_result3[serial.index(item)][5]
 
-                    log.details = ""
+                    log.details = ''
 
-                    self.update_gui.emit('Módulo ' + str(serial.index(item)+1)\
+                    print('**********************************************************************')
+                    print('chegou aqui4')
+                    print('**********************************************************************')
+                    for _softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
+                        log.details = log.details + _softinterlock + '\n'
+
+                    for _hardinterlock in self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()):
+                        log.details = log.details + _hardinterlock + '\n'
+
+                    print(log.data)
+                    self.update_gui.emit('modulo ' + str(serial.index(item)+1)\
                                         + ' ' + log.test_result)
                     log_res = self._send_to_server(log)
+
                     #response[serial.index(item)] = log_res
 
             # Quando o teste terminar emitir o resultado em uma lista de objetos
@@ -334,13 +368,13 @@ class PowerModuleTest(QThread):
         print('--------------------------------------------\n')
 
     def _read_SoftInterlock(self, int_interlock):
-        SoftInterlockList = ['N/A', 'Sobre-tensão na carga 1', 'N/A', \
+        SoftInterlockList = ['N/A', 'Sobre-tensao na carga 1', 'N/A', \
                              'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A',\
-                             'Sobre-tensão na carga 2', 'N/A',        \
+                             'Sobre-tensao na carga 2', 'N/A',        \
                              'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A',\
-                             'Sobre-tensão na carga 3', 'N/A',        \
+                             'Sobre-tensao na carga 3', 'N/A',        \
                              'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A',\
-                             'Sobre-tensão na carga 4', 'N/A',        \
+                             'Sobre-tensao na carga 4', 'N/A',        \
                              'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A']
 
         op_bin = 1
@@ -358,33 +392,33 @@ class PowerModuleTest(QThread):
 
     def _read_HardInterlock(self, int_interlock):
         HardInterlockList = ['Sobre-corrente na carga 1', 'N/A',                   \
-                             'Sobre-tensão no DC-Link do módulo 1',                \
-                             'Sub-tensão no DC-Link do módulo 1',                  \
-                             'Falha no relé de entrada do DC-Link do módulo 1',    \
-                             'Falha no fusível de entrada do DC-Link do módulo 1', \
-                             'Falha nos drivers do módulo 1',                      \
-                             'Sobre-temperatura no módulo 1',                      \
+                             'Sobre-tensao no DC-Link do modulo 1',                \
+                             'Sub-tensao no DC-Link do modulo 1',                  \
+                             'Falha no rele de entrada do DC-Link do modulo 1',    \
+                             'Falha no fusivel de entrada do DC-Link do modulo 1', \
+                             'Falha nos drivers do modulo 1',                      \
+                             'Sobre-temperatura no modulo 1',                      \
                              'Sobre-corrente na carga 2', 'N/A',                   \
-                             'Sobre-tensão no DC-Link do módulo 2',                \
-                             'Sub-tensão no DC-Link do módulo 2',                  \
-                             'Falha no relé de entrada do DC-Link do módulo 2',    \
-                             'Falha no fusível de entrada do DC-Link do módulo 2', \
-                             'Falha nos drivers do módulo 2',                      \
-                             'Sobre-temperatura no módulo 2',                      \
+                             'Sobre-tensao no DC-Link do modulo 2',                \
+                             'Sub-tensao no DC-Link do modulo 2',                  \
+                             'Falha no rele de entrada do DC-Link do modulo 2',    \
+                             'Falha no fusivel de entrada do DC-Link do modulo 2', \
+                             'Falha nos drivers do modulo 2',                      \
+                             'Sobre-temperatura no modulo 2',                      \
                              'Sobre-corrente na carga 3', 'N\A',                   \
-                             'Sobre-tensão no DC-Link do módulo 3',                \
-                             'Sub-tensão no DC-Link do módulo 3',                  \
-                             'Falha no relé de entrada no DC-Link do módulo 3',    \
-                             'Falha no fusível de entrada do DC-Link do módulo 3', \
-                             'Falha nos drivers do módulo 3',                      \
-                             'Sobre-temperatura no módulo 3',                      \
+                             'Sobre-tensao no DC-Link do modulo 3',                \
+                             'Sub-tensao no DC-Link do modulo 3',                  \
+                             'Falha no rele de entrada no DC-Link do modulo 3',    \
+                             'Falha no fusivel de entrada do DC-Link do modulo 3', \
+                             'Falha nos drivers do modulo 3',                      \
+                             'Sobre-temperatura no modulo 3',                      \
                              'Sobre-corrente na carga 4', 'N/A',                   \
-                             'Sobre-tensão no DC-Link do módulo 4',                \
-                             'Sub-tensão no DC-Link do módulo 4',                  \
-                             'Falha no relé de entrada do DC-Link do módulo 4',    \
-                             'Falha no fusível de entrada do DC-Link do módulo 4', \
-                             'Falha nos drivers do módulo 4',                      \
-                             'Sobre-temperatura no módulo 4']
+                             'Sobre-tensao no DC-Link do modulo 4',                \
+                             'Sub-tensao no DC-Link do modulo 4',                  \
+                             'Falha no rele de entrada do DC-Link do modulo 4',    \
+                             'Falha no fusivel de entrada do DC-Link do modulo 4', \
+                             'Falha nos drivers do modulo 4',                      \
+                             'Sobre-temperatura no modulo 4']
         op_bin = 1
         ActiveHardInterlocks = []
 
@@ -401,8 +435,10 @@ class PowerModuleTest(QThread):
     def _send_to_server(self, item):
         client = ElpWebClient()
         client_data = item.data
+        print(client_data)
         client_method = item.method
         client_response = client.do_request(client_method, client_data)
+        print(client_response)
         server_status = self._parse_response(client_response)
         return server_status
 
