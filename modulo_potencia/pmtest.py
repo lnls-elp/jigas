@@ -153,7 +153,7 @@ class PowerModuleTest(QThread):
             if set_current == 'turnedOff':
                 self.FBP.TurnOff(sum_mod)
                 self.update_gui.emit('Iniciando medições com modulos desligados')
-                time.sleep(5) # Alterar para 2 min
+                time.sleep(120) # Alterar para 2 min
             else:
                 self.FBP.TurnOn(sum_mod)
                 time.sleep(1)
@@ -166,7 +166,7 @@ class PowerModuleTest(QThread):
                 self.FBP.SetISlowRef(0.5 * set_current)
                 time.sleep(0.5)
                 self.FBP.SetISlowRef(set_current)
-                time.sleep(5) # Alterar para 2 min
+                time.sleep(120) # Alterar para 2 min
 
             if serial[0] != None:
                 mod_result1[0].append(self.FBP.Read_iMod1())
@@ -342,10 +342,10 @@ class PowerModuleTest(QThread):
                     print('chegou aqui4')
                     print('**********************************************************************')
                     for _softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
-                        log.details = log.details + _softinterlock + '\n'
+                        log.details = log.details + _softinterlock + '\t'
 
                     for _hardinterlock in self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()):
-                        log.details = log.details + _hardinterlock + '\n'
+                        log.details = log.details + _hardinterlock + '\t'
 
                     print(log.data)
                     self.update_gui.emit('modulo ' + str(serial.index(item)+1)\
