@@ -348,11 +348,11 @@ class UDCTest(QThread):
                     self.update_gui.emit(self.APPROVED)
                 else:
                     result_bool[i - 1] = False
-                    self._loopback_fail += "Erro Canal " + str(i) + '\n'
+                    self._loopback_fail += "Erro Canal " + str(i) + '\t'
                     self.update_gui.emit(self.DISAPPROVED)
             else:
                 result_bool[i - 1] = False
-                self._loopback_fail += "Erro Canal " + str(i) + '\n'
+                self._loopback_fail += "Erro Canal " + str(i) + '\t'
                 self.update_gui.emit(self.DISAPPROVED)
         if False in result_bool:
             result = self.DISAPPROVED
