@@ -52,8 +52,8 @@ class HRADCTest(QThread):
                        'Temp': 0.1,
                        'Vin_bipolar_p': 0.02,
                        'Vin_bipolar_n': 0.02,
-                       'Iin_bipolar_p': 0.0001,
-                       'Iin_bipolar_n': 0.0001}
+                       'Iin_bipolar_p': 0.0003,
+                       'Iin_bipolar_n': 0.0003}
 
     @property
     def comport(self):

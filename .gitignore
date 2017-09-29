@@ -1,3 +1,5 @@
 *.pyc
 *.bak
 relatorio_teste/relatorios/
+common/build
+common/dist
