@@ -480,6 +480,7 @@ class SerialDRS(object):
         hex_value       = self.double_to_hex(val)
         send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcComTest'))+hex_rw[0]+hex_value[0]
         self.ser.write(send_packet.encode('ISO-8859-1'))
+        time.sleep(0.2)
         return self.ser.read(6)
 
 

@@ -5,8 +5,11 @@ import os
 
 class LoadFirmware(QThread):
 
-    ARM_COMMAND = " CMD /C ..\\common\\common\\flashfirmware\\ccs_base\\DebugServer\\bin\\DSLite flash -c ../common/common/flashfirmware/user_files/configs/f28m36p63c2.ccxml -l user_files/settings/generated.ufsettings  -f -v "
-    C28_COMMAND = " CMD /C ..\\common\\common\\flashfirmware\\ccs_base\\DebugServer\\bin\\DSLite flash -c ../common/common/flashfirmware/user_files/configs/f28m36p63c2.ccxml -l user_files/settings/generated.ufsettings --core=1 -f -v "
+    #ARM_COMMAND = " CMD /C ..\\common\\common\\flashfirmware\\ccs_base\\DebugServer\\bin\\DSLite flash -c ../common/common/flashfirmware/user_files/configs/f28m36p63c2.ccxml -l user_files/settings/generated.ufsettings  -f -v "
+    #C28_COMMAND = " CMD /C ..\\common\\common\\flashfirmware\\ccs_base\\DebugServer\\bin\\DSLite flash -c ../common/common/flashfirmware/user_files/configs/f28m36p63c2.ccxml -l user_files/settings/generated.ufsettings --core=1 -f -v "
+    ARM_COMMAND = " CMD /C ..\\common\\common\\flashfirmware\\ccs_base\\DebugServer\\bin\\DSLite flash -c ../common/common/flashfirmware/user_files/configs/f28m36p63c2.ccxml   -f -v "
+    C28_COMMAND = " CMD /C ..\\common\\common\\flashfirmware\\ccs_base\\DebugServer\\bin\\DSLite flash -c ../common/common/flashfirmware/user_files/configs/f28m36p63c2.ccxml --core=1 -f -v "
+
 
     ARM_TEST_FWR = '..\\common\\common\\flashfirmware\\udc_firmware\\test\\arm_test.out'
     C28_TEST_FWR = '..\\common\\common\\flashfirmware\\udc_firmware\\test\\dsp_test.out'
@@ -247,7 +250,6 @@ class LoadFirmware(QThread):
         else:
             self._status = False
 
-        self.update_test_firmware_log.emit('\n\nCicle a energia do UDC')
         self.load_test_finished.emit(self._status)
 
     def run(self):
@@ -275,8 +277,8 @@ class LoadFirmware_HRADC:
         print("\nGravando firmware...")
 
         #command = " CMD /C c:\\altera\\16.0\\qprogrammer\\bin64\\quartus_pgm -c USB-Blaster " + self._path
-        #command = " CMD /C c:\\intelFPGA\\16.1\\qprogrammer\\bin64\\quartus_pgm -c USB-Blaster " + self._path
-        command = " CMD /C c:\\intelFPGA_lite\\17.0\\quartus\\bin64\\quartus_pgm -c USB-Blaster " + self._path
+        command = " CMD /C c:\\intelFPGA\\16.1\\qprogrammer\\bin64\\quartus_pgm -c USB-Blaster " + self._path
+        #command = " CMD /C c:\\intelFPGA_lite\\17.0\\quartus\\bin64\\quartus_pgm -c USB-Blaster " + self._path
         proc = subprocess.Popen(command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         (out, err) = proc.communicate()
         out = out.decode("utf-8")
