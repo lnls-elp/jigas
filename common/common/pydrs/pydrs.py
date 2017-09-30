@@ -60,6 +60,8 @@ class SerialDRS(object):
         self.ComSendWfmRef          = '\x41'
         self.ComFunction            = '\x50'
 
+        self.DP_MODULE_MAX_COEFF    = 16
+
         self.ListDPClass = ['ELP_Error','ELP_SRLim','ELP_LPF','ELP_PI_dawu','ELP_IIR_2P2Z','ELP_IIR_3P3Z',
                             'DCL_PID','DCL_PI','DCL_DF13','DCL_DF22','DCL_23']
         self.ListHardInterlocks = ['Sobrecorrente', 'Interlock Externo', 'Falha AC',
@@ -812,12 +814,18 @@ class SerialDRS(object):
         return self.ser.read(5)
 
     def Write_dp_Coeffs(self,list_float):
+
         hex_float_list = []
-        for float_value in list_float:
+        list_full = list_float[:]
+
+        while(len(list_full) < self.DP_MODULE_MAX_COEFF):
+            list_full.append(0)
+
+        for float_value in list_full:
             hex_float = self.float_to_hex(float(float_value))
             hex_float_list.append(hex_float)
         str_float_list = ''.join(hex_float_list)
-        payload_size = self.size_to_hex(1+64) #Payload: ID + 16floats
+        payload_size = self.size_to_hex(1+4*self.DP_MODULE_MAX_COEFF) #Payload: ID + 16floats
         send_packet  = self.ComWriteVar+payload_size+self.index_to_hex(ListVar.index('dp_Coeffs'))+str_float_list
         send_msg     = self.checksum(self.SlaveAdd+send_packet)
         self.ser.write(send_msg.encode('ISO-8859-1'))
