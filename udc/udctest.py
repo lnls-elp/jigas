@@ -118,7 +118,10 @@ class UDCTest(QThread):
             self._udc.Disconnect()
 
     def test_communication(self):
+        time.sleep(0.2)
         res = self._udc.UdcComTest(self.START_TEST, self.START_TEST)
+        print("Retorno teste com")
+        print(res)
         if len(res) > 0:
             if res[3]  is self.START_TEST:
                 return True
@@ -148,6 +151,9 @@ class UDCTest(QThread):
         time.sleep(self.SLEEP_TIME)
         response = self._udc.UdcEepromTest(self.READ_RESULT, serial_int_list)
 
+        print("Retorno Eeprom")
+        print(response)
+
         if (response is not None) and (len(response) > 3):
             if response[self._index_res_ok] is self.SUCESS:
                 result = self.APPROVED
@@ -166,6 +172,10 @@ class UDCTest(QThread):
         self._udc.UdcFlashTest(self.START_TEST)
         time.sleep(self.SLEEP_TIME)
         response = self._udc.UdcFlashTest(self.READ_RESULT)
+
+        print("Retorno Flash")
+        print(response)
+
         if (response is not None) and (len(response) > 3):
             if response[self._index_res_ok] is self.SUCESS:
                 result = self.APPROVED
@@ -183,6 +193,10 @@ class UDCTest(QThread):
         self._udc.UdcRamTest(self.START_TEST)
         time.sleep(self.SLEEP_TIME)
         response = self._udc.UdcRamTest(self.READ_RESULT)
+
+        print("Retorno Ram")
+        print(response)
+
         if (response is not None) and (len(response) > 3):
             if response[self._index_res_ok] is self.SUCESS:
                 result = self.APPROVED
@@ -334,11 +348,11 @@ class UDCTest(QThread):
                     self.update_gui.emit(self.APPROVED)
                 else:
                     result_bool[i - 1] = False
-                    self._loopback_fail += "Erro Canal " + str(i) + '\n'
+                    self._loopback_fail += "Erro Canal " + str(i) + '\t'
                     self.update_gui.emit(self.DISAPPROVED)
             else:
                 result_bool[i - 1] = False
-                self._loopback_fail += "Erro Canal " + str(i) + '\n'
+                self._loopback_fail += "Erro Canal " + str(i) + '\t'
                 self.update_gui.emit(self.DISAPPROVED)
         if False in result_bool:
             result = self.DISAPPROVED
