@@ -116,17 +116,30 @@ class BurnInTest(QThread):
                     self.FBP.SetSlaveAdd(self._serial_number.index(ps_turnOn) + 1)
                     self.FBP.Config_nHRADC(3)# alterar para 4
                     time.sleep(1)
+                    #REMOVER----------------------------------------------------
+                    for b in range(4):
+                        print('config dp ' + str(b))
+                        self.FBP.Write_dp_Class(3)#REMOVER
+                        time.sleep(1)
+                        self.FBP.Write_dp_ID(b)#REMOVER
+                        time.sleep(1)
+                        self.FBP.Write_dp_Coeffs([1.9, 559])#REMOVER
+                        time.sleep(1)
+                        self.FBP.ConfigDPModule()#REMOVER
+                        time.sleep(1)
+                    #REMOVER----------------------------------------------------
                     self.FBP.TurnOn(0b1111)
                     time.sleep(1)
                     self.FBP.ClosedLoop(0b1111)
                     time.sleep(1)
                     self.FBP.SetISlowRef(set_current)
                     time.sleep(0.5)
+
                 else:
                     self.update_gui.emit('Endereço não encontrado')
                     print('Endereço não encontrado')
 
-            for a in range(5):#mudar para 72
+            for a in range(72):#mudar para 72
                 for ps_under_test in self._serial_number:
                     result = False
                     ps = PowerSupply()
@@ -258,8 +271,9 @@ class BurnInTest(QThread):
                     else:
                         self.update_gui.emit('Endereço não encontrado')
                         print('Endereço não encontrado')
-                time.sleep(1)
+                time.sleep(600)
         self.update_gui.emit('FIM DO TESTE!')
+        self.FBP.TurnOff(0b1111)
 
     def _save_AllMeasurements(self, address, module):
         self.FBP.SetSlaveAdd(address)
