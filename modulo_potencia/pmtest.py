@@ -300,13 +300,9 @@ class PowerModuleTest(QThread):
                     if test == [True for t in range(4)]:
                         log.test_result = 'Aprovado'
                         response[serial.index(item)] = True
-                        print('chegou aqui1')
                     else:
                         log.test_result = 'Reprovado'
                         response[serial.index(item)] = False
-                        print('chegou aqui2')
-
-                    print('chegou aqui3')
 
                     log.iload0 = mod_result1[serial.index(item)][0]
                     log.iload1 = mod_result1[serial.index(item)][1]
@@ -338,9 +334,6 @@ class PowerModuleTest(QThread):
 
                     log.details = ''
 
-                    print('**********************************************************************')
-                    print('chegou aqui4')
-                    print('**********************************************************************')
                     for _softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
                         log.details = log.details + _softinterlock + '\t'
 

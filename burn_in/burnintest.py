@@ -49,14 +49,10 @@ class BurnInTest(QThread):
         if self._comport is None or self._baudrate is None:
             return False
         else:
-            #self._serial_port.baudrate  = self._baudrate
-            #self._serial_port.port      = self._comport
-            #self._serial_port.open()
-            #return self._serial_port.is_open
             return self.FBP.Connect(self._comport, self._baudrate)
 
     def test_communication(self, ps_address):
-        result = False     # Result for communication test and aux power supply
+        result = False
         self.FBP.SetSlaveAdd(ps_address)
         time.sleep(2)
 
@@ -111,42 +107,255 @@ class BurnInTest(QThread):
         return write_gui
 
     def _test_sequence(self):
-        result = False
+        for set_current in [10, -10]:
+            for ps_turnOn in self._serial_number:
+                if self.test_communication(self._serial_number.index(ps_turnOn) + 1):
+                    self.FBP.SetSlaveAdd(self._serial_number.index(ps_turnOn) + 1)
+                    self.Config_nHRADC(3)# alterar para 4
+                    time.sleep(1)
+                    self.TurnOn(0b1111)
+                    time.sleep(1)
+                    self.ClosedLoop(0b1111)
+                    time.sleep(1)
+                    self.SetISlowRef(set_current)
+                    time.sleep(0.5)
+                else:
+                    print('Endereço não encontrado')
 
-        ps = PowerSupply()
-        ps.serial_number = self._serial_number
-        res = self._send_to_server(ps)
-        self.update_gui.emit(str(self._serial_number))
+            for a in range(72):
+                for ps_under_test in self._serial_number:
+                    result = False
+                    ps = PowerSupply()
+                    ps.serial_number = ps_under_test
+                    res = self._send_to_server(ps)
+                    self.update_gui.emit(str(self._serial_number))
 
-        if res:
-            #TODO: Sequencia de Testes
-            """
-            Simulação de valores
-            """
-            log = PowerSupplyLog()
-            log.test_type = self.test['Burn-In']
-            log.id_canal_power_supply = 1
-            log.test_result = "Aprovado"
-            log.result_test_on_off = "Aprovado"
-            log.serial_number_power_supply = 1234
-            log.iout0 = random.uniform(1.0, 9.0)
-            log.iout1 = random.uniform(1.0, 9.0)
-            log.vout0 = random.uniform(1.0, 9.0)
-            log.vout1 = random.uniform(1.0, 9.0)
-            log.vdclink0 = random.uniform(1.0, 9.0)
-            log.vdclink1 = random.uniform(1.0, 9.0)
-            log.temperatura0 = random.uniform(1.0, 9.0)
-            log.temperatura1 = random.uniform(1.0, 9.0)
-            log.iout_add_20_duty_cycle = random.uniform(1.0, 9.0)
-            log.iout_less_20_duty_cycle = random.uniform(1.0, 9.0)
-            log.details = ""
+                    if self.test_communication(self._serial_number.index(ps_under_test) + 1):
+                        if res:
+                            #TODO: Sequencia de Testes
 
-            result = self._send_to_server(log)
+                            for i in range(4):
+                                test = True
+                                MeasureList = self._save_AllMeasurements\
+                                (self._serial_number.index(ps_under_test) + 1, i)
 
-        self.test_complete.emit(result)
-        """
-            Fim da Simulação
-        """
+                                '''########## Verificando resultado da corrente de saída ##########'''
+                                '''################################################################'''
+                                if round(MeasureList[0]) == set_current:
+                                    if test:
+                                        test = True
+                                else:
+                                    test = False
+                                '''################################################################'''
+
+
+                                '''########### Verificando resultado da tensão de saída ###########'''
+                                '''################################################################'''
+                                if set_current == 10:
+                                    if 9.5 <= round(MeasureList[1]) <= 10.5:
+                                        if test:
+                                            test = True
+                                    else:
+                                        test = False
+                                elif set_current == -10:
+                                    if -10.5 <= round(MeasureList[1]) <= -9.5:
+                                        if test:
+                                            test = True
+                                    else:
+                                        test = False
+                                '''################################################################'''
+
+
+                                '''########## Verificando resultado da tensão de entrada ##########'''
+                                '''################################################################'''
+                                if round(MeasureList[2]) == 15:
+                                    if test:
+                                        test = True
+                                else:
+                                    test = False
+                                '''################################################################'''
+
+
+                                '''############# Verificando resultado da temperatura #############'''
+                                '''################################################################'''
+                                if round(MeasureList[3]) < 90:
+                                    if test:
+                                        test = True
+                                else:
+                                    test = False
+                                '''################################################################'''
+
+                                if set_current == 10:
+                                    log = PowerSupplyLog()
+                                    log.test_type = self.test['Burn-In']
+                                    log.id_canal_power_supply = i + 1
+                                    if test:
+                                        log.test_result = 'Aprovado'
+                                    else:
+                                        log.test_result = 'Reprovado'
+                                    log.serial_number_power_supply = ps_under_test
+                                    log.iout0 = MeasureList[0]
+                                    log.vout0 = MeasureList[1]
+                                    log.vdclink0 = MeasureList[2]
+                                    log.temperatura0 = MeasureList[3]
+
+                                    log.details = ''
+
+                                    for _softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
+                                        log.details = log.details + _softinterlock + '\t'
+
+                                    for _hardinterlock in self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()):
+                                        log.details = log.details + _hardinterlock + '\t'
+
+                                    result = self._send_to_server(log)
+
+                                elif set_current == -10:
+                                    log = PowerSupplyLog()
+                                    log.test_type = self.test['Burn-In']
+                                    log.id_canal_power_supply = i + 1
+                                        if test:
+                                            log.test_result = 'Aprovado'
+                                        else:
+                                            log.test_result = 'Reprovado'
+                                    log.serial_number_power_supply = ps_under_test
+                                    log.iout1 = MeasureList[0]
+                                    log.vout1 = MeasureList[1]
+                                    log.vdclink1 = MeasureList[2]
+                                    log.temperatura1 = MeasureList[3]
+
+                                    log.details = ''
+
+                                    for _softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
+                                        log.details = log.details + _softinterlock + '\t'
+
+                                    for _hardinterlock in self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()):
+                                        log.details = log.details + _hardinterlock + '\t'
+
+                                    result = self._send_to_server(log)
+
+                                self.test_complete.emit(result)
+
+                            self.update_gui.emit('')
+                            self.update_gui.emit('Interlocks Ativos:')
+                            for softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
+                                self.update_gui.emit(softinterlock)
+                            for hardinterlock in self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()):
+                                self.update_gui.emit(hardinterlock)
+
+                    else:
+                        print('Endereço não encontrado')
+                time.sleep(600)
+                
+    def _save_AllMeasurements(self, address, module):
+        self.FBP.SetSlaveAdd(address)
+        Measurement = []
+
+        if module == 0:
+            Measurement.append(self.FBP.Read_iMod1())
+            time.sleep(0.1)
+            Measurement.append(self.FBP.Read_vOutMod1())
+            time.sleep(0.1)
+            Measurement.append(self.FBP.Read_vDCMod1())
+            time.sleep(0.1)
+            Measurement.append(self.FBP.Read_temp1())
+            time.sleep(0.1)
+
+        elif module == 1:
+            Measurement.append(self.FBP.Read_iMod2())
+            time.sleep(0.1)
+            Measurement.append(self.FBP.Read_vOutMod2())
+            time.sleep(0.1)
+            Measurement.append(self.FBP.Read_vDCMod2())
+            time.sleep(0.1)
+            Measurement.append(self.FBP.Read_temp2())
+            time.sleep(0.1)
+
+        elif module == 2:
+            Measurement.append(self.FBP.Read_iMod3())
+            time.sleep(0.1)
+            Measurement.append(self.FBP.Read_vOutMod3())
+            time.sleep(0.1)
+            Measurement.append(self.FBP.Read_vDCMod3())
+            time.sleep(0.1)
+            Measurement.append(self.FBP.Read_temp3())
+            time.sleep(0.1)
+
+        elif module == 3:
+            Measurement.append(self.FBP.Read_iMod4())
+            time.sleep(0.1)
+            Measurement.append(self.FBP.Read_vOutMod4())
+            time.sleep(0.1)
+            Measurement.append(self.FBP.Read_vDCMod4())
+            time.sleep(0.1)
+            Measurement.append(self.FBP.Read_temp4())
+            time.sleep(0.1)
+
+        return Measurement
+
+    def _read_SoftInterlock(self, int_interlock):
+        SoftInterlockList = ['N/A', 'Sobre-tensao na carga 1', 'N/A', \
+                             'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A',\
+                             'Sobre-tensao na carga 2', 'N/A',        \
+                             'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A',\
+                             'Sobre-tensao na carga 3', 'N/A',        \
+                             'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A',\
+                             'Sobre-tensao na carga 4', 'N/A',        \
+                             'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A']
+
+        op_bin = 1
+        ActiveSoftInterlocks = []
+
+        print('Soft Interlocks ativos:')
+
+        for i in range(len('{0:b}'.format(int_interlock))):
+            if (int_interlock & (op_bin << i)) == 2**i:
+                ActiveSoftInterlocks.append(SoftInterlockList[i])
+                print(SoftInterlockList[i])
+        print('-------------------------------------------------------------------')
+
+        return ActiveSoftInterlocks
+
+    def _read_HardInterlock(self, int_interlock):
+        HardInterlockList = ['Sobre-corrente na carga 1', 'N/A',                   \
+                             'Sobre-tensao no DC-Link do modulo 1',                \
+                             'Sub-tensao no DC-Link do modulo 1',                  \
+                             'Falha no rele de entrada do DC-Link do modulo 1',    \
+                             'Falha no fusivel de entrada do DC-Link do modulo 1', \
+                             'Falha nos drivers do modulo 1',                      \
+                             'Sobre-temperatura no modulo 1',                      \
+                             'Sobre-corrente na carga 2', 'N/A',                   \
+                             'Sobre-tensao no DC-Link do modulo 2',                \
+                             'Sub-tensao no DC-Link do modulo 2',                  \
+                             'Falha no rele de entrada do DC-Link do modulo 2',    \
+                             'Falha no fusivel de entrada do DC-Link do modulo 2', \
+                             'Falha nos drivers do modulo 2',                      \
+                             'Sobre-temperatura no modulo 2',                      \
+                             'Sobre-corrente na carga 3', 'N\A',                   \
+                             'Sobre-tensao no DC-Link do modulo 3',                \
+                             'Sub-tensao no DC-Link do modulo 3',                  \
+                             'Falha no rele de entrada no DC-Link do modulo 3',    \
+                             'Falha no fusivel de entrada do DC-Link do modulo 3', \
+                             'Falha nos drivers do modulo 3',                      \
+                             'Sobre-temperatura no modulo 3',                      \
+                             'Sobre-corrente na carga 4', 'N/A',                   \
+                             'Sobre-tensao no DC-Link do modulo 4',                \
+                             'Sub-tensao no DC-Link do modulo 4',                  \
+                             'Falha no rele de entrada do DC-Link do modulo 4',    \
+                             'Falha no fusivel de entrada do DC-Link do modulo 4', \
+                             'Falha nos drivers do modulo 4',                      \
+                             'Sobre-temperatura no modulo 4']
+        op_bin = 1
+        ActiveHardInterlocks = []
+
+        print('Hard Interlocks ativos:')
+
+        for i in range(len('{0:b}'.format(int_interlock))):
+            if (int_interlock & (op_bin << i)) == 2**i:
+                ActiveHardInterlocks.append(HardInterlockList[i])
+                print(HardInterlockList[i])
+        print('-------------------------------------------------------------------')
+
+        return ActiveHardInterlocks
 
     def _send_to_server(self, item):
         client = ElpWebClient()
