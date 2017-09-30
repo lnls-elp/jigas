@@ -658,7 +658,7 @@ class PowerSupplyWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _set_address(self):
-        self.teAddressingLog.setText('buscando endereço...')
+        #self.teAddressingLog.setText('buscando endereço...')
         write_gui = self._test_thread.set_address()
         self.lbAddress.setText(write_gui[0])
         self.teAddressingLog.setText(write_gui[1])

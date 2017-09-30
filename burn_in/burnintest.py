@@ -54,12 +54,13 @@ class BurnInTest(QThread):
     def test_communication(self, ps_address):
         result = False
         self.FBP.SetSlaveAdd(ps_address)
-        time.sleep(2)
+        time.sleep(1)
 
         try:
-            self.FBP.Write_sigGen_Aux(4)
+            self.FBP.Config_nHRADC(3)#mudar para 4
+            time.sleep(1)
             test_package = self.FBP.Read_ps_Model()
-            time.sleep(2)
+            time.sleep(1)
 
             if (test_package[0] ==   0) and \
                (test_package[1] ==  17) and \
@@ -110,25 +111,30 @@ class BurnInTest(QThread):
         for set_current in [10, -10]:
             for ps_turnOn in self._serial_number:
                 if self.test_communication(self._serial_number.index(ps_turnOn) + 1):
+                    self.update_gui.emit('Ligando fontes e setando correntes para ' \
+                                         + str(set_current) + ' A')
                     self.FBP.SetSlaveAdd(self._serial_number.index(ps_turnOn) + 1)
-                    self.Config_nHRADC(3)# alterar para 4
+                    self.FBP.Config_nHRADC(3)# alterar para 4
                     time.sleep(1)
-                    self.TurnOn(0b1111)
+                    self.FBP.TurnOn(0b1111)
                     time.sleep(1)
-                    self.ClosedLoop(0b1111)
+                    self.FBP.ClosedLoop(0b1111)
                     time.sleep(1)
-                    self.SetISlowRef(set_current)
+                    self.FBP.SetISlowRef(set_current)
                     time.sleep(0.5)
                 else:
+                    self.update_gui.emit('Endereço não encontrado')
                     print('Endereço não encontrado')
 
-            for a in range(72):
+            for a in range(5):#mudar para 72
                 for ps_under_test in self._serial_number:
                     result = False
                     ps = PowerSupply()
                     ps.serial_number = ps_under_test
                     res = self._send_to_server(ps)
-                    self.update_gui.emit(str(self._serial_number))
+                    self.update_gui.emit('Medição da fonte de número serial '\
+                                         + str(self._serial_number))
+                    self.update_gui.emit('  iniciando medições da fonte...')
 
                     if self.test_communication(self._serial_number.index(ps_under_test) + 1):
                         if res:
@@ -146,6 +152,7 @@ class BurnInTest(QThread):
                                         test = True
                                 else:
                                     test = False
+                                self.update_gui.emit('          Corrente de saída: ' + str(MeasureList[0]))
                                 '''################################################################'''
 
 
@@ -163,6 +170,7 @@ class BurnInTest(QThread):
                                             test = True
                                     else:
                                         test = False
+                                self.update_gui.emit('          Tensão de saída: ' + str(MeasureList[1]))
                                 '''################################################################'''
 
 
@@ -173,6 +181,7 @@ class BurnInTest(QThread):
                                         test = True
                                 else:
                                     test = False
+                                self.update_gui.emit('          Tensão de entrada: ' + str(MeasureList[2]))
                                 '''################################################################'''
 
 
@@ -183,6 +192,7 @@ class BurnInTest(QThread):
                                         test = True
                                 else:
                                     test = False
+                                self.update_gui.emit('          Temperatura: ' + str(MeasureList[3]))
                                 '''################################################################'''
 
                                 if set_current == 10:
@@ -191,8 +201,10 @@ class BurnInTest(QThread):
                                     log.id_canal_power_supply = i + 1
                                     if test:
                                         log.test_result = 'Aprovado'
+                                        self.update_gui.emit('          Modulo ' + str(i + 1) + 'OK')
                                     else:
                                         log.test_result = 'Reprovado'
+                                        self.update_gui.emit('          Modulo ' + str(i + 1) + 'NOK')
                                     log.serial_number_power_supply = ps_under_test
                                     log.iout0 = MeasureList[0]
                                     log.vout0 = MeasureList[1]
@@ -213,10 +225,10 @@ class BurnInTest(QThread):
                                     log = PowerSupplyLog()
                                     log.test_type = self.test['Burn-In']
                                     log.id_canal_power_supply = i + 1
-                                        if test:
-                                            log.test_result = 'Aprovado'
-                                        else:
-                                            log.test_result = 'Reprovado'
+                                    if test:
+                                        log.test_result = 'Aprovado'
+                                    else:
+                                        log.test_result = 'Reprovado'
                                     log.serial_number_power_supply = ps_under_test
                                     log.iout1 = MeasureList[0]
                                     log.vout1 = MeasureList[1]
@@ -236,16 +248,19 @@ class BurnInTest(QThread):
                                 self.test_complete.emit(result)
 
                             self.update_gui.emit('')
-                            self.update_gui.emit('Interlocks Ativos:')
+                            self.update_gui.emit('          Interlocks Ativos:')
                             for softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
-                                self.update_gui.emit(softinterlock)
+                                self.update_gui.emit('          ' + softinterlock)
                             for hardinterlock in self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()):
-                                self.update_gui.emit(hardinterlock)
-
+                                self.update_gui.emit('          ' + hardinterlock)
+                            self.update_gui.emit('')
+                            self.update_gui.emit('*********************************************************')
                     else:
+                        self.update_gui.emit('Endereço não encontrado')
                         print('Endereço não encontrado')
-                time.sleep(600)
-                
+                time.sleep(1)
+        self.update_gui.emit('FIM DO TESTE!')
+
     def _save_AllMeasurements(self, address, module):
         self.FBP.SetSlaveAdd(address)
         Measurement = []
