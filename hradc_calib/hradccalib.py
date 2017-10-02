@@ -263,7 +263,7 @@ class HRADCCalib(QThread):
         t.start()
 
         while(t.is_alive()):
-            print(time.strftime("%H:%M:%S", time.gmtime()))
+            print(time.strftime("%H:%M:%S", time.localtime()))
             time.sleep(1)
         self.drs.DisableHRADCSampling()
         time.sleep(1)
