@@ -165,18 +165,29 @@ class HRADCTest(QThread):
 
         print('\n ### Valendo! ###\n')
 
-        print(self._boardsinfo)
         self.nHRADC = max([board['slot'] for board in self._boardsinfo])
+
+        t = ' placas' if self.nHRADC > 1 else ' placa'
+        t2 = 'Inicializando teste de ' + str(self.nHRADC) +  t + ' HRADC...'
+        print(t2 + '\n')
+        self.update_gui.emit(t2)
+
+        print(self._boardsinfo)
+
         print('Configurando nHRADC...\n')
+        self.update_gui.emit('Configurando nHRADC...')
         self.drs.Config_nHRADC(self.nHRADC)
         time.sleep(1)
+
         print('Resetando HRADC...\n')
+        self.update_gui.emit('Resetando nHRADC...')
         self.drs.ResetHRADCBoards(1)
         time.sleep(1)
         self.drs.ResetHRADCBoards(0)
         log_res = []
 
         print('Començando a ler boardsinfo...\n')
+        self.update_gui.emit('Començando a ler boardsinfo...')
 
         for board in self._boardsinfo:
 
@@ -184,6 +195,7 @@ class HRADCTest(QThread):
             print('***************   Slot ' + str(board['slot']) + '   ***************')
             print('******************************************\n\n')
             print(board)
+            self.update_gui.emit('SLOT #' + str(board['slot']) + ' ( S/N: ' + str(board['serial']) + ' / ' + str(board['variant']) + ')')
 
             hradc = HRADC()
             ufmdata_16 = []
@@ -199,10 +211,11 @@ class HRADCTest(QThread):
                 hradc.filter_order = 1
 
             print('\nEnviando ao servidor dados desta placa...\n')
+            self.update_gui.emit('  Enviando ao servidor dados desta placa...')
             res = self._send_to_server(hradc)
 
             print('\nInicializando equipamentos...\n')
-            #self.update_gui.emit('Inicializando equipamentos...')
+            self.update_gui.emit('  Inicializando equipamentos...')
             self.source.DisableOutput()
             self.source.Reset()
             self.source.LOFloatChassis('F')
@@ -233,8 +246,8 @@ class HRADCTest(QThread):
 
                 if board['slot'] > 0:
 
-                    print('Colocando em UFM mode a placa bem sucedida do slot ' + str(board['slot'])+ '...')
-
+                    print('Configurando placa em UFM mode...')
+                    self.update_gui.emit('  Configurando placa em UFM mode...')
                     #slot = slot - 1
                     slot = board['slot'] - 1
 
@@ -242,6 +255,7 @@ class HRADCTest(QThread):
                     time.sleep(0.5)
 
                     print('\nEnviando serial number...')
+                    self.update_gui.emit('  Enviando serial number...')
                     # Send serial number
                     ufmdata_16 = self._convertToUint16List(board['serial'],'Uint64')
                     for i in range(len(ufmdata_16)):
@@ -249,6 +263,7 @@ class HRADCTest(QThread):
                         time.sleep(0.1)
 
                     print('\nEnviando variante...')
+                    self.update_gui.emit('  Enviando variante...')
                     # Send variant
                     ufmdata_16 = self._convertToUint16List(self.hradcVariant[board['variant']],'Uint16')
                     for i in range(len(ufmdata_16)):
@@ -256,6 +271,7 @@ class HRADCTest(QThread):
                         time.sleep(0.1)
 
                     print('\nEnviando rburden...')
+                    self.update_gui.emit('  Enviando Rburden...')
                     # Send Rburden
                     ufmdata_16 = self._convertToUint16List(hradc.burden_res,'float')
                     for i in range(len(ufmdata_16)):
@@ -267,6 +283,9 @@ class HRADCTest(QThread):
                     time.sleep(0.5)
                     self.drs.ReadHRADC_UFM(slot,0)
                     '''
+
+                    print('  Colocando a placa em Sampling mode...')
+                    self.update_gui.emit('  Colocando a placa em Sampling mode...')
                     self.drs.ConfigHRADCOpMode(slot,0)
                     time.sleep(0.5)
                     self._configBoardsToTest(board,'GND')
@@ -289,6 +308,7 @@ class HRADCTest(QThread):
                         if not (hradc.variant == 'HRADC-FAX' and inputType == 'Iin_bipolar'):
 
                             print('\n - ' + signalType + ' -')
+                            self.update_gui.emit('  - ' + signalType + ' -')
 
                             self.drs.ConfigHRADC(slot,100000,inputType,0,0)
                             time.sleep(0.1)
@@ -326,6 +346,7 @@ class HRADCTest(QThread):
                             buff = np.array(self.drs.Recv_samplesBuffer_blocks(0))
                             if np.array_equal(buff,emptyBuff):
                                 print('\n************** FALHA SAMPLES BUFFER **************\n')
+                                self.update_gui.emit('\n *** ERRO: Falha Samples Buffer ***\n')
                                 self.source.DisableOutput()
                                 return
                             #log_hradc.gnd = buff.mean()
@@ -333,7 +354,8 @@ class HRADCTest(QThread):
 
                             buff = np.array(self.dmm.ReadMeasurementPoints())
                             if np.array_equal(buff,emptyBuff):
-                                print('\n************** FALHA DMM SAMPLES **************\n')
+                                print('\n************** FALHA SAMPLES BUFFER **************\n')
+                                self.update_gui.emit('\n *** ERRO: Falha Samples Buffer ***\n')
                                 self.source.DisableOutput()
                                 return
                             #log_dm.gnd = buff.mean()
@@ -347,19 +369,25 @@ class HRADCTest(QThread):
                             print('HRADC: ' + str(log_hradc_list[-1]) + unit)
                             print('DMM: ' + str(log_dm_list[-1]) + unit + '\n')
 
+                            self.update_gui.emit('  HRADC: ' + str(log_hradc_list[-1]) + unit)
+                            self.update_gui.emit('  DMM: ' + str(log_dm_list[-1]) + unit + '\n')
+
                             if abs(log_hradc_list[-1] - self.refVal[signalType]) > self.refTol[signalType]:
                                 log_hradc.test_result = "Reprovado"
                                 print('HRADC Reprovado: ' + signalType)
+                                self.update_gui.emit('  *** HRADC Reprovado! ***')
 
                             if abs(log_dm_list[-1] - self.refVal[signalType]) > self.refTol[signalType]:
                                 log_dm.test_result = "Reprovado"
-                                print('DMM Reprovado:' + signalType)
+                                print('DMM Reprovcado: ' + signalType)
+                                self.update_gui.emit('  *** DMM Reprovado! ***')
 
                         else:
                             log_hradc_list.append(0)
                             log_dm_list.append(0)
 
                     print('\nSalvando log e enviando ao servidor...')
+                    self.update_gui.emit('  Salvando log e enviando ao servidor...')
 
                     log_hradc._iin_n = log_hradc_list.pop()
                     log_hradc._iin_p = log_hradc_list.pop()
@@ -388,6 +416,7 @@ class HRADCTest(QThread):
 
                 else:
                     print('Salvando log de placa reprovada e enviando ao servidor...')
+                    self.update_gui.emit('  Salvando log de placa reprovada e enviando ao servidor...')
                     log_hradc.test_result = "Reprovado"
                     log_hradc.details = board['pre_tests']
 
@@ -395,6 +424,7 @@ class HRADCTest(QThread):
 
             else:
                 print('Falha de comunicacao com servidor!')
+                self.update_gui.emit('*** ERRO: Falha de comunicacao com servidor! ***')
 
                 # TODO: incluir falha de comunicacao com servidor no sinal log_res
                 #log_res.append('')
@@ -407,6 +437,7 @@ class HRADCTest(QThread):
         self.source.SetOutput(0,'V')
 
         print('\nEnviando sinal ao app...')
+        self.update_gui.emit('Enviando sinal ao app...')
 
         for i in range(4 - len(log_res)):
             log_res.append(None)

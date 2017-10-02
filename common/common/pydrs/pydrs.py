@@ -816,10 +816,13 @@ class SerialDRS(object):
     def Write_dp_Coeffs(self,list_float):
 
         hex_float_list = []
-        list_full = list_float[:]
+        #list_full = list_float[:]
 
-        while(len(list_full) < self.DP_MODULE_MAX_COEFF):
-            list_full.append(0)
+        #while(len(list_full) < self.DP_MODULE_MAX_COEFF):
+        #    list_full.append(0)
+
+        list_full = [0 for i in range(self.DP_MODULE_MAX_COEFF)]
+        list_full[:len(list_float)] = list_float[:]
 
         for float_value in list_full:
             hex_float = self.float_to_hex(float(float_value))
