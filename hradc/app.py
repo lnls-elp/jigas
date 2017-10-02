@@ -70,10 +70,18 @@ class HRADCWindow(QWizard, Ui_Class):
         self.leMaterialCode.setReadOnly(True)
         self.leMaterialCode.clear()
         self.lbStatusComunicacao.setText("...")
+        self.rbLedStatusOk.setAutoExclusive(False)
+        self.rbLedStatusNok.setAutoExclusive(False)
+        self.rbLedAlimOk.setAutoExclusive(False)
+        self.rbLedAlimNok.setAutoExclusive(False)
         self.rbLedStatusOk.setChecked(False)
         self.rbLedStatusNok.setChecked(False)
         self.rbLedAlimOk.setChecked(False)
         self.rbLedAlimNok.setChecked(False)
+        self.rbLedStatusOk.setAutoExclusive(True)
+        self.rbLedStatusNok.setAutoExclusive(True)
+        self.rbLedAlimOk.setAutoExclusive(True)
+        self.rbLedAlimNok.setAutoExclusive(True)
         self.lbTestResult1.setText("Aguarde...")
         self.lbTestResult2.setText("Aguarde...")
         self.lbTestResult3.setText("Aguarde...")
@@ -404,6 +412,7 @@ class HRADCWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _load_firmware(self):
+        self.pbLoadFirmware.setEnabled(False)
         self.lbStatusLoadingFirmware.setText("Gravando...")
         qts = LoadFirmware_HRADC()
         result = qts.load_firmware()
@@ -419,6 +428,7 @@ class HRADCWindow(QWizard, Ui_Class):
         self._boardsinfo[-1]['pre_tests'] = self._boardsinfo[-1]['pre_tests'] + '\t' + result
 
         self.lbStatusLoadingFirmware.setText("Finalizado!")
+        self.pbLoadFirmware.setEnabled(True)
         self._status_load_firmware = True
 
     @pyqtSlot(list)

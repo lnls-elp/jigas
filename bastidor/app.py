@@ -49,7 +49,7 @@ class RackWindow(QWizard, Ui_Class):
         self.leMaterialCode.clear()
         self.lbStatusComunicacao.setText("...")
         self.lbTestStatus.setText("Clique para Iniciar Testes")
-        self.lbTestResult.setText("Aguarde...")
+        self.lbTestResult.setText("...")
         self.teTestReport.clear()
 
     def _initialize_signals(self):
@@ -247,6 +247,9 @@ class RackWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _start_test_sequence(self):
+        self.pbStartTests.setEnabled(False)
+        self.lbTestStatus.setText("Sequencia Iniciada")
+        self.lbTestResult.setText("Aguarde...")
         self._test_thread.test_complete.connect(self._test_finished)
         self._test_thread.update_gui.connect(self._update_test_log)
         self._test_thread.start()
@@ -257,6 +260,8 @@ class RackWindow(QWizard, Ui_Class):
 
     @pyqtSlot(bool)
     def _test_finished(self, result):
+        self.pbStartTests.setEnabled(True)
+        self.lbTestStatus.setText("Finalizado!")
         if result:
             self.lbTestResult.setText("Aprovado")
         else:

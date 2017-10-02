@@ -102,6 +102,18 @@ class UDCWindow(QWizard, Ui_Class):
         self.teTestFirmwareLog.setReadOnly(True)
         self.teFinalFirmwareLog.clear()
         self.teFinalFirmwareLog.setReadOnly(True)
+        self.rbLedsOk.setAutoExclusive(False)
+        self.rbLedsNok.setAutoExclusive(False)
+        self.rbBuzzerOk.setAutoExclusive(False)
+        self.rbBuzzerNok.setAutoExclusive(False)
+        self.rbLedsOk.setChecked(False)
+        self.rbLedsNok.setChecked(False)
+        self.rbBuzzerOk.setChecked(False)
+        self.rbBuzzerNok.setChecked(False)
+        self.rbLedsOk.setAutoExclusive(True)
+        self.rbLedsNok.setAutoExclusive(True)
+        self.rbBuzzerOk.setAutoExclusive(True)
+        self.rbBuzzerNok.setAutoExclusive(True)
 
     def _initialize_signals(self):
         """ Configure basic signals """
@@ -310,10 +322,6 @@ class UDCWindow(QWizard, Ui_Class):
             return False
 
     def _validate_page_start_test(self):
-        self.rbLedsOk.setChecked(False)
-        self.rbLedsNok.setChecked(False)
-        self.rbBuzzerOk.setChecked(False)
-        self.rbBuzzerNok.setChecked(False)
 
         if self._leds_status and self._buzzer_status and self._test_finished_status:
             if self._test_result:
