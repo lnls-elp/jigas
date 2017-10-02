@@ -4,6 +4,7 @@ from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from common.dmscanner import Scanner
 from burnintest import BurnInTest
 from PyQt5.uic import loadUiType
+import time
 import serial
 import glob
 import sys
@@ -166,7 +167,7 @@ class PowerSupplyWindow(QWizard, Ui_Class):
         if sys.platform.startswith('win'):
             ports = ['COM%s' % (i + 1) for i in range(256)]
         elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
-            ports = glob.glob('/dev/*')
+            ports = glob.glob('/dev/tty[A-Za-z]*')
         elif sys.platform.startswith('darwin'):
             ports = glob.glob('/dev/tty.*')
         else:
@@ -183,6 +184,7 @@ class PowerSupplyWindow(QWizard, Ui_Class):
     def _restart_test_thread(self):
         self._test_thread.test_complete.disconnect()
         self._test_thread.update_gui.disconnect()
+        self._test_thread.current_state.disconnect()
         self._test_thread.quit()
         self._test_thread.wait()
 
@@ -526,7 +528,7 @@ class PowerSupplyWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _disbl_read_serial_edit_0(self):
-        if self.cbDisableModuleReadSerial0.isChecked():
+        if self.cbDisableFbpSlot0.isChecked():
             self.leSerialNumber0.clear()
             self.leSerialNumber0.setEnabled(False)
             self.leMaterialCode0.setEnabled(False)
@@ -538,7 +540,7 @@ class PowerSupplyWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _disbl_read_serial_edit_1(self):
-        if self.cbDisableModuleReadSerial1.isChecked():
+        if self.cbDisableFbpSlot1.isChecked():
             self.leSerialNumber1.clear()
             self.leSerialNumber1.setEnabled(False)
             self.leMaterialCode1.setEnabled(False)
@@ -550,7 +552,7 @@ class PowerSupplyWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _disbl_read_serial_edit_2(self):
-        if self.cbDisableModuleReadSerial2.isChecked():
+        if self.cbDisableFbpSlot2.isChecked():
             self.leSerialNumber2.clear()
             self.leSerialNumber2.setEnabled(False)
             self.leMaterialCode2.setEnabled(False)
@@ -562,7 +564,7 @@ class PowerSupplyWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _disbl_read_serial_edit_3(self):
-        if self.cbDisableModuleReadSerial3.isChecked():
+        if self.cbDisableFbpSlot3.isChecked():
             self.leSerialNumber3.clear()
             self.leSerialNumber3.setEnabled(False)
             self.leMaterialCode3.setEnabled(False)
@@ -575,7 +577,7 @@ class PowerSupplyWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _disbl_read_serial_edit_4(self):
-        if self.cbDisableModuleReadSerial4.isChecked():
+        if self.cbDisableFbpSlot4.isChecked():
             self.leSerialNumber4.clear()
             self.leSerialNumber4.setEnabled(False)
             self.leMaterialCode4.setEnabled(False)
@@ -587,7 +589,7 @@ class PowerSupplyWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _disbl_read_serial_edit_5(self):
-        if self.cbDisableModuleReadSerial5.isChecked():
+        if self.cbDisableFbpSlot5.isChecked():
             self.leSerialNumber5.clear()
             self.leSerialNumber5.setEnabled(False)
             self.leMaterialCode5.setEnabled(False)
@@ -599,7 +601,7 @@ class PowerSupplyWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _disbl_read_serial_edit_6(self):
-        if self.cbDisableModuleReadSerial6.isChecked():
+        if self.cbDisableFbpSlot6.isChecked():
             self.leSerialNumber6.clear()
             self.leSerialNumber6.setEnabled(False)
             self.leMaterialCode6.setEnabled(False)
@@ -611,7 +613,7 @@ class PowerSupplyWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _disbl_read_serial_edit_7(self):
-        if self.cbDisableModuleReadSerial7.isChecked():
+        if self.cbDisableFbpSlot7.isChecked():
             self.leSerialNumber7.clear()
             self.leSerialNumber7.setEnabled(False)
             self.leMaterialCode7.setEnabled(False)
@@ -623,7 +625,7 @@ class PowerSupplyWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _disbl_read_serial_edit_8(self):
-        if self.cbDisableModuleReadSerial8.isChecked():
+        if self.cbDisableFbpSlot8.isChecked():
             self.leSerialNumber8.clear()
             self.leSerialNumber8.setEnabled(False)
             self.leMaterialCode8.setEnabled(False)
@@ -635,7 +637,7 @@ class PowerSupplyWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _disbl_read_serial_edit_9(self):
-        if self.cbDisableModuleReadSerial9.isChecked():
+        if self.cbDisableFbpSlot9.isChecked():
             self.leSerialNumber9.clear()
             self.leSerialNumber9.setEnabled(False)
             self.leMaterialCode9.setEnabled(False)
@@ -658,16 +660,18 @@ class PowerSupplyWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _set_address(self):
-        #self.teAddressingLog.setText('buscando endereço...')
+        self.teAddressingLog.setText('Buscando endereço...')
+        QApplication.processEvents()
         write_gui = self._test_thread.set_address()
         self.lbAddress.setText(write_gui[0])
-        self.teAddressingLog.setText(write_gui[1])
-        #pass
+        self.teAddressingLog.append(write_gui[1])
+
 
     @pyqtSlot()
     def _start_test_sequence(self):
         self._test_thread.test_complete.connect(self._test_finished)
         self._test_thread.update_gui.connect(self._update_test_log)
+        self._test_thread.current_state.connect(self._update_label_current_state)
         self._test_thread.start()
 
     @pyqtSlot()
@@ -684,6 +688,10 @@ class PowerSupplyWindow(QWizard, Ui_Class):
     @pyqtSlot(str)
     def _update_test_log(self, value):
         self.teTestReport.append(value)
+
+    @pyqtSlot(str)
+    def _update_label_current_state(self, value):
+        self.lbCurrentState.setText(value)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

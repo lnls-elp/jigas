@@ -9,6 +9,7 @@ import time
 class BurnInTest(QThread):
     test_complete       = pyqtSignal(bool)
     update_gui          = pyqtSignal(str)
+    current_state       = pyqtSignal(str)
     connection_lost     = pyqtSignal()
 
     test = {'Normal':1, 'Burn-In': 2}
@@ -108,6 +109,8 @@ class BurnInTest(QThread):
         return write_gui
 
     def _test_sequence(self):
+        self.current_state.emit('Desligado')
+
         for set_current in [10, -10]:
             for ps_turnOn in self._serial_number:
                 if self.test_communication(self._serial_number.index(ps_turnOn) + 1):
@@ -128,84 +131,102 @@ class BurnInTest(QThread):
                         self.FBP.ConfigDPModule()#REMOVER
                         time.sleep(1)
                     #REMOVER----------------------------------------------------
-                    self.FBP.TurnOn(0b1111)
+                    self.FBP.TurnOn(0b0111)#alterar para 0b1111
                     time.sleep(1)
-                    self.FBP.ClosedLoop(0b1111)
+                    self.FBP.ClosedLoop(0b0111)#alterar para 0b1111
                     time.sleep(1)
                     self.FBP.SetISlowRef(set_current)
                     time.sleep(0.5)
+                    self.current_state.emit(str(set_current) + 'A')
 
                 else:
                     self.update_gui.emit('Endereço não encontrado')
                     print('Endereço não encontrado')
 
-            for a in range(72):#mudar para 72
+            for a in range(5):#alterar para 72
                 for ps_under_test in self._serial_number:
-                    result = False
+                    result = True
                     ps = PowerSupply()
                     ps.serial_number = ps_under_test
                     res = self._send_to_server(ps)
                     self.update_gui.emit('Medição da fonte de número serial '\
                                          + str(self._serial_number))
-                    self.update_gui.emit('  iniciando medições da fonte...')
+                    self.update_gui.emit('')
 
                     if self.test_communication(self._serial_number.index(ps_under_test) + 1):
                         if res:
                             #TODO: Sequencia de Testes
 
-                            for i in range(4):
+                            for i in range(3):# Alterar para 4
+                                self.update_gui.emit('Iniciando medições do módulo ' + str(i + 1))
+                                self.update_gui.emit('')
                                 test = True
                                 MeasureList = self._save_AllMeasurements\
                                 (self._serial_number.index(ps_under_test) + 1, i)
 
                                 '''########## Verificando resultado da corrente de saída ##########'''
                                 '''################################################################'''
+                                self.update_gui.emit('          Corrente de saída: ' + str(MeasureList[0]))
                                 if round(MeasureList[0]) == set_current:
+                                    self.update_gui.emit('          Leitura da corrente de saída OK')
                                     if test:
                                         test = True
                                 else:
                                     test = False
-                                self.update_gui.emit('          Corrente de saída: ' + str(MeasureList[0]))
+                                    self.update_gui.emit('          Leitura da corrente de saída NOK')
+                                self.update_gui.emit('')
                                 '''################################################################'''
 
 
                                 '''########### Verificando resultado da tensão de saída ###########'''
                                 '''################################################################'''
-                                if set_current == 10:
-                                    if 9.5 <= round(MeasureList[1]) <= 10.5:
-                                        if test:
-                                            test = True
-                                    else:
-                                        test = False
-                                elif set_current == -10:
-                                    if -10.5 <= round(MeasureList[1]) <= -9.5:
-                                        if test:
-                                            test = True
-                                    else:
-                                        test = False
                                 self.update_gui.emit('          Tensão de saída: ' + str(MeasureList[1]))
+                                if set_current == 10:
+                                    if 9 <= round(MeasureList[1]) <= 11:
+                                        self.update_gui.emit('          Leitura da tensão de saída OK')
+                                        if test:
+                                            test = True
+                                    else:
+                                        test = False
+                                        self.update_gui.emit('          Leitura da tensão de saída NOK')
+
+                                elif set_current == -10:
+                                    if -11 <= round(MeasureList[1]) <= -9:
+                                        self.update_gui.emit('          Leitura da tensão de saída OK')
+                                        if test:
+                                            test = True
+                                    else:
+                                        test = False
+                                        self.update_gui.emit('          Leitura da tensão de saída NOK')
+                                self.update_gui.emit('')
                                 '''################################################################'''
 
 
                                 '''########## Verificando resultado da tensão de entrada ##########'''
                                 '''################################################################'''
+                                self.update_gui.emit('          Tensão de entrada: ' + str(MeasureList[2]))
                                 if round(MeasureList[2]) == 15:
+                                    self.update_gui.emit('          Leitura da tensão de entrada OK')
                                     if test:
                                         test = True
                                 else:
                                     test = False
-                                self.update_gui.emit('          Tensão de entrada: ' + str(MeasureList[2]))
+                                    self.update_gui.emit('          Leitura da tensão de entrada NOK')
+                                self.update_gui.emit('')
                                 '''################################################################'''
 
 
                                 '''############# Verificando resultado da temperatura #############'''
                                 '''################################################################'''
+                                self.update_gui.emit('          Temperatura: ' + str(MeasureList[3]))
                                 if round(MeasureList[3]) < 90:
+                                    self.update_gui.emit('          Leitura da temperatura OK')
                                     if test:
                                         test = True
                                 else:
                                     test = False
-                                self.update_gui.emit('          Temperatura: ' + str(MeasureList[3]))
+                                    self.update_gui.emit('          Leitura da temperatura NOK')
+                                self.update_gui.emit('')
                                 '''################################################################'''
 
                                 if set_current == 10:
@@ -214,10 +235,12 @@ class BurnInTest(QThread):
                                     log.id_canal_power_supply = i + 1
                                     if test:
                                         log.test_result = 'Aprovado'
-                                        self.update_gui.emit('          Modulo ' + str(i + 1) + 'OK')
+                                        self.update_gui.emit('          MÓDULO ' + str(i + 1) + ' OK')
+                                        self.update_gui.emit('')
                                     else:
                                         log.test_result = 'Reprovado'
-                                        self.update_gui.emit('          Modulo ' + str(i + 1) + 'NOK')
+                                        self.update_gui.emit('          MÓDULO ' + str(i + 1) + ' NOK')
+                                        self.update_gui.emit('')
                                     log.serial_number_power_supply = ps_under_test
                                     log.iout0 = MeasureList[0]
                                     log.vout0 = MeasureList[1]
@@ -258,9 +281,6 @@ class BurnInTest(QThread):
 
                                     result = self._send_to_server(log)
 
-                                self.test_complete.emit(result)
-
-                            self.update_gui.emit('')
                             self.update_gui.emit('          Interlocks Ativos:')
                             for softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
                                 self.update_gui.emit('          ' + softinterlock)
@@ -271,7 +291,15 @@ class BurnInTest(QThread):
                     else:
                         self.update_gui.emit('Endereço não encontrado')
                         print('Endereço não encontrado')
-                time.sleep(600)
+                if test:
+                    if result:
+                        result = True
+                else:
+                    result = False
+
+                time.sleep(2)#Alterar para 600
+
+        self.test_complete.emit(result)
         self.update_gui.emit('FIM DO TESTE!')
         self.FBP.TurnOff(0b1111)
 
