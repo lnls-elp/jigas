@@ -113,6 +113,71 @@ class SerialDRS(object):
     def is_open(self):
         return self.ser.isOpen()
 
+    def read_HardInterlock(self, int_interlock):
+        HardInterlockList = ['Sobre-corrente na carga 1', 'N/A',                   \
+                             'Sobre-tensao no DC-Link do modulo 1',                \
+                             'Sub-tensao no DC-Link do modulo 1',                  \
+                             'Falha no rele de entrada do DC-Link do modulo 1',    \
+                             'Falha no fusivel de entrada do DC-Link do modulo 1', \
+                             'Falha nos drivers do modulo 1',                      \
+                             'Sobre-temperatura no modulo 1',                      \
+                             'Sobre-corrente na carga 2', 'N/A',                   \
+                             'Sobre-tensao no DC-Link do modulo 2',                \
+                             'Sub-tensao no DC-Link do modulo 2',                  \
+                             'Falha no rele de entrada do DC-Link do modulo 2',    \
+                             'Falha no fusivel de entrada do DC-Link do modulo 2', \
+                             'Falha nos drivers do modulo 2',                      \
+                             'Sobre-temperatura no modulo 2',                      \
+                             'Sobre-corrente na carga 3', 'N\A',                   \
+                             'Sobre-tensao no DC-Link do modulo 3',                \
+                             'Sub-tensao no DC-Link do modulo 3',                  \
+                             'Falha no rele de entrada no DC-Link do modulo 3',    \
+                             'Falha no fusivel de entrada do DC-Link do modulo 3', \
+                             'Falha nos drivers do modulo 3',                      \
+                             'Sobre-temperatura no modulo 3',                      \
+                             'Sobre-corrente na carga 4', 'N/A',                   \
+                             'Sobre-tensao no DC-Link do modulo 4',                \
+                             'Sub-tensao no DC-Link do modulo 4',                  \
+                             'Falha no rele de entrada do DC-Link do modulo 4',    \
+                             'Falha no fusivel de entrada do DC-Link do modulo 4', \
+                             'Falha nos drivers do modulo 4',                      \
+                             'Sobre-temperatura no modulo 4']
+        op_bin = 1
+        ActiveHardInterlocks = []
+
+        print('Hard Interlocks ativos:')
+
+        for i in range(len('{0:b}'.format(int_interlock))):
+            if (int_interlock & (op_bin << i)) == 2**i:
+                ActiveHardInterlocks.append(HardInterlockList[i])
+                print(HardInterlockList[i])
+        print('-------------------------------------------------------------------')
+
+        return ActiveHardInterlocks
+
+    def read_SoftInterlock(self, int_interlock):
+        SoftInterlockList = ['N/A', 'Sobre-tensao na carga 1', 'N/A', \
+                             'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A',\
+                             'Sobre-tensao na carga 2', 'N/A',        \
+                             'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A',\
+                             'Sobre-tensao na carga 3', 'N/A',        \
+                             'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A',\
+                             'Sobre-tensao na carga 4', 'N/A',        \
+                             'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A']
+
+        op_bin = 1
+        ActiveSoftInterlocks = []
+
+        print('Soft Interlocks ativos:')
+
+        for i in range(len('{0:b}'.format(int_interlock))):
+            if (int_interlock & (op_bin << i)) == 2**i:
+                ActiveSoftInterlocks.append(SoftInterlockList[i])
+                print(SoftInterlockList[i])
+        print('-------------------------------------------------------------------')
+
+        return ActiveSoftInterlocks
+
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     ======================================================================
                 Métodos de Chamada de Entidades Funções BSMP
