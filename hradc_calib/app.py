@@ -431,8 +431,8 @@ class HRADCWindow(QWizard, Ui_Class):
     def _start_calib_sequence(self):
         self.pbStartCalib.setEnabled(False)
         self.pbStartCalib.setText('Calibrando')
-        self.lbTestResult('Aguarde...')
-        self.lbTestStatus('Calibração Iniciada. Por Favor, Aguarde...')
+        self.lbTestResult.setText('Aguarde...')
+        self.lbTestStatus.setText('Calibração Iniciada. Por Favor, Aguarde...')
         self._test_thread.calib_complete.connect(self._calib_finished)
         self._test_thread.update_gui.connect(self._update_test_log)
         self._test_thread.start()
@@ -445,7 +445,7 @@ class HRADCWindow(QWizard, Ui_Class):
     def _calib_finished(self, result):
         self.pbStartCalib.setEnabled(True)
         self.pbStartCalib.setText('Nova\nCalibração')
-        self.lbTestStatus('Calibração Finalizada!')
+        self.lbTestStatus.setText('Calibração Finalizada!')
         if result:
             self.lbTestResult.setText("Sucesso")
         else:
