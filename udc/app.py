@@ -508,7 +508,11 @@ class UDCWindow(QWizard, Ui_Class):
     def _refresh_com_port(self):
         self.comboComPort.setEnabled(False)
         self.pbRefreshCom.setEnabled(False)
+        self.pbRefreshCom.setText("Atualizando")
+        QApplication.processEvents()
         self._list_serial_ports()
+        QApplication.processEvents()
+        self.pbRefreshCom.setText("Refresh\nCOM")
         self.comboComPort.setEnabled(True)
         self.pbRefreshCom.setEnabled(True)
 
