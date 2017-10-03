@@ -333,7 +333,7 @@ class UDCTest(QThread):
             return False
 
     def _test_periph_loopback(self):
-        self._loopback_fail = "\n"
+        self._loopback_fail = "\t"
         self.update_gui.emit("Testando Loopbacks...")
         result = self.DISAPPROVED
         result_bool = [False for i in range(32)]
