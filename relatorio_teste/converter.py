@@ -80,10 +80,10 @@ class Converter(QThread):
 
         elif res == '/UdcReport':
             header = ['Data', 'Resultado', 'Serial', 'Leds', 'Buzzer', 'EEPROM',
-                    'FLASH', 'RAM', 'Alimentação Plano Isolado',
-                    'Ethernet Inicialização', 'Ethernet Ping', 'Loopback', 'Detalhes',
-                    'SD Card', 'Expansor I/O', 'RTC', 'Sensor Temperatura', 'RS485',
-                    'ADC 1', 'ADC 2', 'ADC 3', 'ADC 4', 'ADC 5', 'ADC 6', 'ADC 7', 'ADC 8']
+                    'FLASH', 'RAM', 'Alimentação Plano Isolado', 'Ethernet Ping',
+                    'Loopback', 'Expansor I/O', 'RTC', 'Sensor Temperatura', 'RS485',
+                    'ADC 1', 'ADC 2', 'ADC 3', 'ADC 4', 'ADC 5', 'ADC 6', 'ADC 7',
+                    'ADC 8','Detalhes',]
             return header
 
         return []
