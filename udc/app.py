@@ -566,7 +566,7 @@ class UDCWindow(QWizard, Ui_Class):
     def _test_finished(self, result):
         self._test_finished_status = True
         self.pbStartTests.setEnabled(True)
-        self.pbStartTests.setText("Repetir Teste")
+        self.pbStartTests.setText("Concluido!")
         if result:
             self.lbTestResult.setText("Aprovado")
             self._test_result = True
