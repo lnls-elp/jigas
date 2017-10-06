@@ -299,6 +299,7 @@ class UDCWindow(QWizard, Ui_Class):
                 self._test_thread.start()
                 self._restart_variables()
                 self._initialize_widgets()
+                self._disconnect_test_signals()
                 self._jump_to(self.num_serial_number)
                 return False
         else:
@@ -318,6 +319,7 @@ class UDCWindow(QWizard, Ui_Class):
             self._test_thread.start()
             self._restart_variables()
             self._initialize_widgets()
+            self._disconnect_test_signals()
             self._jump_to(self.num_serial_number)
             return False
 
