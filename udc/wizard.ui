@@ -470,6 +470,25 @@
      </item>
     </layout>
    </widget>
+   <widget class="QCheckBox" name="cbJumpFlash">
+    <property name="geometry">
+     <rect>
+      <x>540</x>
+      <y>410</y>
+      <width>111</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Pular Gravação</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QWizardPage" name="PageCyclePower">
    <widget class="QLabel" name="label_45">
@@ -556,7 +575,7 @@
      <string>11. Connecte na porta COM do UDC e verifique a comunicação.</string>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>30</x>
