@@ -281,6 +281,12 @@ class SerialDRS(object):
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
 
+    def ConfigDPModuleFull(self,dp_id,dp_class,dp_coeffs):
+        self.Write_dp_ID(dp_id)
+        self.Write_dp_Class(dp_class)
+        self.Write_dp_Coeffs(dp_coeffs)
+        self.ConfigDPModule()
+
     def WfmRefUpdate(self):
         payload_size = self.size_to_hex(1) #Payload: ID
         send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('WfmRefUpdate'))
@@ -548,6 +554,17 @@ class SerialDRS(object):
         send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcComTest'))+hex_rw[0]+hex_value[0]
         self.ser.write(send_packet.encode('ISO-8859-1'))
         time.sleep(0.2)
+        return self.ser.read(6)
+
+    def SetISlowRefx4(self, iRef1 = 0, iRef2 = 0, iRef3 = 0, iRef4 = 0):
+        payload_size = self.size_to_hex(1+4*4) #Payload: ID + 4*iRef
+        hex_iRef1    = self.float_to_hex(iRef1)
+        hex_iRef2    = self.float_to_hex(iRef2)
+        hex_iRef3    = self.float_to_hex(iRef3)
+        hex_iRef4    = self.float_to_hex(iRef4)
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(23)+hex_iRef1+hex_iRef2+hex_iRef3+hex_iRef4
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
 
 
@@ -828,6 +845,35 @@ class SerialDRS(object):
         val = struct.unpack('BBHHB',reply_msg)
         return val[3]
 
+    def Read_iRef1(self):
+        self.read_var(self.index_to_hex(45))
+        reply_msg = self.ser.read(9)
+        val = struct.unpack('BBHfB',reply_msg)
+        return val[3]
+
+    def Read_iRef2(self):
+        self.read_var(self.index_to_hex(46))
+        reply_msg = self.ser.read(9)
+        val = struct.unpack('BBHfB',reply_msg)
+        return val[3]
+
+    def Read_iRef3(self):
+        self.read_var(self.index_to_hex(47))
+        reply_msg = self.ser.read(9)
+        val = struct.unpack('BBHfB',reply_msg)
+        return val[3]
+
+    def Read_iRef4(self):
+        self.read_var(self.index_to_hex(48))
+        reply_msg = self.ser.read(9)
+        val = struct.unpack('BBHfB',reply_msg)
+        return val[3]
+
+    def Read_counterSetISlowRefx4(self):
+        self.read_var(self.index_to_hex(49))
+        reply_msg = self.ser.read(9)
+        val = struct.unpack('BBHfB',reply_msg)
+        return val[3]
 
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     ======================================================================
