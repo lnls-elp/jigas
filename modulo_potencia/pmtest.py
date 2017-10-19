@@ -84,6 +84,7 @@ class PowerModuleTest(QThread):
 
     def test_communication(self):
         # Resultado teste de comunicação para os 4 modulos
+        time.sleep(30)
         n_mod  = 0
         result = ''
         serial = [self._serial_mod0, self._serial_mod1, self._serial_mod2,
@@ -380,6 +381,7 @@ class PowerModuleTest(QThread):
                     self.update_gui.emit('modulo ' + str(serial.index(item)+1)\
                                         + ' ' + log.test_result)
                     log_res = self._send_to_server(log)
+                    self._active_interlocks = ''
 
                     #response[serial.index(item)] = log_res
 
