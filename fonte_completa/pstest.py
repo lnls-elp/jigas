@@ -141,10 +141,11 @@ class PowerSupplyTest(QThread):
             '''##########################################################################'''
             self.update_gui.emit('Iniciando teste com módulos em malha aberta a 20%...')
             for module in range(4):
-                self.FBP.ConfigWfmRef(module+1, 20) # ajusta 20% do ciclo de trabalho apenas para o modulo testado
+                #self.FBP.ConfigWfmRef(module+1, 20) # ajusta 20% do ciclo de trabalho apenas para o modulo testado
+                self.FBP.SetISlowRef(20)
                 time.sleep(2)
-                self.FBP.WfmRefUpdate()
-                time.sleep(5)
+                #self.FBP.WfmRefUpdate()
+                #time.sleep(5)
 
                 MeasureList = self._save_CurrentMeasurement(module)
 
@@ -163,10 +164,11 @@ class PowerSupplyTest(QThread):
                 print('mod4: ' + str(self.FBP.Read_iMod4()) + '\n')
                 time.sleep(0.1)
 
-                self.FBP.ConfigWfmRef(module+1, 0) # ajusta 0 o ciclo de trabalho apenas para o modulo testado
+                #self.FBP.ConfigWfmRef(module+1, 0) # ajusta 0 o ciclo de trabalho apenas para o modulo testado
+                self.FBP.SetISlowRef(0)
                 time.sleep(2)
-                self.FBP.WfmRefUpdate()
-                time.sleep(1)
+                #self.FBP.WfmRefUpdate()
+                #time.sleep(1)
             '''##########################################################################'''
 
             self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks())
@@ -176,10 +178,11 @@ class PowerSupplyTest(QThread):
             '''##########################################################################'''
             self.update_gui.emit('Iniciando teste com módulos em malha aberta a -20%...')
             for module in range(4):
-                self.FBP.ConfigWfmRef(module+1, -20) # ajusta 20% do ciclo de trabalho apenas para o modulo testado
+                #self.FBP.ConfigWfmRef(module+1, -20) # ajusta 20% do ciclo de trabalho apenas para o modulo testado
+                self.FBP.SetISlowRef(-20)
                 time.sleep(2)
-                self.FBP.WfmRefUpdate()
-                time.sleep(5)
+                #self.FBP.WfmRefUpdate()
+                #time.sleep(5)
 
                 MeasureList = self._save_CurrentMeasurement(module)
 
@@ -198,10 +201,11 @@ class PowerSupplyTest(QThread):
                 print('mod4: ' + str(self.FBP.Read_iMod4()) + '\n')
                 time.sleep(0.1)
 
-                self.FBP.ConfigWfmRef(module+1, 0) # ajusta 0 o ciclo de trabalho apenas para o modulo testado
+                #self.FBP.ConfigWfmRef(module+1, 0) # ajusta 0 o ciclo de trabalho apenas para o modulo testado
+                self.FBP.SetISlowRef(0)
                 time.sleep(2)
-                self.FBP.WfmRefUpdate()
-                time.sleep(1)
+                #self.FBP.WfmRefUpdate()
+                #time.sleep(1)
             '''##########################################################################'''
 
             self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks())
@@ -214,10 +218,11 @@ class PowerSupplyTest(QThread):
             for module in range(4):
                 self.FBP.ClosedLoop(2**module)
                 time.sleep(2)
-                self.FBP.ConfigWfmRef(module+1, 5)
+                #self.FBP.ConfigWfmRef(module+1, 5)
+                self.FBP.SetISlowRef(5)
                 time.sleep(2)
-                self.FBP.WfmRefUpdate()
-                time.sleep(5)
+                #self.FBP.WfmRefUpdate()
+                #time.sleep(5)
 
                 MeasureList = self._save_CurrentMeasurement(module)
 
@@ -234,10 +239,11 @@ class PowerSupplyTest(QThread):
                     MeasCurr[module][2].append(current)
 
                 self.FBP.SetSlaveAdd(1)
-                self.FBP.ConfigWfmRef(module+1, 0) # ajusta 0 o ciclo de trabalho apenas para o modulo testado
+                #self.FBP.ConfigWfmRef(module+1, 0) # ajusta 0 o ciclo de trabalho apenas para o modulo testado
+                self.FBP.SetISlowRef(0)
                 time.sleep(2)
-                self.FBP.WfmRefUpdate()
-                time.sleep(1)
+                #self.FBP.WfmRefUpdate()
+                #time.sleep(1)
                 self.FBP.OpenLoop(2**module)
 
                 time.sleep(2)
