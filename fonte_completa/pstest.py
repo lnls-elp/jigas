@@ -81,6 +81,7 @@ class PowerSupplyTest(QThread):
 
     def _test_sequence(self):
         result = True
+        send_to_server_result = False
         OnOff  = ['Reprovado' for i in range(4)]
         MeasDCLink = [[]  for j in range(4)]
         MeasVout   = [[]  for k in range(4)]
@@ -135,7 +136,7 @@ class PowerSupplyTest(QThread):
             self.FBP.TurnOn(0b1111)   # liga todos os módulos
             time.sleep(5)
             self.FBP.OpenLoop(0b1111) # todos os módulos em malha aberta
-            self.FBP.OpMode(2)        # coloca a fonte no modo WfmRef para setar as correntes individualmente
+            #self.FBP.OpMode(2)        # coloca a fonte no modo WfmRef para setar as correntes individualmente
 
             '''#################### Teste em Malha Aberta com 20% #######################'''
             '''##########################################################################'''
@@ -295,7 +296,7 @@ class PowerSupplyTest(QThread):
 
             self.update_gui.emit('Realizando medidas de tensão do DC-Link, tensão de saída e temperatura')
             for o in range(8):
-                time.sleep(5)#Alterar tempo
+                time.sleep(30)#Alterar tempo
                 MeasDCLink[0].append(self.FBP.Read_vDCMod1())
                 time.sleep(0.1)
                 MeasDCLink[1].append(self.FBP.Read_vDCMod2())
@@ -364,7 +365,7 @@ class PowerSupplyTest(QThread):
 
             self.update_gui.emit('Realizando medidas de tensão do DC-Link, tensão de saída e temperatura')
             for p in range(8):
-                time.sleep(5)# alterar tempo
+                time.sleep(30)# alterar tempo
                 MeasDCLink[0].append(self.FBP.Read_vDCMod1())
                 time.sleep(0.1)
                 MeasDCLink[1].append(self.FBP.Read_vDCMod2())
@@ -497,7 +498,7 @@ class PowerSupplyTest(QThread):
                 log.iout_less_20_duty_cycle = MeasCurr[module][1][0]
                 log.details = ''
 
-                result = self._send_to_server(log)
+                send_to_server_result = self._send_to_server(log)
 
         self.update_gui.emit('')
         self.update_gui.emit('Interlocks Ativos:')
