@@ -716,13 +716,13 @@ class SerialDRS(object):
     def Read_ps_SoftInterlocks(self):
         self.read_var(self.index_to_hex(ListVar.index('ps_SoftInterlocks')))
         reply_msg = self.ser.read(9)
-        val = struct.unpack('BBHIB',reply_msg)
+        val = struct.unpack('BBHLB',reply_msg)
         return val[3]
 
     def Read_ps_HardInterlocks(self):
         self.read_var(self.index_to_hex(ListVar.index('ps_HardInterlocks')))
         reply_msg = self.ser.read(9)
-        val = struct.unpack('BBHIB',reply_msg)
+        val = struct.unpack('BBHLB',reply_msg)
         return val[3]
 
     def Read_iRef(self):
