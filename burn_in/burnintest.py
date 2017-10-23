@@ -58,7 +58,7 @@ class BurnInTest(QThread):
         time.sleep(1)
 
         try:
-            self.FBP.Config_nHRADC(3)#mudar para 4
+            self.FBP.Config_nHRADC(1) #mudar para 4
             time.sleep(1)
             test_package = self.FBP.Read_ps_Model()
             time.sleep(1)
@@ -111,15 +111,22 @@ class BurnInTest(QThread):
     def _test_sequence(self):
         self.current_state.emit('Desligado')
 
+        print('##################################################')
+        print('##################################################')
+        print(self._serial_number)
+        print('##################################################')
+        print('##################################################')
+
         for set_current in [10, -10]:
             for ps_turnOn in self._serial_number:
                 if self.test_communication(self._serial_number.index(ps_turnOn) + 1):
                     self.update_gui.emit('Ligando fontes e setando correntes para ' \
                                          + str(set_current) + ' A')
                     self.FBP.SetSlaveAdd(self._serial_number.index(ps_turnOn) + 1)
-                    self.FBP.Config_nHRADC(3)# alterar para 4
+                    self.FBP.Config_nHRADC(1)# alterar para 4
                     time.sleep(1)
                     #REMOVER----------------------------------------------------
+                    '''
                     for b in range(4):
                         print('config dp ' + str(b))
                         self.FBP.Write_dp_Class(3)#REMOVER
@@ -130,10 +137,11 @@ class BurnInTest(QThread):
                         time.sleep(1)
                         self.FBP.ConfigDPModule()#REMOVER
                         time.sleep(1)
+                    '''
                     #REMOVER----------------------------------------------------
-                    self.FBP.TurnOn(0b0111)#alterar para 0b1111
+                    self.FBP.TurnOn(0b0001)#alterar para 0b1111
                     time.sleep(1)
-                    self.FBP.ClosedLoop(0b0111)#alterar para 0b1111
+                    self.FBP.ClosedLoop(0b0001)#alterar para 0b1111
                     time.sleep(1)
                     self.FBP.SetISlowRef(set_current)
                     time.sleep(0.5)
@@ -143,21 +151,21 @@ class BurnInTest(QThread):
                     self.update_gui.emit('Endereço não encontrado')
                     print('Endereço não encontrado')
 
-            for a in range(5):#alterar para 72
+            for a in range(36): #alterar para 36
                 for ps_under_test in self._serial_number:
                     result = True
                     ps = PowerSupply()
                     ps.serial_number = ps_under_test
                     res = self._send_to_server(ps)
                     self.update_gui.emit('Medição da fonte de número serial '\
-                                         + str(self._serial_number))
+                                         + str(ps_under_test))
                     self.update_gui.emit('')
 
                     if self.test_communication(self._serial_number.index(ps_under_test) + 1):
                         if res:
                             #TODO: Sequencia de Testes
 
-                            for i in range(3):# Alterar para 4
+                            for i in range(1):# Alterar para 4
                                 self.update_gui.emit('Iniciando medições do módulo ' + str(i + 1))
                                 self.update_gui.emit('')
                                 test = True
@@ -297,7 +305,7 @@ class BurnInTest(QThread):
                 else:
                     result = False
 
-                time.sleep(2)#Alterar para 600
+                time.sleep(600) #Alterar para 600
 
         self.test_complete.emit(result)
         self.update_gui.emit('FIM DO TESTE!')

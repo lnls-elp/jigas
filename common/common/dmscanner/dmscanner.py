@@ -9,6 +9,7 @@ class Scanner(QWidget):
                 '14024292': 'DCCT-CONF-A',
                 '14024295': 'DCCT-CONF-B',
                 '14026758': 'Bastidor',
+                '14019820': 'FBP 4 CH LP',
                 '14019821': 'FBP 4 CH',
                 '14019822': 'FBP 3 CH',
                 '14019823': 'FBP 2 CH'}

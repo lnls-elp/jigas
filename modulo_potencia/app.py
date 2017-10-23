@@ -72,7 +72,7 @@ class PowerModuleWindow(QWizard, Ui_Class):
         self.cbDisableModuleReadSerial1.setChecked(False)
         self.cbDisableModuleReadSerial2.setChecked(False)
         self.cbDisableModuleReadSerial3.setChecked(False)
-        self.lbStatusComunicacao.setText("Aguarde...")
+        self.lbStatusComunicacao.setText("Clique...")
         self.lbTestStatus.setText("Clique para Iniciar Testes")
         self.lbTestResult0.setText("NC")
         self.lbTestResult1.setText("NC")
@@ -395,6 +395,9 @@ class PowerModuleWindow(QWizard, Ui_Class):
     @pyqtSlot()
     def _communication_test(self):
         #Verificar status de comunicação?
+        self.lbStatusComunicacao.setText('Aguarde...')
+        self.pbCommunicationTest.setEnabled(False)
+        QApplication.processEvents()
         result = self._test_thread.test_communication()
         if result is not None:
             self.lbStatusComunicacao.setText(result)
@@ -403,6 +406,7 @@ class PowerModuleWindow(QWizard, Ui_Class):
                 self._test_serial_port_status = True
             else:
                 self._test_serial_port_status = False
+        self.pbCommunicationTest.setEnabled(True)
 
     @pyqtSlot()
     def _start_test_sequence(self):
