@@ -91,8 +91,10 @@ class BurnInTest(QThread):
     def set_address(self):
         write_gui  = []
         ps_address = self.find_address()
+        time.sleep(0.5)
 
         self.FBP.SetSlaveAdd(ps_address)
+        time.sleep(0.5)
 
         if self.test_communication(ps_address):
             self.FBP.SetRSAddress(self._ps_address)
