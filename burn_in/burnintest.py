@@ -153,7 +153,7 @@ class BurnInTest(QThread):
                     self.update_gui.emit('Endereço não encontrado')
                     print('Endereço não encontrado')
 
-            for a in range(36): #alterar para 36
+            for a in range(72): #alterar para 72
                 for ps_under_test in self._serial_number:
                     result = True
                     ps = PowerSupply()
