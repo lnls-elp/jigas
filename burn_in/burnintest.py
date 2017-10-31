@@ -58,8 +58,8 @@ class BurnInTest(QThread):
         time.sleep(1)
 
         try:
-            #self.FBP.Config_nHRADC(1) #mudar para 4
-            self.FBP.Write_sigGen_Aux(4)
+            self.FBP.Config_nHRADC(1) # alterar para 4
+            # self.FBP.Write_sigGen_Aux(1) # alterar para 4
             time.sleep(1)
             test_package = self.FBP.Read_ps_Model()
             time.sleep(1)
@@ -120,14 +120,15 @@ class BurnInTest(QThread):
         print('##################################################')
         print('##################################################')
 
-        for set_current in [10, -10]:
+        # for set_current in [10, -10]:
+        for set_current in [9, -9]: # alterar para 10 e -10, adequação à carga da WEG
             for ps_turnOn in self._serial_number:
                 if self.test_communication(self._serial_number.index(ps_turnOn) + 1):
                     self.update_gui.emit('Ligando fontes e setando correntes para ' \
                                          + str(set_current) + ' A')
                     self.FBP.SetSlaveAdd(self._serial_number.index(ps_turnOn) + 1)
-                    #self.FBP.Config_nHRADC(1)# alterar para 4
-                    self.FBP.Write_sigGen_Aux(4)
+                    self.FBP.Config_nHRADC(1)# alterar para 4
+                    # self.FBP.Write_sigGen_Aux(1) # alterar para 4
                     time.sleep(1)
                     #REMOVER----------------------------------------------------
                     '''
@@ -143,9 +144,11 @@ class BurnInTest(QThread):
                         time.sleep(1)
                     '''
                     #REMOVER----------------------------------------------------
-                    self.FBP.TurnOn(0b1111)#alterar para 0b1111
+                    self.FBP.ResetInterlocks()
+                    time.sleep(0.5)
+                    self.FBP.TurnOn(0b0001)#alterar para 0b1111
                     time.sleep(1)
-                    self.FBP.ClosedLoop(0b1111)#alterar para 0b1111
+                    self.FBP.ClosedLoop(0b0001)#alterar para 0b1111
                     time.sleep(1)
                     self.FBP.SetISlowRef(set_current)
                     time.sleep(0.5)
@@ -193,8 +196,8 @@ class BurnInTest(QThread):
                                 '''########### Verificando resultado da tensão de saída ###########'''
                                 '''################################################################'''
                                 self.update_gui.emit('          Tensão de saída: ' + str(MeasureList[1]))
-                                if set_current == 10:
-                                    if 9 <= round(MeasureList[1]) <= 11:
+                                if set_current == 9:
+                                    if 9 <= round(MeasureList[1]) <= 12:
                                         self.update_gui.emit('          Leitura da tensão de saída OK')
                                         if test:
                                             test = True
@@ -202,8 +205,8 @@ class BurnInTest(QThread):
                                         test = False
                                         self.update_gui.emit('          Leitura da tensão de saída NOK')
 
-                                elif set_current == -10:
-                                    if -11 <= round(MeasureList[1]) <= -9:
+                                elif set_current == -9:
+                                    if -12 <= round(MeasureList[1]) <= -9:
                                         self.update_gui.emit('          Leitura da tensão de saída OK')
                                         if test:
                                             test = True
@@ -217,7 +220,7 @@ class BurnInTest(QThread):
                                 '''########## Verificando resultado da tensão de entrada ##########'''
                                 '''################################################################'''
                                 self.update_gui.emit('          Tensão de entrada: ' + str(MeasureList[2]))
-                                if round(MeasureList[2]) == 15:
+                                if 14 <= round(MeasureList[2]) <= 15:
                                     self.update_gui.emit('          Leitura da tensão de entrada OK')
                                     if test:
                                         test = True
@@ -241,7 +244,7 @@ class BurnInTest(QThread):
                                 self.update_gui.emit('')
                                 '''################################################################'''
 
-                                if set_current == 10:
+                                if set_current == 9:
                                     log = PowerSupplyLog()
                                     log.test_type = self.test['Burn-In']
                                     log.id_canal_power_supply = i + 1
@@ -269,7 +272,7 @@ class BurnInTest(QThread):
 
                                     result = self._send_to_server(log)
 
-                                elif set_current == -10:
+                                elif set_current == -9:
                                     log = PowerSupplyLog()
                                     log.test_type = self.test['Burn-In']
                                     log.id_canal_power_supply = i + 1
