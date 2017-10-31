@@ -287,6 +287,10 @@ class UDCWindow(QWizard, Ui_Class):
         return True
 
     def _validate_page_load_test_firmware(self):
+        if self.cbJumpFlash.isChecked():
+            self.cbJumpFlash.setChecked(False)
+            return True
+
         if self._test_firmware_loaded:
             self._test_firmware_loaded = False
             if self._test_firmware_loaded_sucess:
@@ -299,6 +303,7 @@ class UDCWindow(QWizard, Ui_Class):
                 self._test_thread.start()
                 self._restart_variables()
                 self._initialize_widgets()
+                self._disconnect_test_signals()
                 self._jump_to(self.num_serial_number)
                 return False
         else:
@@ -318,6 +323,7 @@ class UDCWindow(QWizard, Ui_Class):
             self._test_thread.start()
             self._restart_variables()
             self._initialize_widgets()
+            self._disconnect_test_signals()
             self._jump_to(self.num_serial_number)
             return False
 

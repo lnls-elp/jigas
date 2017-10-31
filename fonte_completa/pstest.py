@@ -81,6 +81,7 @@ class PowerSupplyTest(QThread):
 
     def _test_sequence(self):
         result = True
+        send_to_server_result = False
         OnOff  = ['Reprovado' for i in range(4)]
         MeasDCLink = [[]  for j in range(4)]
         MeasVout   = [[]  for k in range(4)]
@@ -135,16 +136,17 @@ class PowerSupplyTest(QThread):
             self.FBP.TurnOn(0b1111)   # liga todos os módulos
             time.sleep(5)
             self.FBP.OpenLoop(0b1111) # todos os módulos em malha aberta
-            self.FBP.OpMode(2)        # coloca a fonte no modo WfmRef para setar as correntes individualmente
+            #self.FBP.OpMode(2)        # coloca a fonte no modo WfmRef para setar as correntes individualmente
 
             '''#################### Teste em Malha Aberta com 20% #######################'''
             '''##########################################################################'''
             self.update_gui.emit('Iniciando teste com módulos em malha aberta a 20%...')
             for module in range(4):
-                self.FBP.ConfigWfmRef(module+1, 20) # ajusta 20% do ciclo de trabalho apenas para o modulo testado
+                #self.FBP.ConfigWfmRef(module+1, 20) # ajusta 20% do ciclo de trabalho apenas para o modulo testado
+                self.FBP.SetISlowRef(20)
                 time.sleep(2)
-                self.FBP.WfmRefUpdate()
-                time.sleep(5)
+                #self.FBP.WfmRefUpdate()
+                #time.sleep(5)
 
                 MeasureList = self._save_CurrentMeasurement(module)
 
@@ -163,10 +165,11 @@ class PowerSupplyTest(QThread):
                 print('mod4: ' + str(self.FBP.Read_iMod4()) + '\n')
                 time.sleep(0.1)
 
-                self.FBP.ConfigWfmRef(module+1, 0) # ajusta 0 o ciclo de trabalho apenas para o modulo testado
+                #self.FBP.ConfigWfmRef(module+1, 0) # ajusta 0 o ciclo de trabalho apenas para o modulo testado
+                self.FBP.SetISlowRef(0)
                 time.sleep(2)
-                self.FBP.WfmRefUpdate()
-                time.sleep(1)
+                #self.FBP.WfmRefUpdate()
+                #time.sleep(1)
             '''##########################################################################'''
 
             self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks())
@@ -176,10 +179,11 @@ class PowerSupplyTest(QThread):
             '''##########################################################################'''
             self.update_gui.emit('Iniciando teste com módulos em malha aberta a -20%...')
             for module in range(4):
-                self.FBP.ConfigWfmRef(module+1, -20) # ajusta 20% do ciclo de trabalho apenas para o modulo testado
+                #self.FBP.ConfigWfmRef(module+1, -20) # ajusta 20% do ciclo de trabalho apenas para o modulo testado
+                self.FBP.SetISlowRef(-20)
                 time.sleep(2)
-                self.FBP.WfmRefUpdate()
-                time.sleep(5)
+                #self.FBP.WfmRefUpdate()
+                #time.sleep(5)
 
                 MeasureList = self._save_CurrentMeasurement(module)
 
@@ -198,10 +202,11 @@ class PowerSupplyTest(QThread):
                 print('mod4: ' + str(self.FBP.Read_iMod4()) + '\n')
                 time.sleep(0.1)
 
-                self.FBP.ConfigWfmRef(module+1, 0) # ajusta 0 o ciclo de trabalho apenas para o modulo testado
+                #self.FBP.ConfigWfmRef(module+1, 0) # ajusta 0 o ciclo de trabalho apenas para o modulo testado
+                self.FBP.SetISlowRef(0)
                 time.sleep(2)
-                self.FBP.WfmRefUpdate()
-                time.sleep(1)
+                #self.FBP.WfmRefUpdate()
+                #time.sleep(1)
             '''##########################################################################'''
 
             self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks())
@@ -214,10 +219,11 @@ class PowerSupplyTest(QThread):
             for module in range(4):
                 self.FBP.ClosedLoop(2**module)
                 time.sleep(2)
-                self.FBP.ConfigWfmRef(module+1, 5)
+                #self.FBP.ConfigWfmRef(module+1, 5)
+                self.FBP.SetISlowRef(5)
                 time.sleep(2)
-                self.FBP.WfmRefUpdate()
-                time.sleep(5)
+                #self.FBP.WfmRefUpdate()
+                #time.sleep(5)
 
                 MeasureList = self._save_CurrentMeasurement(module)
 
@@ -234,10 +240,11 @@ class PowerSupplyTest(QThread):
                     MeasCurr[module][2].append(current)
 
                 self.FBP.SetSlaveAdd(1)
-                self.FBP.ConfigWfmRef(module+1, 0) # ajusta 0 o ciclo de trabalho apenas para o modulo testado
+                #self.FBP.ConfigWfmRef(module+1, 0) # ajusta 0 o ciclo de trabalho apenas para o modulo testado
+                self.FBP.SetISlowRef(0)
                 time.sleep(2)
-                self.FBP.WfmRefUpdate()
-                time.sleep(1)
+                #self.FBP.WfmRefUpdate()
+                #time.sleep(1)
                 self.FBP.OpenLoop(2**module)
 
                 time.sleep(2)
@@ -289,7 +296,7 @@ class PowerSupplyTest(QThread):
 
             self.update_gui.emit('Realizando medidas de tensão do DC-Link, tensão de saída e temperatura')
             for o in range(8):
-                time.sleep(5)#Alterar tempo
+                time.sleep(30)#Alterar tempo
                 MeasDCLink[0].append(self.FBP.Read_vDCMod1())
                 time.sleep(0.1)
                 MeasDCLink[1].append(self.FBP.Read_vDCMod2())
@@ -358,7 +365,7 @@ class PowerSupplyTest(QThread):
 
             self.update_gui.emit('Realizando medidas de tensão do DC-Link, tensão de saída e temperatura')
             for p in range(8):
-                time.sleep(5)# alterar tempo
+                time.sleep(30)# alterar tempo
                 MeasDCLink[0].append(self.FBP.Read_vDCMod1())
                 time.sleep(0.1)
                 MeasDCLink[1].append(self.FBP.Read_vDCMod2())
@@ -491,7 +498,7 @@ class PowerSupplyTest(QThread):
                 log.iout_less_20_duty_cycle = MeasCurr[module][1][0]
                 log.details = ''
 
-                result = self._send_to_server(log)
+                send_to_server_result = self._send_to_server(log)
 
         self.update_gui.emit('')
         self.update_gui.emit('Interlocks Ativos:')

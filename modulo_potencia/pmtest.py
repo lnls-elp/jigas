@@ -21,6 +21,7 @@ class PowerModuleTest(QThread):
         self._serial_mod2 = mod2
         self._serial_mod3 = mod3
         self._serial_port = serial.Serial()
+        self._active_interlocks = ''
         self.FBP = SerialDRS()
 
 
@@ -83,6 +84,7 @@ class PowerModuleTest(QThread):
 
     def test_communication(self):
         # Resultado teste de comunicação para os 4 modulos
+        time.sleep(30)
         n_mod  = 0
         result = ''
         serial = [self._serial_mod0, self._serial_mod1, self._serial_mod2,
@@ -102,6 +104,14 @@ class PowerModuleTest(QThread):
                (test_package[4] == 223):
                result = 'OK'
 
+               #---------------------verifica interlocks 1----------------------
+               soft = str(self.FBP.Read_ps_SoftInterlocks())
+               hard = str(self.FBP.Read_ps_HardInterlocks())
+               self._active_interlocks = self._active_interlocks +\
+               '1-'  + soft + '-' + hard + '  '
+               #----------------------------------------------------------------
+
+               self.FBP.ResetInterlocks()
             else:
                 result = 'Falha'
         except:
@@ -149,10 +159,25 @@ class PowerModuleTest(QThread):
 
         print('sum_mod enviado para UDC: ' + str(sum_mod) + '\n')
 
+        #---------------------verifica interlocks 2----------------------
+        soft = str(self.FBP.Read_ps_SoftInterlocks())
+        hard = str(self.FBP.Read_ps_HardInterlocks())
+        self._active_interlocks = self._active_interlocks +\
+        '2-'  + soft + '-' + hard + '  '
+        #----------------------------------------------------------------
+
         for set_current in load_current:
             if set_current == 'turnedOff':
                 self.FBP.TurnOff(sum_mod)
                 self.update_gui.emit('Iniciando medições com modulos desligados')
+
+                #---------------------verifica interlocks 3----------------------
+                soft = str(self.FBP.Read_ps_SoftInterlocks())
+                hard = str(self.FBP.Read_ps_HardInterlocks())
+                self._active_interlocks = self._active_interlocks +\
+                '3-'  + soft + '-' + hard + '  '
+                #----------------------------------------------------------------
+
                 time.sleep(120) # Alterar para 2 min
             else:
                 self.FBP.TurnOn(sum_mod)
@@ -166,6 +191,16 @@ class PowerModuleTest(QThread):
                 self.FBP.SetISlowRef(0.5 * set_current)
                 time.sleep(0.5)
                 self.FBP.SetISlowRef(set_current)
+
+                #---------------------verifica interlocks 4 - 8-----------------
+                soft  = str(self.FBP.Read_ps_SoftInterlocks())
+                hard  = str(self.FBP.Read_ps_HardInterlocks())
+                index = str(load_current.index(set_current) + 3)
+
+                self._active_interlocks = self._active_interlocks\
+                + index + '-' + soft + '-' + hard + '  '
+                #---------------------------------------------------------------
+
                 time.sleep(120) # Alterar para 2 min
 
             if serial[0] != None:
@@ -340,10 +375,13 @@ class PowerModuleTest(QThread):
                     for _hardinterlock in self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()):
                         log.details = log.details + _hardinterlock + '\t'
 
+                    log.details = log.details + self._active_interlocks
+
                     print(log.data)
                     self.update_gui.emit('modulo ' + str(serial.index(item)+1)\
                                         + ' ' + log.test_result)
                     log_res = self._send_to_server(log)
+                    self._active_interlocks = ''
 
                     #response[serial.index(item)] = log_res
 
