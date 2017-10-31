@@ -121,7 +121,7 @@ class BurnInTest(QThread):
         print('##################################################')
 
         # for set_current in [10, -10]:
-        for set_current in [9, -9]: # alterar para 10 e -10, adequação à carga da WEG
+        for set_current in [7, -7]: # alterar para 10 e -10, adequação à carga da WEG
             for ps_turnOn in self._serial_number:
                 if self.test_communication(self._serial_number.index(ps_turnOn) + 1):
                     self.update_gui.emit('Ligando fontes e setando correntes para ' \
@@ -196,8 +196,8 @@ class BurnInTest(QThread):
                                 '''########### Verificando resultado da tensão de saída ###########'''
                                 '''################################################################'''
                                 self.update_gui.emit('          Tensão de saída: ' + str(MeasureList[1]))
-                                if set_current == 9:
-                                    if 9 <= round(MeasureList[1]) <= 12:
+                                if set_current == 7:
+                                    if 8 <= round(MeasureList[1]) <= 11:
                                         self.update_gui.emit('          Leitura da tensão de saída OK')
                                         if test:
                                             test = True
@@ -205,8 +205,8 @@ class BurnInTest(QThread):
                                         test = False
                                         self.update_gui.emit('          Leitura da tensão de saída NOK')
 
-                                elif set_current == -9:
-                                    if -12 <= round(MeasureList[1]) <= -9:
+                                elif set_current == -7:
+                                    if -11 <= round(MeasureList[1]) <= -8:
                                         self.update_gui.emit('          Leitura da tensão de saída OK')
                                         if test:
                                             test = True
@@ -244,7 +244,7 @@ class BurnInTest(QThread):
                                 self.update_gui.emit('')
                                 '''################################################################'''
 
-                                if set_current == 9:
+                                if set_current == 7:
                                     log = PowerSupplyLog()
                                     log.test_type = self.test['Burn-In']
                                     log.id_canal_power_supply = i + 1
@@ -272,7 +272,7 @@ class BurnInTest(QThread):
 
                                     result = self._send_to_server(log)
 
-                                elif set_current == -9:
+                                elif set_current == -7:
                                     log = PowerSupplyLog()
                                     log.test_type = self.test['Burn-In']
                                     log.id_canal_power_supply = i + 1
