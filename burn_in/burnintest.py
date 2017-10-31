@@ -58,7 +58,7 @@ class BurnInTest(QThread):
         time.sleep(1)
 
         try:
-            self.FBP.Config_nHRADC(1) # alterar para 4
+            self.FBP.Config_nHRADC(4) # alterar para 4
             # self.FBP.Write_sigGen_Aux(1) # alterar para 4
             time.sleep(1)
             test_package = self.FBP.Read_ps_Model()
@@ -127,7 +127,7 @@ class BurnInTest(QThread):
                     self.update_gui.emit('Ligando fontes e setando correntes para ' \
                                          + str(set_current) + ' A')
                     self.FBP.SetSlaveAdd(self._serial_number.index(ps_turnOn) + 1)
-                    self.FBP.Config_nHRADC(1)# alterar para 4
+                    self.FBP.Config_nHRADC(4)# alterar para 4
                     # self.FBP.Write_sigGen_Aux(1) # alterar para 4
                     time.sleep(1)
                     #REMOVER----------------------------------------------------
@@ -146,9 +146,9 @@ class BurnInTest(QThread):
                     #REMOVER----------------------------------------------------
                     self.FBP.ResetInterlocks()
                     time.sleep(0.5)
-                    self.FBP.TurnOn(0b0001)#alterar para 0b1111
+                    self.FBP.TurnOn(0b1111)#alterar para 0b1111
                     time.sleep(1)
-                    self.FBP.ClosedLoop(0b0001)#alterar para 0b1111
+                    self.FBP.ClosedLoop(0b1111)#alterar para 0b1111
                     time.sleep(1)
                     self.FBP.SetISlowRef(set_current)
                     time.sleep(0.5)
