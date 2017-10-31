@@ -660,15 +660,19 @@ class PowerSupplyWindow(QWizard, Ui_Class):
 
     @pyqtSlot()
     def _set_address(self):
+        self.pbSetAddress.setEnabled(False)
         self.teAddressingLog.setText('Buscando endereço...')
         QApplication.processEvents()
         write_gui = self._test_thread.set_address()
+        QApplication.processEvents()
         self.lbAddress.setText(write_gui[0])
         self.teAddressingLog.append(write_gui[1])
+        self.pbSetAddress.setEnabled(True)
 
 
     @pyqtSlot()
     def _start_test_sequence(self):
+        self.pbStartTests.setEnabled(False)
         self._test_thread.test_complete.connect(self._test_finished)
         self._test_thread.update_gui.connect(self._update_test_log)
         self._test_thread.current_state.connect(self._update_label_current_state)
@@ -680,6 +684,7 @@ class PowerSupplyWindow(QWizard, Ui_Class):
 
     @pyqtSlot(bool)
     def _test_finished(self, result):
+        self.pbStartTests.setEnabled(True)
         if result:
             self.lbTestResult.setText("Aprovado")
         else:
