@@ -38,7 +38,7 @@ ListFunc = ['TurnOn','TurnOff','OpenLoop','ClosedLoop','OpMode','RemoteInterface
             'ResetHRADCBoards','Config_nHRADC','ReadHRADC_UFM','WriteHRADC_UFM','EraseHRADC_UFM','ReadHRADC_BoardData']
 ListTestFunc = ['UdcIoExpanderTest', 'UdcLedTest', 'UdcBuzzerTest', 'UdcEepromTest', 'UdcFlashTest', 'UdcRamTest',
                 'UdcRtcTest', 'UdcSensorTempTest', 'UdcIsoPlaneTest', 'UdcAdcTest', 'UdcUartTest', 'UdcLoopBackTest',
-                'UdcComTest']
+                'UdcComTest', 'UdcI2cIsoTest']
 ListHRADCInputType = ['Vin_bipolar','Vin_unipolar_p','Vin_unipolar_n','Iin_bipolar','Iin_unipolar_p',
                       'Iin_unipolar_n','Vref_bipolar_p','Vref_bipolar_n','GND','Vref_unipolar_p',
                       'Vref_unipolar_n','GND_unipolar','Temp','Reserved0','Reserved1','Reserved2']
@@ -554,6 +554,14 @@ class SerialDRS(object):
         send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcComTest'))+hex_rw[0]+hex_value[0]
         self.ser.write(send_packet.encode('ISO-8859-1'))
         time.sleep(0.2)
+        return self.ser.read(6)
+
+    def UdcI2cIsoTest(self, rw, val):
+        payload_size    = self.size_to_hex(3)
+        hex_rw          = self.double_to_hex(rw)
+        hex_value       = self.double_to_hex(val)
+        send_packet     = self.ComFunction+payload_size+self.index_to_hex(ListTestFunc.index('UdcI2cIsoTest'))+hex_rw[0]+hex_value[0]
+        self.ser.write(send_packet.encode('ISO-8859-1'))
         return self.ser.read(6)
 
     def SetISlowRefx4(self, iRef1 = 0, iRef2 = 0, iRef3 = 0, iRef4 = 0):
