@@ -220,7 +220,7 @@ class BurnInTest(QThread):
                                 '''########## Verificando resultado da tensão de entrada ##########'''
                                 '''################################################################'''
                                 self.update_gui.emit('          Tensão de entrada: ' + str(MeasureList[2]))
-                                if 14 <= round(MeasureList[2]) <= 15:
+                                if 14 <= round(MeasureList[2]) <= 16:
                                     self.update_gui.emit('          Leitura da tensão de entrada OK')
                                     if test:
                                         test = True
