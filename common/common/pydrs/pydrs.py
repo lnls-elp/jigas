@@ -628,48 +628,56 @@ class SerialDRS(object):
     def Read_vDCMod1(self):
         self.read_var(self.index_to_hex(ListVar.index('vDCMod1')))
         reply_msg = self.ser.read(9)
+        print(reply_msg)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
 
     def Read_vDCMod2(self):
         self.read_var(self.index_to_hex(ListVar.index('vDCMod2')))
         reply_msg = self.ser.read(9)
+        print(reply_msg)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
 
     def Read_vDCMod3(self):
         self.read_var(self.index_to_hex(ListVar.index('vDCMod3')))
         reply_msg = self.ser.read(9)
+        print(reply_msg)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
 
     def Read_vDCMod4(self):
         self.read_var(self.index_to_hex(ListVar.index('vDCMod4')))
         reply_msg = self.ser.read(9)
+        print(reply_msg)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
 
     def Read_vOutMod1(self):
         self.read_var(self.index_to_hex(ListVar.index('vOutMod1')))
         reply_msg = self.ser.read(9)
+        print(reply_msg)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
 
     def Read_vOutMod2(self):
         self.read_var(self.index_to_hex(ListVar.index('vOutMod2')))
         reply_msg = self.ser.read(9)
+        print(reply_msg)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
 
     def Read_vOutMod3(self):
         self.read_var(self.index_to_hex(ListVar.index('vOutMod3')))
         reply_msg = self.ser.read(9)
+        print(reply_msg)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
 
     def Read_vOutMod4(self):
         self.read_var(self.index_to_hex(ListVar.index('vOutMod4')))
         reply_msg = self.ser.read(9)
+        print(reply_msg)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
 
