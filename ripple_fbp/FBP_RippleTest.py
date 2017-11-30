@@ -1,8 +1,8 @@
-from common import pydrs
+from common import pydrs.SerialDRS
 from DSOX_3024A import DSOX_3024A_USB
 import time
 
-drs = pydrs.SerialDRS()
+drs = SerialDRS()
 dso = DSOX_3024A_USB()
 
 dso_addr = 'USB0::2391::6054::MY52492161::INSTR'
