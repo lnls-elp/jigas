@@ -43,6 +43,19 @@ ListHRADCInputType = ['Vin_bipolar','Vin_unipolar_p','Vin_unipolar_n','Iin_bipol
                       'Iin_unipolar_n','Vref_bipolar_p','Vref_bipolar_n','GND','Vref_unipolar_p',
                       'Vref_unipolar_n','GND_unipolar','Temp','Reserved0','Reserved1','Reserved2']
 
+ListVar_v2_1 = ['ps_status','ps_setpoint','ps_reference','wfmref_selected',
+                'wfmref_sync_mode','wfmref_gain','wfmref_offset',
+                'p_wfmref_start','p_wfmref_end','p_wfmref_idx']
+ListFunc_v2_1 = ['turn_on','turn_off','open_loop','closed_loop','cfg_op_mode',
+                 'cfg_ps_model','reset_interlocks','remote_interface',''
+                 'set_serial_address','set_serial_termination','unlock_udc',
+                 'lock_udc','cfg_buf_samples','enable_buf_samples',
+                 'disable_buf_samples','sync_pulse','set_slowref',
+                 'set_slowref_fbp']
+
+typeFormat = {'uint16_t': 'BBHHB', 'uint32_t': 'BBHIB', 'float': 'BBHfB'}
+typeSize   = {'uint16_t': 7, 'uint32_t': 9, 'float': 9}
+
 class SerialDRS(object):
 
     ser = serial.Serial()
@@ -193,10 +206,38 @@ class SerialDRS(object):
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
 
+    def turn_on(self):
+        payload_size = self.size_to_hex(1) #Payload: ID
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('turn_on'))
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
     def TurnOff(self,ps_modules):
         payload_size = self.size_to_hex(1+2) #Payload: ID + ps_modules
         hex_modules  = self.double_to_hex(ps_modules)
         send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('TurnOff'))+hex_modules
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def turn_off(self):
+        payload_size = self.size_to_hex(1) #Payload: ID
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('turn_off'))
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def open_loop(self):
+        payload_size = self.size_to_hex(1) #Payload: ID
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('open_loop'))
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def closed_loop(self):
+        payload_size = self.size_to_hex(1) #Payload: ID
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('closed_loop'))
         send_msg     = self.checksum(self.SlaveAdd+send_packet)
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
@@ -582,6 +623,13 @@ class SerialDRS(object):
     O retorno do método são os valores double/float da respectiva variavel
     ======================================================================
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+    def read_bsmp_variable(self,id_var,type_var):
+        self.read_var(self.index_to_hex(id_var))
+        reply_msg = self.ser.read(typeSize[type_var])
+        #print(reply_msg)
+        val = struct.unpack(typeFormat[type_var],reply_msg)
+        return val[3]
 
     def Read_iLoad1(self):
         self.read_var(self.index_to_hex(ListVar.index('iLoad1')))
