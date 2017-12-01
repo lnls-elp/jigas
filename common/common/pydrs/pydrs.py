@@ -616,6 +616,24 @@ class SerialDRS(object):
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
 
+    def set_slowref(self,setpoint):
+        payload_size   = self.size_to_hex(1+4) #Payload: ID + iSlowRef
+        hex_setpoint   = self.float_to_hex(setpoint)
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('set_slowref'))+hex_setpoint
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def set_slowref_fbp(self, iRef1 = 0, iRef2 = 0, iRef3 = 0, iRef4 = 0):
+        payload_size = self.size_to_hex(1+4*4) #Payload: ID + 4*iRef
+        hex_iRef1    = self.float_to_hex(iRef1)
+        hex_iRef2    = self.float_to_hex(iRef2)
+        hex_iRef3    = self.float_to_hex(iRef3)
+        hex_iRef4    = self.float_to_hex(iRef4)
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('set_slowref_fbp'))+hex_iRef1+hex_iRef2+hex_iRef3+hex_iRef4
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
 
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     ======================================================================
@@ -624,10 +642,11 @@ class SerialDRS(object):
     ======================================================================
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-    def read_bsmp_variable(self,id_var,type_var):
+    def read_bsmp_variable(self,id_var,type_var,print_msg):
         self.read_var(self.index_to_hex(id_var))
         reply_msg = self.ser.read(typeSize[type_var])
-        #print(reply_msg)
+        if print_msg:
+            print(reply_msg)
         val = struct.unpack(typeFormat[type_var],reply_msg)
         return val[3]
 
