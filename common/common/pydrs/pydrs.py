@@ -34,7 +34,7 @@ ListFunc = ['TurnOn','TurnOff','OpenLoop','ClosedLoop','OpMode','RemoteInterface
             'SetISlowRef','ConfigWfmRef','ConfigSigGen', 'EnableSigGen',
             'DisableSigGen','ConfigDPModule','WfmRefUpdate','ResetInterlocks','ConfigPSModel',
             'ConfigHRADC','ConfigHRADCOpMode','EnableHRADCSampling','DisableHRADCSampling','ResetWfmRef',
-            'SetRSAddress','EnableSamplesBuffer','DisableSamplesBuffer','SelectHRADCBoard','SelectTestSource',
+            'SetRSAddress','EnableSamplesBuffer','DisableSamplesBuffer','SetISlowRefx4','SelectHRADCBoard','SelectTestSource',
             'ResetHRADCBoards','Config_nHRADC','ReadHRADC_UFM','WriteHRADC_UFM','EraseHRADC_UFM','ReadHRADC_BoardData']
 ListTestFunc = ['UdcIoExpanderTest', 'UdcLedTest', 'UdcBuzzerTest', 'UdcEepromTest', 'UdcFlashTest', 'UdcRamTest',
                 'UdcRtcTest', 'UdcSensorTempTest', 'UdcIsoPlaneTest', 'UdcAdcTest', 'UdcUartTest', 'UdcLoopBackTest',
@@ -611,7 +611,7 @@ class SerialDRS(object):
         hex_iRef2    = self.float_to_hex(iRef2)
         hex_iRef3    = self.float_to_hex(iRef3)
         hex_iRef4    = self.float_to_hex(iRef4)
-        send_packet  = self.ComFunction+payload_size+self.index_to_hex(23)+hex_iRef1+hex_iRef2+hex_iRef3+hex_iRef4
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('SetISlowRefx4'))+hex_iRef1+hex_iRef2+hex_iRef3+hex_iRef4
         send_msg     = self.checksum(self.SlaveAdd+send_packet)
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
