@@ -503,6 +503,13 @@ class SerialDRS(object):
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
 
+    def GetHRADCs_BoardData(self,numHRADC):
+        for i in range(numHRADC):
+            self.ConfigHRADCOpMode(i,1)
+            self.ReadHRADC_BoardData(i)
+            time.sleep(0.1)
+            self.ConfigHRADCOpMode(i,0)
+
     def InitHRADC_BoardData(self, serial = 12345678, variant = 'HRADC-FBP',
                             rburden = 20, day = 1, mon = 1, year = 2017,
                             hour = 12, minutes = 30, calibtemp = 40,
