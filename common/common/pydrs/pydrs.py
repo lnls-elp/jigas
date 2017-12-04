@@ -34,7 +34,7 @@ ListFunc = ['TurnOn','TurnOff','OpenLoop','ClosedLoop','OpMode','RemoteInterface
             'SetISlowRef','ConfigWfmRef','ConfigSigGen', 'EnableSigGen',
             'DisableSigGen','ConfigDPModule','WfmRefUpdate','ResetInterlocks','ConfigPSModel',
             'ConfigHRADC','ConfigHRADCOpMode','EnableHRADCSampling','DisableHRADCSampling','ResetWfmRef',
-            'SetRSAddress','EnableSamplesBuffer','DisableSamplesBuffer','SelectHRADCBoard','SelectTestSource',
+            'SetRSAddress','EnableSamplesBuffer','DisableSamplesBuffer','SetISlowRefx4','SelectHRADCBoard','SelectTestSource',
             'ResetHRADCBoards','Config_nHRADC','ReadHRADC_UFM','WriteHRADC_UFM','EraseHRADC_UFM','ReadHRADC_BoardData']
 ListTestFunc = ['UdcIoExpanderTest', 'UdcLedTest', 'UdcBuzzerTest', 'UdcEepromTest', 'UdcFlashTest', 'UdcRamTest',
                 'UdcRtcTest', 'UdcSensorTempTest', 'UdcIsoPlaneTest', 'UdcAdcTest', 'UdcUartTest', 'UdcLoopBackTest',
@@ -43,6 +43,33 @@ ListHRADCInputType = ['Vin_bipolar','Vin_unipolar_p','Vin_unipolar_n','Iin_bipol
                       'Iin_unipolar_n','Vref_bipolar_p','Vref_bipolar_n','GND','Vref_unipolar_p',
                       'Vref_unipolar_n','GND_unipolar','Temp','Reserved0','Reserved1','Reserved2']
 
+ListPSModels = ['FBP_100kHz', 'FBP_Parallel_100kHz', 'FAC_ACDC_10kHz', 'FAC_DCDC_20kHz',
+	            'FAC_Full_ACDC_10kHz', 'FAC_Full_DCDC_20kHz', 'FAP_ACDC',
+	            'FAP_DCDC_20kHz', 'TEST_HRPWM', 'TEST_HRADC', 'JIGA_HRADC',
+	            'FAP_DCDC_15kHz_225A', 'FBPx4_100kHz', 'FAP_6U_DCDC_20kHz',
+	            'JIGA_BASTIDOR']
+
+ListVar_v2_1 = ['ps_status','ps_setpoint','ps_reference','wfmref_selected',
+                'wfmref_sync_mode','wfmref_gain','wfmref_offset',
+                'p_wfmref_start','p_wfmref_end','p_wfmref_idx']
+ListFunc_v2_1 = ['turn_on','turn_off','open_loop','closed_loop','cfg_op_mode',
+                 'cfg_ps_model','reset_interlocks','remote_interface',''
+                 'set_serial_address','set_serial_termination','unlock_udc',
+                 'lock_udc','cfg_buf_samples','enable_buf_samples',
+                 'disable_buf_samples','sync_pulse','set_slowref',
+                 'set_slowref_fbp']
+
+typeFormat = {'uint16_t': 'BBHHB', 'uint32_t': 'BBHIB', 'float': 'BBHfB'}
+bytesFormat = {'Uint16': 'H', 'Uint32': 'L', 'Uint64': 'Q', 'float': 'f'}
+
+typeSize   = {'uint16_t': 7, 'uint32_t': 9, 'float': 9}
+ufmOffset = {'serial': 0, 'calibdate': 4, 'variant': 9, 'rburden': 10,
+             'calibtemp': 12, 'vin_gain': 14, 'vin_offset': 16,
+             'iin_gain': 18, 'iin_offset': 20, 'vref_p': 22, 'vref_n': 24,
+             'gnd': 26}
+hradcVariant = {'HRADC-FBP': 0, 'HRADC-FAX': 1}
+hradcInputTypes = ['GND', 'Vref_bipolar_p', 'Vref_bipolar_n', 'Temp',
+                       'Vin_bipolar_p', 'Vin_bipolar_n', 'Iin_bipolar_p','Iin_bipolar_n']
 class SerialDRS(object):
 
     ser = serial.Serial()
@@ -178,6 +205,15 @@ class SerialDRS(object):
 
         return ActiveSoftInterlocks
 
+    def _convertToUint16List(self, val, format):
+        val_16 = []
+        val_b = struct.pack(bytesFormat[format],val)
+        print(val_b)
+        for i in range(0,len(val_b),2):
+            val_16.append(struct.unpack('H',val_b[i:i+2])[0])
+        print(val_16)
+        return val_16
+
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     ======================================================================
                 Métodos de Chamada de Entidades Funções BSMP
@@ -193,10 +229,38 @@ class SerialDRS(object):
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
 
+    def turn_on(self):
+        payload_size = self.size_to_hex(1) #Payload: ID
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('turn_on'))
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
     def TurnOff(self,ps_modules):
         payload_size = self.size_to_hex(1+2) #Payload: ID + ps_modules
         hex_modules  = self.double_to_hex(ps_modules)
         send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('TurnOff'))+hex_modules
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def turn_off(self):
+        payload_size = self.size_to_hex(1) #Payload: ID
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('turn_off'))
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def open_loop(self):
+        payload_size = self.size_to_hex(1) #Payload: ID
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('open_loop'))
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def closed_loop(self):
+        payload_size = self.size_to_hex(1) #Payload: ID
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('closed_loop'))
         send_msg     = self.checksum(self.SlaveAdd+send_packet)
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
@@ -439,6 +503,127 @@ class SerialDRS(object):
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
 
+    def GetHRADCs_BoardData(self,numHRADC):
+        for i in range(numHRADC):
+            self.ConfigHRADCOpMode(i,1)
+            self.ReadHRADC_BoardData(i)
+            time.sleep(0.1)
+            self.ConfigHRADCOpMode(i,0)
+
+    def InitHRADC_BoardData(self, serial = 12345678, variant = 'HRADC-FBP',
+                            rburden = 20, day = 1, mon = 1, year = 2017,
+                            hour = 12, minutes = 30, calibtemp = 40,
+                            vin_gain = 1, vin_offset = 0, iin_gain = 1,
+                            iin_offset = 0, vref_p = 5, vref_n = -5, gnd = 0):
+        boardData = {'serial': serial, 'variant': variant, 'rburden': rburden,
+                     'tm_mday': day, 'tm_mon': mon, 'tm_year': year,
+                     'tm_hour': hour, 'tm_min': minutes, 'calibtemp': calibtemp,
+                     'vin_gain': vin_gain, 'vin_offset': vin_offset,
+                     'iin_gain': iin_gain, 'iin_offset': iin_offset,
+                     'vref_p': vref_p, 'vref_n': vref_n, 'gnd': gnd}
+        return boardData
+
+    def WriteHRADC_BoardData(self,hradcID,boardData):
+        print('Configurando placa em UFM mode...')
+        self.ConfigHRADCOpMode(hradcID,1)
+        time.sleep(0.5)
+
+        print('\nEnviando serial number...')
+        ufmdata_16 = self._convertToUint16List(boardData['serial'],'Uint64')
+        for i in range(len(ufmdata_16)):
+            self.WriteHRADC_UFM(hradcID,i+ufmOffset['serial'],ufmdata_16[i])
+            time.sleep(0.1)
+
+        print('\nEnviando variante...')
+        ufmdata_16 = self._convertToUint16List(hradcVariant[boardData['variant']],'Uint16')
+        for i in range(len(ufmdata_16)):
+            self.WriteHRADC_UFM(hradcID,i+ufmOffset['variant'],ufmdata_16[i])
+            time.sleep(0.1)
+
+        print('\nEnviando rburden...')
+        ufmdata_16 = self._convertToUint16List(boardData['rburden'],'float')
+        for i in range(len(ufmdata_16)):
+            self.WriteHRADC_UFM(hradcID,i+ufmOffset['rburden'],ufmdata_16[i])
+            time.sleep(0.1)
+
+        print('\nEnviando calibdate...')
+        ufmdata_16 = self._convertToUint16List(boardData['tm_mday'],'Uint16')
+        for i in range(len(ufmdata_16)):
+            self.WriteHRADC_UFM(hradcID,i+ufmOffset['calibdate'],ufmdata_16[i])
+            time.sleep(0.1)
+        # Month
+        ufmdata_16 = self._convertToUint16List(boardData['tm_mon'],'Uint16')
+        for i in range(len(ufmdata_16)):
+            self.WriteHRADC_UFM(hradcID,i+ufmOffset['calibdate']+1,ufmdata_16[i])
+            time.sleep(0.1)
+        # Year
+        ufmdata_16 = self._convertToUint16List(boardData['tm_year'],'Uint16')
+        for i in range(len(ufmdata_16)):
+            self.WriteHRADC_UFM(hradcID,i+ufmOffset['calibdate']+2,ufmdata_16[i])
+            time.sleep(0.1)
+        # Hour
+        ufmdata_16 = self._convertToUint16List(boardData['tm_hour'],'Uint16')
+        for i in range(len(ufmdata_16)):
+            self.WriteHRADC_UFM(hradcID,i+ufmOffset['calibdate']+3,ufmdata_16[i])
+            time.sleep(0.1)
+        # Minutes
+        ufmdata_16 = self._convertToUint16List(boardData['tm_min'],'Uint16')
+        for i in range(len(ufmdata_16)):
+            self.WriteHRADC_UFM(hradcID,i+ufmOffset['calibdate']+4,ufmdata_16[i])
+            time.sleep(0.1)
+
+        print('\nEnviando calibtemp...')
+        ufmdata_16 = self._convertToUint16List(boardData['calibtemp'],'float')
+        for i in range(len(ufmdata_16)):
+            self.WriteHRADC_UFM(hradcID,i+ufmOffset['calibtemp'],ufmdata_16[i])
+            time.sleep(0.1)
+
+        print('\nEnviando vin_gain...')
+        ufmdata_16 = self._convertToUint16List(boardData['vin_gain'],'float')
+        for i in range(len(ufmdata_16)):
+            self.WriteHRADC_UFM(hradcID,i+ufmOffset['vin_gain'],ufmdata_16[i])
+            time.sleep(0.1)
+
+        print('\nEnviando vin_offset...')
+        ufmdata_16 = self._convertToUint16List(boardData['vin_offset'],'float')
+        for i in range(len(ufmdata_16)):
+            self.WriteHRADC_UFM(hradcID,i+ufmOffset['vin_offset'],ufmdata_16[i])
+            time.sleep(0.1)
+
+        print('\nEnviando iin_gain...')
+        ufmdata_16 = self._convertToUint16List(boardData['iin_gain'],'float')
+        for i in range(len(ufmdata_16)):
+            self.WriteHRADC_UFM(hradcID,i+ufmOffset['iin_gain'],ufmdata_16[i])
+            time.sleep(0.1)
+
+        print('\nEnviando iin_offset...')
+        ufmdata_16 = self._convertToUint16List(boardData['iin_offset'],'float')
+        for i in range(len(ufmdata_16)):
+            self.WriteHRADC_UFM(hradcID,i+ufmOffset['iin_offset'],ufmdata_16[i])
+            time.sleep(0.1)
+
+        print('\nEnviando vref_p...')
+        ufmdata_16 = self._convertToUint16List(boardData['vref_p'],'float')
+        for i in range(len(ufmdata_16)):
+            self.WriteHRADC_UFM(hradcID,i+ufmOffset['vref_p'],ufmdata_16[i])
+            time.sleep(0.1)
+
+        print('\nEnviando vref_n...')
+        ufmdata_16 = self._convertToUint16List(boardData['vref_n'],'float')
+        for i in range(len(ufmdata_16)):
+            self.WriteHRADC_UFM(hradcID,i+ufmOffset['vref_n'],ufmdata_16[i])
+            time.sleep(0.1)
+
+        print('\nEnviando gnd...')
+        ufmdata_16 = self._convertToUint16List(boardData['gnd'],'float')
+        for i in range(len(ufmdata_16)):
+            self.WriteHRADC_UFM(hradcID,i+ufmOffset['gnd'],ufmdata_16[i])
+            time.sleep(0.1)
+
+        print('Colocando a placa em Sampling mode...')
+        self.ConfigHRADCOpMode(hradcID,0)
+
+
     def UdcEepromTest(self, rw, data=None):
         if data is not None:
             payload_size    = self.size_to_hex(12)
@@ -570,11 +755,29 @@ class SerialDRS(object):
         hex_iRef2    = self.float_to_hex(iRef2)
         hex_iRef3    = self.float_to_hex(iRef3)
         hex_iRef4    = self.float_to_hex(iRef4)
-        send_packet  = self.ComFunction+payload_size+self.index_to_hex(23)+hex_iRef1+hex_iRef2+hex_iRef3+hex_iRef4
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('SetISlowRefx4'))+hex_iRef1+hex_iRef2+hex_iRef3+hex_iRef4
         send_msg     = self.checksum(self.SlaveAdd+send_packet)
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
 
+    def set_slowref(self,setpoint):
+        payload_size   = self.size_to_hex(1+4) #Payload: ID + iSlowRef
+        hex_setpoint   = self.float_to_hex(setpoint)
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('set_slowref'))+hex_setpoint
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def set_slowref_fbp(self, iRef1 = 0, iRef2 = 0, iRef3 = 0, iRef4 = 0):
+        payload_size = self.size_to_hex(1+4*4) #Payload: ID + 4*iRef
+        hex_iRef1    = self.float_to_hex(iRef1)
+        hex_iRef2    = self.float_to_hex(iRef2)
+        hex_iRef3    = self.float_to_hex(iRef3)
+        hex_iRef4    = self.float_to_hex(iRef4)
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('set_slowref_fbp'))+hex_iRef1+hex_iRef2+hex_iRef3+hex_iRef4
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
 
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     ======================================================================
@@ -582,6 +785,14 @@ class SerialDRS(object):
     O retorno do método são os valores double/float da respectiva variavel
     ======================================================================
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+    def read_bsmp_variable(self,id_var,type_var,print_msg):
+        self.read_var(self.index_to_hex(id_var))
+        reply_msg = self.ser.read(typeSize[type_var])
+        if print_msg:
+            print(reply_msg)
+        val = struct.unpack(typeFormat[type_var],reply_msg)
+        return val[3]
 
     def Read_iLoad1(self):
         self.read_var(self.index_to_hex(ListVar.index('iLoad1')))
@@ -629,48 +840,56 @@ class SerialDRS(object):
     def Read_vDCMod1(self):
         self.read_var(self.index_to_hex(ListVar.index('vDCMod1')))
         reply_msg = self.ser.read(9)
+        print(reply_msg)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
 
     def Read_vDCMod2(self):
         self.read_var(self.index_to_hex(ListVar.index('vDCMod2')))
         reply_msg = self.ser.read(9)
+        print(reply_msg)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
 
     def Read_vDCMod3(self):
         self.read_var(self.index_to_hex(ListVar.index('vDCMod3')))
         reply_msg = self.ser.read(9)
+        print(reply_msg)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
 
     def Read_vDCMod4(self):
         self.read_var(self.index_to_hex(ListVar.index('vDCMod4')))
         reply_msg = self.ser.read(9)
+        print(reply_msg)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
 
     def Read_vOutMod1(self):
         self.read_var(self.index_to_hex(ListVar.index('vOutMod1')))
         reply_msg = self.ser.read(9)
+        print(reply_msg)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
 
     def Read_vOutMod2(self):
         self.read_var(self.index_to_hex(ListVar.index('vOutMod2')))
         reply_msg = self.ser.read(9)
+        print(reply_msg)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
 
     def Read_vOutMod3(self):
         self.read_var(self.index_to_hex(ListVar.index('vOutMod3')))
         reply_msg = self.ser.read(9)
+        print(reply_msg)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
 
     def Read_vOutMod4(self):
         self.read_var(self.index_to_hex(ListVar.index('vOutMod4')))
         reply_msg = self.ser.read(9)
+        print(reply_msg)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
 
@@ -831,6 +1050,10 @@ class SerialDRS(object):
         reply_msg = self.ser.read(7)
         val = struct.unpack('BBHHB',reply_msg)
         return val
+
+    def read_ps_model(self):
+        reply_msg = self.Read_ps_Model()
+        return ListPSModels[reply_msg[3]]
 
     def Read_wfmRef_PtrBufferStart(self):
         self.read_var(self.index_to_hex(ListVar.index('wfmRef_PtrBufferStart')))

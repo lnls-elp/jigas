@@ -197,7 +197,7 @@ class BurnInTest(QThread):
                                 '''################################################################'''
                                 self.update_gui.emit('          Tensão de saída: ' + str(MeasureList[1]))
                                 if set_current == 7:
-                                    if 8 <= round(MeasureList[1]) <= 11:
+                                    if 2 <= round(MeasureList[1]) <= 5:
                                         self.update_gui.emit('          Leitura da tensão de saída OK')
                                         if test:
                                             test = True
@@ -206,7 +206,7 @@ class BurnInTest(QThread):
                                         self.update_gui.emit('          Leitura da tensão de saída NOK')
 
                                 elif set_current == -7:
-                                    if -11 <= round(MeasureList[1]) <= -8:
+                                    if -5 <= round(MeasureList[1]) <= -2:
                                         self.update_gui.emit('          Leitura da tensão de saída OK')
                                         if test:
                                             test = True
@@ -220,7 +220,7 @@ class BurnInTest(QThread):
                                 '''########## Verificando resultado da tensão de entrada ##########'''
                                 '''################################################################'''
                                 self.update_gui.emit('          Tensão de entrada: ' + str(MeasureList[2]))
-                                if 14 <= round(MeasureList[2]) <= 15:
+                                if 5 <= round(MeasureList[2]) <= 7:
                                     self.update_gui.emit('          Leitura da tensão de entrada OK')
                                     if test:
                                         test = True
