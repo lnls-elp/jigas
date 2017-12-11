@@ -9,8 +9,8 @@ dso_addr = 'USB0::2391::6054::MY52492161::INSTR'
 dso_file = 'ripple_fbp.scp'
 
 drs_port = 'COM10'
-drs_addr = 1
-bastidor = '1041182348'
+drs_addr = 2
+bastidor = '1041182344'
 
 module_list = ['modulo 1', 'modulo 2', 'modulo 3', 'modulo 4']
 ps_iout  = [0, 2, 4, 6, 8, 10, -10, -8, -6, -4, -2]
@@ -23,7 +23,7 @@ time.sleep(1)
 drs.Config_nHRADC(4)
 time.sleep(5)
 
-for i in range(2):
+for i in range(2): # for i in range(1,2,1):
 
     for module in module_list:
         if i == 0:
