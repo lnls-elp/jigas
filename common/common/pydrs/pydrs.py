@@ -803,6 +803,7 @@ class SerialDRS(object):
     def Read_iLoad1(self):
         self.read_var(self.index_to_hex(ListVar.index('iLoad1')))
         reply_msg = self.ser.read(9)
+        print(reply_msg)
         val = struct.unpack('BBHfB',reply_msg)
         return val[3]
 
