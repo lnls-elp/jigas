@@ -501,7 +501,13 @@ class SerialDRS(object):
         send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('ReadHRADC_BoardData'))+hex_hradcID
         send_msg       = self.checksum(self.SlaveAdd+send_packet)
         self.ser.write(send_msg.encode('ISO-8859-1'))
-        return self.ser.read(6)
+        reply_msg = self.ser.read(56)
+        val = struct.unpack('BBQHfHHHHHHffffffffB',reply_msg)
+        boardData = InitHRADC_BoardData(val[0],val[1],val[2],val[3],val[4],
+                                        val[5],val[6],val[7],val[8],val[9],
+                                        val[10],val[11],val[12],val[13],val[14],
+                                        val[15],val[16])
+        return boardData
 
     def GetHRADCs_BoardData(self,numHRADC):
         for i in range(numHRADC):
