@@ -67,7 +67,7 @@ ufmOffset = {'serial': 0, 'calibdate': 4, 'variant': 9, 'rburden': 10,
              'calibtemp': 12, 'vin_gain': 14, 'vin_offset': 16,
              'iin_gain': 18, 'iin_offset': 20, 'vref_p': 22, 'vref_n': 24,
              'gnd': 26}
-hradcVariant = {'HRADC-FBP': 0, 'HRADC-FAX': 1}
+hradcVariant = ['HRADC-FBP','HRADC-FAX']
 hradcInputTypes = ['GND', 'Vref_bipolar_p', 'Vref_bipolar_n', 'Temp',
                        'Vin_bipolar_p', 'Vin_bipolar_n', 'Iin_bipolar_p','Iin_bipolar_n']
 class SerialDRS(object):
@@ -495,30 +495,9 @@ class SerialDRS(object):
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
 
-    def ReadHRADC_BoardData(self,hradcID):
-        payload_size   = self.size_to_hex(1+2) #Payload: ID + hradcID
-        hex_hradcID    = self.double_to_hex(hradcID)
-        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('ReadHRADC_BoardData'))+hex_hradcID
-        send_msg       = self.checksum(self.SlaveAdd+send_packet)
-        self.ser.write(send_msg.encode('ISO-8859-1'))
-        reply_msg = self.ser.read(56)
-        val = struct.unpack('BBQHfHHHHHHffffffffB',reply_msg)
-        boardData = InitHRADC_BoardData(val[0],val[1],val[2],val[3],val[4],
-                                        val[5],val[6],val[7],val[8],val[9],
-                                        val[10],val[11],val[12],val[13],val[14],
-                                        val[15],val[16])
-        return boardData
-
-    def GetHRADCs_BoardData(self,numHRADC):
-        for i in range(numHRADC):
-            self.ConfigHRADCOpMode(i,1)
-            self.ReadHRADC_BoardData(i)
-            time.sleep(0.1)
-            self.ConfigHRADCOpMode(i,0)
-
-    def InitHRADC_BoardData(self, serial = 12345678, variant = 'HRADC-FBP',
-                            rburden = 20, day = 1, mon = 1, year = 2017,
-                            hour = 12, minutes = 30, calibtemp = 40,
+    def InitHRADC_BoardData(self, serial = 12345678, day = 1, mon = 1,
+                            year = 2017, hour = 12, minutes = 30,
+                            variant = 'HRADC-FBP', rburden = 20, calibtemp = 40,
                             vin_gain = 1, vin_offset = 0, iin_gain = 1,
                             iin_offset = 0, vref_p = 5, vref_n = -5, gnd = 0):
         boardData = {'serial': serial, 'variant': variant, 'rburden': rburden,
@@ -541,7 +520,7 @@ class SerialDRS(object):
             time.sleep(0.1)
 
         print('\nEnviando variante...')
-        ufmdata_16 = self._convertToUint16List(hradcVariant[boardData['variant']],'Uint16')
+        ufmdata_16 = self._convertToUint16List(hradcVariant.index(boardData['variant']),'Uint16')
         for i in range(len(ufmdata_16)):
             self.WriteHRADC_UFM(hradcID,i+ufmOffset['variant'],ufmdata_16[i])
             time.sleep(0.1)
@@ -629,6 +608,42 @@ class SerialDRS(object):
         print('Colocando a placa em Sampling mode...')
         self.ConfigHRADCOpMode(hradcID,0)
 
+    def ReadHRADC_BoardData(self,hradcID):
+        print('Configurando placa em UFM mode...')
+        print(self.ConfigHRADCOpMode(hradcID,1))
+        time.sleep(0.5)
+
+        print('Extraindo dados da placa...')
+        payload_size   = self.size_to_hex(1+2) #Payload: ID + hradcID
+        hex_hradcID    = self.double_to_hex(hradcID)
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('ReadHRADC_BoardData'))+hex_hradcID
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        print(self.ser.read(6))
+
+        print('Lendo dados da placa...')
+        self.read_var(self.index_to_hex(50+hradcID))
+        reply_msg = self.ser.read(1+1+2+56+1)
+        print(reply_msg)
+        print(len(reply_msg))
+        val = struct.unpack('BBHLLHHHHHHfffffffffB',reply_msg)
+        boardData = self.InitHRADC_BoardData(val[3]+val[4]*pow(2,32),val[5],
+                                             val[6],val[7],val[8],val[9],
+                                             hradcVariant[val[10]],val[11],
+                                             val[12],val[13],val[14],val[15],
+                                             val[16],val[17],val[18],val[19])
+
+        print('Colocando a placa em Sampling mode...')
+        print(self.ConfigHRADCOpMode(hradcID,0))
+        time.sleep(0.5)
+
+        return boardData
+
+    def GetHRADCs_BoardData(self,numHRADC):
+        boardData_list = []
+        for i in range(numHRADC):
+            boardData_list.append(self.ReadHRADC_BoardData(i))
+        return boardData_list
 
     def UdcEepromTest(self, rw, data=None):
         if data is not None:
