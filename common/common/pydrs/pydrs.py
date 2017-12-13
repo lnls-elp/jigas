@@ -964,7 +964,7 @@ class SerialDRS(object):
         print('Hard Interlocks ativos:')
         for i in range(len('{0:b}'.format(val[3]))):
             if (val[3] & (op_bin << i)) == 2**i:
-                ActiveHardInterlocks.append(HardInterlockList[i])
+                ActiveHardInterlocks.append(HardInterlocksList[i])
                 print(HardInterlocksList[i])
         print('---------------------------------------------------------------')
         return val[3]
