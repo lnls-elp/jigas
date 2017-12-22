@@ -59,28 +59,17 @@ class PowerSupplyTest(QThread):
 
         for i in range(2):
             try:
-<<<<<<< HEAD
-                if i == 0:
-                    self.FBP.SetSlaveAdd(1 + (4 * i))      # Endereço do controlador
-                    self.FBP.Config_nHRADC(4)
-                elif i == 1:
-                    self.FBP.SetSlaveAdd(1 + (4 * i))      # Endereço do controlador
-                    self.FBP.Write_sigGen_Aux(4 - (4 * i)) # Usando 4 fontes no bastidor
-                                                       # em teste e 0 na jiga bastidor
-=======
-                self.FBP.SetSlaveAdd(1 + (4 * i))          # Endereço do controlador
-                time.sleep(1)
-
                 if i == 0:
                     print('Configurando UDC da Fonte...')
-                    self.FBP.Config_nHRADC(4)    # Configurando UDC da fonte
-                                                           # em teste
+                    self.FBP.SetSlaveAdd(1)      # Endereço do controlador
+                    self.FBP.Config_nHRADC(4)
                 elif i == 1:
                     print('Configurando UDC da jiga...')
-                    self.FBP.Write_sigGen_Aux(0) # Configurando UDC da jiga
+                    self.FBP.SetSlaveAdd(5)      # Endereço do controlador
+                    self.FBP.Write_sigGen_Aux(0) # Usando 4 fontes no bastidor
+                                                 # em teste e 0 na jiga bastidor
 
                 time.sleep(1)
->>>>>>> e4a974aabb210d842b81ca233245eb66f4cdbef4
                 test_package = self.FBP.Read_ps_Model()
 
                 if (test_package[0] == 0)   and (test_package[1] == 17) and \
@@ -90,6 +79,7 @@ class PowerSupplyTest(QThread):
                 else:
                     test.append(False)
             except:
+                print('ERRO!!!')
                 test.append(False)
 
         if test == [True, True]:
@@ -106,7 +96,7 @@ class PowerSupplyTest(QThread):
         MeasVout   = [[]  for k in range(4)]
         MeasTemp   = [[]  for l in range(4)]
         MeasCurr   = [[[] for m in range(5)] for n in range(4)]
-        compare_current = [2, -2, 5, 10, -10]
+        compare_current = [3, -3, 5, 10, -10]
 
         # If serial connection is lost
         if not self._serial_port.is_open:
@@ -207,13 +197,13 @@ class PowerSupplyTest(QThread):
             self.update_gui.emit('Iniciando teste com módulos em malha aberta a -20%...')
             for module in range(4):
                 if module == 0:
-                    self.FBP.SetISlowRefx4(20, 0, 0, 0)
+                    self.FBP.SetISlowRefx4(-20, 0, 0, 0)
                 elif module == 1:
-                    self.FBP.SetISlowRefx4(0, 20, 0, 0)
+                    self.FBP.SetISlowRefx4(0, -20, 0, 0)
                 elif module == 2:
-                    self.FBP.SetISlowRefx4(0, 0, 20, 0)
+                    self.FBP.SetISlowRefx4(0, 0, -20, 0)
                 elif module == 3:
-                    self.FBP.SetISlowRefx4(0, 0, 0, 20)
+                    self.FBP.SetISlowRefx4(0, 0, 0, -20)
                 time.sleep(2)
 
                 MeasureList = self._save_CurrentMeasurement(module)
@@ -247,6 +237,7 @@ class PowerSupplyTest(QThread):
 
             for module in range(4):
                 self.FBP.ClosedLoop(2**module)
+                time.sleep(1)
                 if module == 0:
                     self.FBP.SetISlowRefx4(5, 0, 0, 0)
                 elif module == 1:
@@ -456,7 +447,7 @@ class PowerSupplyTest(QThread):
 
                 '''-------------------------------------------------------------'''
                 for c in MeasDCLink[module]:
-                    if round(c) == 15:
+                    if (14 <= round(c)) and (round(c) <= 16):
                         if test[5]:
                             test[5] = True
                     else:
