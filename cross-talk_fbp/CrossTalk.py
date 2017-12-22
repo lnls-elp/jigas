@@ -1,32 +1,39 @@
-from common import pydrs.SerialDRS
+from common import pydrs
 import time
 
-drs = SerialDRS()
+from datetime import datetime
+now = datetime.now()
+
+print(str(now.day) + ',' + str(now.hour) + ':' + str(now.minute))
+
+
+drs = pydrs.SerialDRS()
 
 drs_port = 'COM10'
-drs_addr = 1
 
-bastidor = '1041182344'
+BastidorList = ['1041182348', '1041182344']
+module_list  = ['modulo 1', 'modulo 2', 'modulo 3', 'modulo 4']
 
-module_list = ['modulo 1', 'modulo 2', 'modulo 3', 'modulo 4']
 
 PS_List =        [1, 2, 3, 4]
 SetTestList =    [10, 0, -10]
 SetCurrentList = [0, 10, 0, -10, 0]
 
 WarmUpTime = 2*3600
+StepTime   = 60
 
-print('\nConfigurando DRS e ligando módulos de potência...\n')
-drs.Connect(drs_port)
-time.sleep(1)
-drs.SetSlaveAdd(drs_addr)
-time.sleep(1)
-drs.Config_nHRADC(4)
-time.sleep(1)
-drs.TurnOn(0b1111)
-time.sleep(0.5)
-drs.ClosedLoop(0b1111)
-time.sleep(0.5)
+for bastidor in BastidorList:
+	print('\nConfigurando DRS e ligando módulos de potência do bastidor NS.:' + str(bastidor) + '...\n')
+	drs.Connect(drs_port)
+	time.sleep(1)
+	drs.SetSlaveAdd(BastidorList.index(bastidor) + 1)
+	time.sleep(1)
+	drs.Config_nHRADC(4)
+	time.sleep(5)
+	drs.TurnOn(0b1111)
+	time.sleep(1)
+	drs.ClosedLoop(0b1111)
+	time.sleep(1)
 
 #########################################################################
 '''                    Inicio do teste de Cross Talk                  '''
@@ -35,37 +42,118 @@ for module in module_list:
 
 	for test_current in SetTestList:
 
-		drs.OpMode(3)
-		time.sleep(1)
-		drs.ConfigSigGen(0, 0, 0, 0)
-		time.sleep(1)
-		drs.EnableSigGen()
-		time.sleep(1)
-		drs.Write_sigGen_Freq(module_list.index(module) + 1)
-		time.sleep(1)
-		drs.Write_sigGen_Amplitude(test_current)
-		time.sleep(1)
-		drs.Write_sigGen_Freq(module_list.index(module))
+		if module_list.index(module) == 0:
+			for bastidor in BastidorList:
+				drs.SetSlaveAdd(BastidorList.index(bastidor) + 1)
+				time.sleep(1)
+				drs.SetISlowRefx4(test_current, 0, 0, 0)
+			time.sleep(WarmUpTime)
 
-		time.sleep(WarmUpTime)
+			for bastidor in BastidorList:
+				drs.SetSlaveAdd(BastidorList.index(bastidor) + 1)
+				time.sleep(1)
+				print('Início de teste:')
+				print('			bastidor NS.:' + bastidor)
+				print('			' + module)
+				for aux_current in SetCurrentList:
+					drs.SetISlowRefx4(test_current, aux_current, aux_current, aux_current)
+					time.sleep(0.5)
+					print('Modulo 1: ' + str(drs.Read_iMod1()))
+					time.sleep(0.5)
+					print('Modulo 2: ' + str(drs.Read_iMod2()))
+					time.sleep(0.5)
+					print('Modulo 3: ' + str(drs.Read_iMod3()))
+					time.sleep(0.5)
+					print('Modulo 4: ' + str(drs.Read_iMod4()))
+					time.sleep(0.5)
+					print('\n')
+					time.sleep(StepTime)
 
-		for aux_current in SetCurrentList:
+		if module_list.index(module) == 1:
+			for bastidor in BastidorList:
+				drs.SetSlaveAdd(BastidorList.index(bastidor) + 1)
+				time.sleep(1)
+				drs.SetISlowRefx4(0, test_current, 0, 0)
+			time.sleep(WarmUpTime)
 
-			drs.Write_sigGen_Amplitude(aux_current)
-			time.sleep(0.5)
+			for bastidor in BastidorList:
+				drs.SetSlaveAdd(BastidorList.index(bastidor) + 1)
+				time.sleep(1)
+				print('Início de teste:')
+				print('			bastidor NS.:' + bastidor)
+				print('			' + module)
+				for aux_current in SetCurrentList:
+					drs.SetISlowRefx4(aux_current, test_current, aux_current, aux_current)
+					time.sleep(0.5)
+					print('Modulo 1: ' + str(drs.Read_iMod1()))
+					time.sleep(0.5)
+					print('Modulo 2: ' + str(drs.Read_iMod2()))
+					time.sleep(0.5)
+					print('Modulo 3: ' + str(drs.Read_iMod3()))
+					time.sleep(0.5)
+					print('Modulo 4: ' + str(drs.Read_iMod4()))
+					time.sleep(0.5)
+					print('\n')
+					time.sleep(StepTime)
 
-			print('Fonte 1: ' + str(DRS.Read_iMod1()))
-			time.sleep(0.5)
-			print('Fonte 2: ' + str(DRS.Read_iMod2()))
-			time.sleep(0.5)
-			print('Fonte 3: ' + str(DRS.Read_iMod3()))
-			time.sleep(0.5)
-			print('Fonte 4: ' + str(DRS.Read_iMod4()))
-			time.sleep(0.5)
-			print('\n')
-			time.sleep(58)
+		if module_list.index(module) == 2:
+			for bastidor in BastidorList:
+				drs.SetSlaveAdd(BastidorList.index(bastidor) + 1)
+				time.sleep(1)
+				drs.SetISlowRefx4(0, 0, test_current, 0)
+			time.sleep(WarmUpTime)
 
-drs.TurnOff()
-drs.Disconnect()
+			for bastidor in BastidorList:
+				drs.SetSlaveAdd(BastidorList.index(bastidor) + 1)
+				time.sleep(1)
+				print('Início de teste:')
+				print('			bastidor NS.:' + bastidor)
+				print('			' + module)
+				for aux_current in SetCurrentList:
+					drs.SetISlowRefx4(aux_current, aux_current, test_current, aux_current)
+					time.sleep(0.5)
+					print('Modulo 1: ' + str(drs.Read_iMod1()))
+					time.sleep(0.5)
+					print('Modulo 2: ' + str(drs.Read_iMod2()))
+					time.sleep(0.5)
+					print('Modulo 3: ' + str(drs.Read_iMod3()))
+					time.sleep(0.5)
+					print('Modulo 4: ' + str(drs.Read_iMod4()))
+					time.sleep(0.5)
+					print('\n')
+					time.sleep(StepTime)
 
+		if module_list.index(module) == 3:
+			for bastidor in BastidorList:
+				drs.SetSlaveAdd(BastidorList.index(bastidor) + 1)
+				time.sleep(1)
+				drs.SetISlowRefx4(0, 0, 0, test_current)
+			time.sleep(WarmUpTime)
+
+			for bastidor in BastidorList:
+				drs.SetSlaveAdd(BastidorList.index(bastidor) + 1)
+				time.sleep(1)
+				print('Início de teste:')
+				print('			bastidor NS.:' + bastidor)
+				print('			' + module)
+				for aux_current in SetCurrentList:
+					drs.SetISlowRefx4(aux_current, aux_current, aux_current, test_current)
+					time.sleep(0.5)
+					print('Modulo 1: ' + str(drs.Read_iMod1()))
+					time.sleep(0.5)
+					print('Modulo 2: ' + str(drs.Read_iMod2()))
+					time.sleep(0.5)
+					print('Modulo 3: ' + str(drs.Read_iMod3()))
+					time.sleep(0.5)
+					print('Modulo 4: ' + str(drs.Read_iMod4()))
+					time.sleep(0.5)
+					print('\n')
+					time.sleep(StepTime)
+
+for bastidor in BastidorList:
+	drs.SetSlaveAdd(BastidorList.index(bastidor) + 1)
+	time.sleep(1)
+	drs.TurnOff(0b1111)
+
+print(str(now.day) + ',' + str(now.hour) + ':' + str(now.minute))
 #########################################################################
