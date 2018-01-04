@@ -53,7 +53,7 @@ ListVar_v2_1 = ['ps_status','ps_setpoint','ps_reference','wfmref_selected',
                 'wfmref_sync_mode','wfmref_gain','wfmref_offset',
                 'p_wfmref_start','p_wfmref_end','p_wfmref_idx']
 ListFunc_v2_1 = ['turn_on','turn_off','open_loop','closed_loop','cfg_op_mode',
-                 'cfg_ps_model','reset_interlocks','remote_interface',''
+                 'cfg_ps_model','reset_interlocks','remote_interface',
                  'set_serial_address','set_serial_termination','unlock_udc',
                  'lock_udc','cfg_buf_samples','enable_buf_samples',
                  'disable_buf_samples','sync_pulse','set_slowref',
@@ -220,6 +220,12 @@ class SerialDRS(object):
             O retorno do método são os bytes de retorno da mensagem
     ======================================================================
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    def TurnOn_FAx(self):
+        payload_size = self.size_to_hex(1) #Payload: ID
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('TurnOn'))
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
 
     def TurnOn(self,ps_modules):
         payload_size = self.size_to_hex(1+2) #Payload: ID + ps_modules
@@ -232,6 +238,13 @@ class SerialDRS(object):
     def turn_on(self):
         payload_size = self.size_to_hex(1) #Payload: ID
         send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('turn_on'))
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def TurnOff_FAx(self):
+        payload_size = self.size_to_hex(1) #Payload: ID
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('TurnOff'))
         send_msg     = self.checksum(self.SlaveAdd+send_packet)
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
@@ -360,6 +373,13 @@ class SerialDRS(object):
     def ResetInterlocks(self):
         payload_size = self.size_to_hex(1) #Payload: ID
         send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc.index('ResetInterlocks'))
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def reset_interlocks(self):
+        payload_size = self.size_to_hex(1) #Payload: ID
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('reset_interlocks'))
         send_msg     = self.checksum(self.SlaveAdd+send_packet)
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
