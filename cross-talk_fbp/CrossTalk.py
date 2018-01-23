@@ -1,13 +1,9 @@
-from common import pydrs
+from common.pydrs import SerialDRS
+from datetime import datetime
 import time
 
-from datetime import datetime
+drs = SerialDRS()
 now = datetime.now()
-
-print(str(now.day) + ',' + str(now.hour) + ':' + str(now.minute))
-
-
-drs = pydrs.SerialDRS()
 
 drs_port = 'COM10'
 
@@ -21,6 +17,10 @@ SetCurrentList = [0, 10, 0, -10, 0]
 
 WarmUpTime = 2*3600
 StepTime   = 60
+
+# o teste dura 50 horas (em média) com um WarmUpTime de 2 horas e um StepTime de 60 min
+
+print(str(now.day) + ',' + str(now.hour) + ':' + str(now.minute))
 
 for bastidor in BastidorList:
 	print('\nConfigurando DRS e ligando módulos de potência do bastidor NS.:' + str(bastidor) + '...\n')

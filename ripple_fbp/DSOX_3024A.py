@@ -71,7 +71,7 @@ class DSOX_3024A_USB(object):
 				for k in range(0,3):
 					self.inst.write(':MEASure:SOURce CHANnel'+str(j))
 					time.sleep(1)
-					print(self.inst.query(':MEASure:VPP?'))
+					#print(self.inst.query(':MEASure:VPP?'))
 					ch_vpp = self.inst.query(':MEASure:VPP?')
 					ch_vpp = float(ch_vpp)/2
 					time.sleep(1)
