@@ -13,8 +13,8 @@ import visa
 class DSOX_3024A_USB(object):
 
 	def __init__(self):
-		#self.rm = visa.ResourceManager('@py') #Using PyVisa-py backend
-		self.rm = visa.ResourceManager()
+		self.rm = visa.ResourceManager('@py') #Using PyVisa-py backend
+		# self.rm = visa.ResourceManager()
 
 	def connect(self,visa_address):
 		self.inst = self.rm.open_resource(visa_address)
