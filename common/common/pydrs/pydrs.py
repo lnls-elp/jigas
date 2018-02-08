@@ -59,6 +59,10 @@ ListFunc_v2_1 = ['turn_on','turn_off','open_loop','closed_loop','cfg_op_mode',
                  'disable_buf_samples','sync_pulse','set_slowref',
                  'set_slowref_fbp']
 
+ListBCBFunc = ['ClearPof', 'SetPof', 'ReadPof', 'EnableBuzzer', 'DisableBuzzer',
+                'SendUartData', 'GetUartData', 'SendCanData', 'GetCanData',
+                'GetI2cData']
+
 typeFormat = {'uint16_t': 'BBHHB', 'uint32_t': 'BBHIB', 'float': 'BBHfB'}
 bytesFormat = {'Uint16': 'H', 'Uint32': 'L', 'Uint64': 'Q', 'float': 'f'}
 
@@ -736,6 +740,76 @@ class SerialDRS(object):
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
 
+    def SetPof(self):
+        payload_size   = self.size_to_hex(1) #Payload: ID
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListBCBFunc.index('SetPof'))
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def ClearPof(self):
+        payload_size   = self.size_to_hex(1) #Payload: ID
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListBCBFunc.index('ClearPof'))
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def ReadPof(self):
+        payload_size   = self.size_to_hex(1) #Payload: ID
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListBCBFunc.index('ReadPof'))
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def EnableBuzzer(self):
+        payload_size   = self.size_to_hex(1) #Payload: ID
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListBCBFunc.index('EnableBuzzer'))
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def DisableBuzzer(self):
+        payload_size   = self.size_to_hex(1) #Payload: ID
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListBCBFunc.index('DisableBuzzer'))
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def SendUartData(self):
+        payload_size   = self.size_to_hex(1) #Payload: ID
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListBCBFunc.index('SendUartData'))
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def GetUartData(self):
+        payload_size   = self.size_to_hex(1) #Payload: ID
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListBCBFunc.index('GetUartData'))
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def SendCanData(self):
+        payload_size   = self.size_to_hex(1) #Payload: ID
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListBCBFunc.index('SendCanData'))
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def GetCanData(self):
+        payload_size   = self.size_to_hex(1) #Payload: ID
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListBCBFunc.index('GetCanData'))
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def GetI2cData(self):
+        payload_size   = self.size_to_hex(1) #Payload: ID
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListBCBFunc.index('GetI2cData'))
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
     def set_slowref(self,setpoint):
         payload_size   = self.size_to_hex(1+4) #Payload: ID + iSlowRef
         hex_setpoint   = self.float_to_hex(setpoint)
@@ -755,6 +829,18 @@ class SerialDRS(object):
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
 
+    def run_bsmp_func(self,id_func,print_msg = 0):
+        payload_size = self.size_to_hex(1) #Payload: ID
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(id_func)
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        print(send_msg)
+        print(send_msg.encode('ISO-8859-1'))
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        reply_msg = self.ser.read(6)
+        if print_msg:
+            print(reply_msg)
+        return reply_msg
+
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     ======================================================================
                 Métodos de Leitura de Valores das Variáveis BSMP
@@ -762,7 +848,7 @@ class SerialDRS(object):
     ======================================================================
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-    def read_bsmp_variable(self,id_var,type_var,print_msg):
+    def read_bsmp_variable(self,id_var,type_var,print_msg = 0):
         self.read_var(self.index_to_hex(id_var))
         reply_msg = self.ser.read(typeSize[type_var])
         if print_msg:
