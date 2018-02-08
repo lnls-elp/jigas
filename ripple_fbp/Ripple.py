@@ -10,7 +10,7 @@ dso_file = 'ripple_fbp.scp'
 
 drs_port = 'COM11'
 drs_addr = 2
-bastidor = '1041182344'
+bastidor = '1041182349'
 
 module_list = ['modulo 1', 'modulo 2', 'modulo 3', 'modulo 4']
 ps_iout  = [0, 2, 4, 6, 8, 10, -10, -8, -6, -4, -2]
@@ -23,10 +23,10 @@ time.sleep(1)
 drs.Config_nHRADC(4)
 time.sleep(5)
 
-# for i in range(2):
-for i in range(1,2,1):
+for i in range(2):
+# for i in range(1,2,1):
 
-    # for module in module_list[2:]:
+    # for module in module_list[3:]:
     for module in module_list:
         if i == 0:
             print('Iniciando medidas isoladas do ' + module + '...\n')

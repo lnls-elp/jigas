@@ -7,7 +7,7 @@ now = datetime.now()
 
 drs_port   = 'COM11'
 drs_addr   = 2
-bastidor   = '1041182344'
+bastidor   = '1041182349'
 WarmUpTime = 2*3600
 
 module_list = ['modulo 1', 'modulo 2', 'modulo 3', 'modulo 4']
