@@ -131,12 +131,12 @@ for bastidor in bastidor_list:
             print('Inicio do teste do ' + module + ', IDC = ' + str(idc) + 'A:')
             print(str(datetime.now()))
 
-            for i in range(5):
+            for i in range(30):
                 data = ref_increment(module, idc, nbits, i)
                 time.sleep(5)
-                read = read_multimeter()
 
-                for j in range(1):
+                for j in range(5):
+                    read = read_multimeter()
                     _file.write(str(datetime.now()) + ';' + read.replace('.', ',') + ';' + data[0] + ';' + data[1] + '\n')
 
             print('Fim do teste: ')
