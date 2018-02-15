@@ -75,28 +75,40 @@ def init_module(drs_port, drs_addr, module, module_list, idc):
 
 def ref_increment(module, idc, nbits, count):
     if module == 'modulo1':
-        drs.SetISlowRefx4\
-        ((idc-(15 * (10/(2 ** nbits)))) + count * (10/(2 ** nbits)), 0, 0, 0)
+        ans = ['', '']
+        ref = (idc-(15 * (10/(2 ** nbits)))) + count * (10/(2 ** nbits))
+        drs.SetISlowRefx4(ref, 0, 0, 0)
         print(drs.Read_iMod1())
-        return str(drs.Read_temp1())
+        ans[0] = str(ref)
+        ans[1] = str(drs.Read_temp1())
+        return ans
 
     elif module == 'modulo2':
-        drs.SetISlowRefx4\
-        (0, (idc-(15 * (10/(2 ** nbits)))) + count * (10/(2 ** nbits)), 0, 0)
+        ans = ['', '']
+        ref = (idc-(15 * (10/(2 ** nbits)))) + count * (10/(2 ** nbits))
+        drs.SetISlowRefx4(0, ref, 0, 0)
         print(drs.Read_iMod2())
-        return str(drs.Read_temp2())
+        ans[0] = str(ref)
+        ans[1] = str(drs.Read_temp2())
+        return ans
 
     elif module == 'modulo3':
-        drs.SetISlowRefx4\
-        (0, 0, (idc-(15 * (10/(2 ** nbits)))) + count * (10/(2 ** nbits)), 0)
+        ans = ['', '']
+        ref = (idc-(15 * (10/(2 ** nbits)))) + count * (10/(2 ** nbits))
+        drs.SetISlowRefx4(0, 0, ref, 0)
         print(drs.Read_iMod3())
-        return str(drs.Read_temp3())
+        ans[0] = str(ref)
+        ans[1] = str(drs.Read_temp3())
+        return ans
 
     elif module == 'modulo4':
-        drs.SetISlowRefx4\
-        (0, 0, 0, (idc-(15 * (10/(2 ** nbits)))) + count * (10/(2 ** nbits)))
+        ans = ['', '']
+        ref = (idc-(15 * (10/(2 ** nbits)))) + count * (10/(2 ** nbits))
+        drs.SetISlowRefx4(0, 0, 0, ref)
         print(drs.Read_iMod4())
-        return str(drs.Read_temp4())
+        ans[0] = str(ref)
+        ans[1] = str(drs.Read_temp4())
+        return ans
 ################################################################################
 ################################################################################
 
@@ -111,7 +123,7 @@ for bastidor in bastidor_list:
         for idc in idc_list:
             _file = open('Resolucao_' + module + '_NS' + bastidor + '.csv', 'a')
             _file.write('IDC = ' + str(idc) + 'A\n')
-            _file.write('time stamp;VDC;temp\n')
+            _file.write('time stamp;VDC;Ref;temp\n')
 
             init_module(drs_port, drs_addr, module, module_list, idc)
             print('Aguardando tempo de WarmUp...')
@@ -120,12 +132,12 @@ for bastidor in bastidor_list:
             print(str(datetime.now()))
 
             for i in range(5):
-                temp = ref_increment(module, idc, nbits, i)
+                data = ref_increment(module, idc, nbits, i)
                 time.sleep(5)
                 read = read_multimeter()
 
                 for j in range(1):
-                    _file.write(str(datetime.now()) + ';' + read.replace('.', ',') + ';' + str(temp) + '\n')
+                    _file.write(str(datetime.now()) + ';' + read.replace('.', ',') + ';' + data[0] + ';' + data[1] + '\n')
 
             print('Fim do teste: ')
             print(str(datetime.now()))
