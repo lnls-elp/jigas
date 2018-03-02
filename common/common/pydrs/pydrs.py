@@ -60,8 +60,8 @@ ListFunc_v2_1 = ['turn_on','turn_off','open_loop','closed_loop','cfg_op_mode',
                  'set_slowref_fbp']
 
 ListBCBFunc = ['ClearPof', 'SetPof', 'ReadPof', 'EnableBuzzer', 'DisableBuzzer',
-                'SendUartData', 'GetUartData', 'SendCanData', 'GetCanData',
-                'GetI2cData']
+                'SendUartData', 'GetUartData', 'ClearUartBuffer', 'SendCanData',
+                'GetCanData', 'GetI2cData']
 
 typeFormat = {'uint16_t': 'BBHHB', 'uint32_t': 'BBHIB', 'float': 'BBHfB'}
 bytesFormat = {'Uint16': 'H', 'Uint32': 'L', 'Uint64': 'Q', 'float': 'f'}
@@ -785,6 +785,13 @@ class SerialDRS(object):
     def GetUartData(self):
         payload_size   = self.size_to_hex(1) #Payload: ID
         send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListBCBFunc.index('GetUartData'))
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def ClearUartBuffer(self):
+        payload_size   = self.size_to_hex(1) #Payload: ID
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListBCBFunc.index('ClearUartBuffer'))
         send_msg       = self.checksum(self.SlaveAdd+send_packet)
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
