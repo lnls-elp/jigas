@@ -5,9 +5,9 @@ import time
 drs = SerialDRS()
 now = datetime.now()
 
-drs_port = 'COM10'
+drs_port = 'COM11'
 
-BastidorList = ['1041182348', '1041182344']
+BastidorList = ['1041182343', '1041182349']
 module_list  = ['modulo 1', 'modulo 2', 'modulo 3', 'modulo 4']
 
 

@@ -836,6 +836,18 @@ class SerialDRS(object):
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
 
+    def run_bsmp_func(self,id_func,print_msg = 0):
+        payload_size = self.size_to_hex(1) #Payload: ID
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(id_func)
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        print(send_msg)
+        print(send_msg.encode('ISO-8859-1'))
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        reply_msg = self.ser.read(6)
+        if print_msg:
+            print(reply_msg)
+        return reply_msg
+
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     ======================================================================
                 Métodos de Leitura de Valores das Variáveis BSMP
@@ -843,7 +855,7 @@ class SerialDRS(object):
     ======================================================================
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-    def read_bsmp_variable(self,id_var,type_var,print_msg):
+    def read_bsmp_variable(self,id_var,type_var,print_msg = 0):
         self.read_var(self.index_to_hex(id_var))
         reply_msg = self.ser.read(typeSize[type_var])
         if print_msg:
