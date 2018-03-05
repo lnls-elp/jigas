@@ -5,7 +5,10 @@ import time
 drs = SerialDRS()
 dso = DSOX_3024A_USB()
 
-_cfile = open('test_config.csv', 'r')
+################################################################################
+####################### LENDO ARQUIVO DE CONFIGURAÇÃO ##########################
+################################################################################
+_cfile = open('rippletest_config.csv', 'r')
 config = _cfile.read()
 _cfile.close()
 
@@ -81,7 +84,13 @@ for j in config:
         else:
             for k in ps_iout:
                 ps_iout[ps_iout.index(k)] = int(k)
+################################################################################
+################################################################################
 
+
+################################################################################
+###################### CONFIRMANDO DADOS DE CONFIGURAÇÃO #######################
+################################################################################
 print('Confirme os dados:\n')
 print('Porta de comunicação:                    ' + str(drs_port))
 print('Endereço do UDC:                         ' + str(drs_addr))
@@ -93,7 +102,12 @@ print('Lista de módulos para teste conjunto:    ' + str(group_module_list))
 print('Lista de valores de corrente de saída:   ' + str(ps_iout))
 
 ctrl = input('\nOs dados estão corretos?(y/n): ')
+################################################################################
+################################################################################
 
+################################################################################
+############################### ROTINA DE TESTE ################################
+################################################################################
 if (ctrl == 'y'):
     print('\nConfigurando DRS...\n')
     drs.Connect(drs_port)
@@ -103,124 +117,201 @@ if (ctrl == 'y'):
     drs.Config_nHRADC(4)
     time.sleep(5)
 
-    for i in range(2):
-    # for i in range(1,2,1):
+    for module in individual_module_list:
+        print('Iniciando medidas isoladas do ' + module + '...\n')
 
-        # for module in module_list[3:]:
-        for module in module_list:
-            if i == 0:
-                print('Iniciando medidas isoladas do ' + module + '...\n')
-                drs.TurnOn(2**module_list.index(module))
-                time.sleep(1)
-                drs.ClosedLoop(2**module_list.index(module))
-            elif i == 1:
-                print('Iniciando medidas conjuntas do ' + module + '...\n')
-                drs.TurnOn(15)
-                time.sleep(1)
-                drs.ClosedLoop(15)
+        if   module == 'modulo 1':
+            drs.TurnOn(0b0001)
+        elif module == 'modulo 2':
+            drs.TurnOn(0b0010)
+        elif module == 'modulo 3':
+            drs.TurnOn(0b0100)
+        elif module == 'modulo 4':
+            drs.TurnOn(0b1000)
 
-            dso.connect(dso_addr)
-            time.sleep(1)
-            dso.setup_config(dso_file)
-            time.sleep(5)
+        time.sleep(1)
 
-            if i == 0:
-                _file = open('ripple_results_iso.csv', 'a')
-            elif i == 1:
-                _file = open('ripple_results_con.csv', 'a')
+        if   module == 'modulo 1':
+            drs.ClosedLoop(0b0001)
+        elif module == 'modulo 2':
+            drs.ClosedLoop(0b0010)
+        elif module == 'modulo 3':
+            drs.ClosedLoop(0b0100)
+        elif module == 'modulo 4':
+            drs.ClosedLoop(0b1000)
 
-            _file.write('NS bastidor: ' + bastidor + '\n')
-            _file.write(module + '\n')
-            _file.write("\nCH1: corrente @ 10 Hz - 3 kHz;'1:100\n")
-            _file.write("CH2: corrente @ 10 Hz - 500 kHz;'1:1\n")
-            _file.write("CH3: tensão @ 10 Hz - 1 MHz;'1:1\n")
-            _file.write('\ncorrente;CH1_App;CH2_App;CH3_Vpp;CH1_Arms;CH2_Arms;CH3_Vrms\n')
+        dso.connect(dso_addr)
+        time.sleep(1)
+        dso.setup_config(dso_file)
+        time.sleep(5)
+
+        _file = open('ripple_results_iso.csv', 'a')
+
+        _file.write('NS bastidor: ' + bastidor + '\n')
+        _file.write(module + '\n')
+        _file.write("\nCH1: corrente @ 10 Hz - 3 kHz;'1:100\n")
+        _file.write("CH2: corrente @ 10 Hz - 500 kHz;'1:1\n")
+        _file.write("CH3: tensão @ 10 Hz - 1 MHz;'1:1\n")
+        _file.write('\ncorrente;CH1_App;CH2_App;CH3_Vpp;CH1_Arms;CH2_Arms;CH3_Vrms\n')
+        _file.close()
+
+        for set_iout in ps_iout:
+            print('Iniciando teste com a corrente de ' + str(set_iout) + 'A\n')
+
+            if   module == 'modulo 1':
+                drs.SetISlowRefx4(set_iout, 0, 0, 0)
+            elif module == 'modulo 2':
+                drs.SetISlowRefx4(0, set_iout, 0, 0)
+            elif module == 'modulo 3':
+                drs.SetISlowRefx4(0, 0, set_iout, 0)
+            elif module == 'modulo 4':
+                drs.SetISlowRefx4(0, 0, 0, set_iout)
+
+            print('Aguardando 60 segundos para maior estabilidade da medida...\n')
+            time.sleep(2) # WarmUpTime
+
+            if module == 'modulo 1':
+                while round(drs.Read_iMod1()) != set_iout:
+                    print('Corrente de saída errada')
+                    time.sleep(2)
+
+            elif module == 'modulo 2':
+                while round(drs.Read_iMod2()) != set_iout:
+                    print('Corrente de saída errada')
+                    time.sleep(2)
+
+            elif module == 'modulo 3':
+                while round(drs.Read_iMod3()) != set_iout:
+                    print('Corrente de saída errada')
+                    time.sleep(2)
+
+            elif module == 'modulo 4':
+                while round(drs.Read_iMod4()) != set_iout:
+                    print('Corrente de saída errada')
+                    time.sleep(2)
+
+            print('Iniciando processo de escala automática do osciloscópio...\n')
+            dso.auto_scale(3)
+            print('Realizando medidas...\n')
+            vpp_list = dso.single_shot(1,3) # modificar para (10,3)
+            print('Obtendo resultados e salvando imagem da tela...\n')
+
+            pic_name = module + '_' + str(set_iout) + 'A_iso'
+
+            rms_list = dso.get_results(3, pic_name)
+
+            _file = open('ripple_results_iso.csv', 'a')
+            _file.write(str(set_iout) + ';')
+
+            print('salvando medidas no arquivo...\n')
+            for j in vpp_list:
+                write_value = str(j)
+                _file.write(write_value.replace('.', ','))
+                _file.write(';')
+            for k in rms_list:
+                write_value = str(k)
+                _file.write(write_value.replace('.', ','))
+                _file.write(';')
+            _file.write('\n')
             _file.close()
 
-            for set_iout in ps_iout:
-                print('Iniciando teste com a corrente de ' + str(set_iout) + 'A\n')
+        if   module == 'modulo 1':
+            drs.TurnOff(0b0001)
+        elif module == 'modulo 2':
+            drs.TurnOff(0b0010)
+        elif module == 'modulo 3':
+            drs.TurnOff(0b0100)
+        elif module == 'modulo 4':
+            drs.TurnOff(0b1000)
 
-                if i == 0:
-                    if   module == 'modulo 1':
-                        drs.SetISlowRefx4(set_iout, 0, 0, 0)
-                    elif module == 'modulo 2':
-                        drs.SetISlowRefx4(0, set_iout, 0, 0)
-                    elif module == 'modulo 3':
-                        drs.SetISlowRefx4(0, 0, set_iout, 0)
-                    elif module == 'modulo 4':
-                        drs.SetISlowRefx4(0, 0, 0, set_iout)
+        print('**********************************************************')
+        pause = input('\nTroque os cabos de medição para medir o próximo módulo e tecle enter\n')
 
-                elif i == 1:
-                    if   module == 'modulo 1':
-                        drs.SetISlowRefx4(set_iout, 10, 10, 10)
-                    elif module == 'modulo 2':
-                        drs.SetISlowRefx4(10, set_iout, 10, 10)
-                    elif module == 'modulo 3':
-                        drs.SetISlowRefx4(10, 10, set_iout, 10)
-                    elif module == 'modulo 4':
-                        drs.SetISlowRefx4(10, 10, 10, set_iout)
+    for module in group_module_list:
+        print('Iniciando medidas conjuntas do ' + module + '...\n')
+        drs.TurnOn(15)
+        time.sleep(1)
+        drs.ClosedLoop(15)
 
-                print('Aguardando 60 segundos para maior estabilidade da medida...\n')
-                # time.sleep(60)
+        dso.connect(dso_addr)
+        time.sleep(1)
+        dso.setup_config(dso_file)
+        time.sleep(5)
 
-                if module_list.index(module) == 0:
-                    while round(drs.Read_iMod1()) != set_iout:
-                        print('Corrente de saída errada')
-                        time.sleep(2)
+        _file = open('ripple_results_con.csv', 'a')
 
-                elif module_list.index(module) == 1:
-                    while round(drs.Read_iMod2()) != set_iout:
-                        print('Corrente de saída errada')
-                        time.sleep(2)
+        _file.write('NS bastidor: ' + bastidor + '\n')
+        _file.write(module + '\n')
+        _file.write("\nCH1: corrente @ 10 Hz - 3 kHz;'1:100\n")
+        _file.write("CH2: corrente @ 10 Hz - 500 kHz;'1:1\n")
+        _file.write("CH3: tensão @ 10 Hz - 1 MHz;'1:1\n")
+        _file.write('\ncorrente;CH1_App;CH2_App;CH3_Vpp;CH1_Arms;CH2_Arms;CH3_Vrms\n')
+        _file.close()
 
-                elif module_list.index(module) == 2:
-                    while round(drs.Read_iMod3()) != set_iout:
-                        print('Corrente de saída errada')
-                        time.sleep(2)
+        for set_iout in ps_iout:
+            print('Iniciando teste com a corrente de ' + str(set_iout) + 'A\n')
 
-                elif module_list.index(module) == 3:
-                    while round(drs.Read_iMod4()) != set_iout:
-                        print('Corrente de saída errada')
-                        time.sleep(2)
+            if   module == 'modulo 1':
+                drs.SetISlowRefx4(set_iout, 10, 10, 10)
+            elif module == 'modulo 2':
+                drs.SetISlowRefx4(10, set_iout, 10, 10)
+            elif module == 'modulo 3':
+                drs.SetISlowRefx4(10, 10, set_iout, 10)
+            elif module == 'modulo 4':
+                drs.SetISlowRefx4(10, 10, 10, set_iout)
 
-                print('Iniciando processo de escala automática do osciloscópio...\n')
-                dso.auto_scale(3)
-                print('Realizando medidas...\n')
-                vpp_list = dso.single_shot(10,3)
-                print('Obtendo resultados e salvando imagem da tela...\n')
+            print('Aguardando 60 segundos para maior estabilidade da medida...\n')
+            time.sleep(2) # WarmUpTime
 
-                if i == 0:
-                    pic_name = module + '_' + str(set_iout) + 'A_iso'
-                elif i == 1:
-                    pic_name = module + '_' + str(set_iout) + 'A_con'
+            if module == 'modulo 1':
+                while round(drs.Read_iMod1()) != set_iout:
+                    print('Corrente de saída errada')
+                    time.sleep(2)
 
-                rms_list = dso.get_results(3, pic_name)
+            elif module == 'modulo 2':
+                while round(drs.Read_iMod2()) != set_iout:
+                    print('Corrente de saída errada')
+                    time.sleep(2)
 
-                if   i == 0:
-                    _file = open('ripple_results_iso.csv', 'a')
-                    _file.write(str(set_iout) + ';')
-                elif i == 1:
-                    _file = open('ripple_results_con.csv', 'a')
-                    _file.write(str(set_iout) + ';')
+            elif module == 'modulo 3':
+                while round(drs.Read_iMod3()) != set_iout:
+                    print('Corrente de saída errada')
+                    time.sleep(2)
 
-                print('salvando medidas no arquivo...\n')
-                for j in vpp_list:
-                    write_value = str(j)
-                    _file.write(write_value.replace('.', ','))
-                    _file.write(';')
-                for k in rms_list:
-                    write_value = str(k)
-                    _file.write(write_value.replace('.', ','))
-                    _file.write(';')
-                _file.write('\n')
-                _file.close()
+            elif module == 'modulo 4':
+                while round(drs.Read_iMod4()) != set_iout:
+                    print('Corrente de saída errada')
+                    time.sleep(2)
 
-            if   i == 0:
-                drs.TurnOff(2**module_list.index(module))
-            elif i == 1:
-                drs.TurnOff(15)
+            print('Iniciando processo de escala automática do osciloscópio...\n')
+            dso.auto_scale(3)
+            print('Realizando medidas...\n')
+            vpp_list = dso.single_shot(1,3)
+            print('Obtendo resultados e salvando imagem da tela...\n')
 
-            print('**********************************************************')
-            pause = input('\nTroque os cabos de medição para medir o próximo módulo e tecle enter\n')
+            pic_name = module + '_' + str(set_iout) + 'A_con'
+            rms_list = dso.get_results(3, pic_name)
+
+            _file = open('ripple_results_con.csv', 'a')
+            _file.write(str(set_iout) + ';')
+
+            print('salvando medidas no arquivo...\n')
+            for j in vpp_list:
+                write_value = str(j)
+                _file.write(write_value.replace('.', ','))
+                _file.write(';')
+            for k in rms_list:
+                write_value = str(k)
+                _file.write(write_value.replace('.', ','))
+                _file.write(';')
+            _file.write('\n')
+            _file.close()
+
+        drs.TurnOff(15)
+
+        print('**********************************************************')
+        pause = input('\nTroque os cabos de medição para medir o próximo módulo e tecle enter\n')
 else:
-    print('Corrija os dados e reinicie o teste.')
+    print('\nCorrija os dados e reinicie o teste.\n')
+################################################################################
+################################################################################

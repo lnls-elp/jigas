@@ -105,12 +105,9 @@ class PowerModuleTest(QThread):
                result = 'OK'
 
                #---------------------verifica interlocks 1----------------------
-               soft = str(self.FBP.Read_ps_SoftInterlocks())
-               hard = str(self.FBP.Read_ps_HardInterlocks())
-               self._active_interlocks = self._active_interlocks +\
-               '1-'  + soft + '-' + hard + '  '
+               print(self.FBP.Read_ps_SoftInterlocks())
+               print(self.FBP.Read_ps_HardInterlocks())
                #----------------------------------------------------------------
-
                self.FBP.ResetInterlocks()
             else:
                 result = 'Falha'
@@ -129,7 +126,7 @@ class PowerModuleTest(QThread):
         mod_result2      = [[] for k in range(4)] # para medidas de vout
         mod_result3      = [[] for l in range(4)] # para medidas de temperatura
         mod_result4      = [[] for m in range(4)] # para medidas de dclink
-        load_current     = ['turnedOff', 0, 30.5, 58.5, -58.5, -30.5] # correntes setadas
+        load_current     = ['turnedOff', 0, 23.5, 43.5, -43.5, -23.5] # correntes setadas
         compare_current  = [0, 0, 5, 10, -10, -5] # para comparar medidas de correntes
 
         if not self._serial_port.is_open:
@@ -160,10 +157,10 @@ class PowerModuleTest(QThread):
         print('sum_mod enviado para UDC: ' + str(sum_mod) + '\n')
 
         #---------------------verifica interlocks 2----------------------
-        soft = str(self.FBP.Read_ps_SoftInterlocks())
-        hard = str(self.FBP.Read_ps_HardInterlocks())
-        self._active_interlocks = self._active_interlocks +\
-        '2-'  + soft + '-' + hard + '  '
+        print(self.FBP.Read_ps_SoftInterlocks())
+        print(self.FBP.Read_ps_HardInterlocks())
+        # self._active_interlocks = 'self._active_interlocks +\
+        # '2-'  + soft + '-' + hard + '  ''
         #----------------------------------------------------------------
 
         for set_current in load_current:
@@ -172,10 +169,10 @@ class PowerModuleTest(QThread):
                 self.update_gui.emit('Iniciando medições com modulos desligados')
 
                 #---------------------verifica interlocks 3----------------------
-                soft = str(self.FBP.Read_ps_SoftInterlocks())
-                hard = str(self.FBP.Read_ps_HardInterlocks())
-                self._active_interlocks = self._active_interlocks +\
-                '3-'  + soft + '-' + hard + '  '
+                print(self.FBP.Read_ps_SoftInterlocks())
+                print(self.FBP.Read_ps_HardInterlocks())
+                # self._active_interlocks = self._active_interlocks +\
+                # '3-'  + soft + '-' + hard + '  '
                 #----------------------------------------------------------------
 
                 time.sleep(120) # Alterar para 2 min
@@ -193,12 +190,12 @@ class PowerModuleTest(QThread):
                 self.FBP.SetISlowRef(set_current)
 
                 #---------------------verifica interlocks 4 - 8-----------------
-                soft  = str(self.FBP.Read_ps_SoftInterlocks())
-                hard  = str(self.FBP.Read_ps_HardInterlocks())
+                print(self.FBP.Read_ps_SoftInterlocks())
+                print(self.FBP.Read_ps_HardInterlocks())
                 index = str(load_current.index(set_current) + 3)
 
-                self._active_interlocks = self._active_interlocks\
-                + index + '-' + soft + '-' + hard + '  '
+                # self._active_interlocks = self._active_interlocks\
+                # + index + '-' + soft + '-' + hard + '  '
                 #---------------------------------------------------------------
 
                 time.sleep(120) # Alterar para 2 min
@@ -298,10 +295,10 @@ class PowerModuleTest(QThread):
 
                     if round(mod_result2[serial.index(item)][0]) == 0     and \
                        round(mod_result2[serial.index(item)][1]) == 0     and \
-                             3 < mod_result2[serial.index(item)][2] < 4   and \
-                             7 < mod_result2[serial.index(item)][3] < 8   and \
-                             -8 < mod_result2[serial.index(item)][4] < -7 and \
-                             -4 < mod_result2[serial.index(item)][5] < -3:
+                             2 < mod_result2[serial.index(item)][2] < 3   and \
+                             5 < mod_result2[serial.index(item)][3] < 6   and \
+                             -6 < mod_result2[serial.index(item)][4] < -5 and \
+                             -3 < mod_result2[serial.index(item)][5] < -2:
                         test[1] = True
                     else:
                         test[1] = False
@@ -369,6 +366,7 @@ class PowerModuleTest(QThread):
 
                     log.details = ''
 
+                    '''
                     for _softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
                         log.details = log.details + _softinterlock + '\t'
 
@@ -376,6 +374,7 @@ class PowerModuleTest(QThread):
                         log.details = log.details + _hardinterlock + '\t'
 
                     log.details = log.details + self._active_interlocks
+                    '''
 
                     print(log.data)
                     self.update_gui.emit('modulo ' + str(serial.index(item)+1)\
@@ -392,76 +391,13 @@ class PowerModuleTest(QThread):
 
         self.update_gui.emit('')
         self.update_gui.emit('Interlocks Ativos:')
+        '''
         for softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
             self.update_gui.emit(softinterlock)
         for hardinterlock in self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()):
             self.update_gui.emit(hardinterlock)
+        '''
         print('--------------------------------------------\n')
-
-    def _read_SoftInterlock(self, int_interlock):
-        SoftInterlockList = ['N/A', 'Sobre-tensao na carga 1', 'N/A', \
-                             'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A',\
-                             'Sobre-tensao na carga 2', 'N/A',        \
-                             'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A',\
-                             'Sobre-tensao na carga 3', 'N/A',        \
-                             'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A',\
-                             'Sobre-tensao na carga 4', 'N/A',        \
-                             'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A']
-
-        op_bin = 1
-        ActiveSoftInterlocks = []
-
-        print('Soft Interlocks ativos:')
-
-        for i in range(len('{0:b}'.format(int_interlock))):
-            if (int_interlock & (op_bin << i)) == 2**i:
-                ActiveSoftInterlocks.append(SoftInterlockList[i])
-                print(SoftInterlockList[i])
-        print('-------------------------------------------------------------------')
-
-        return ActiveSoftInterlocks
-
-    def _read_HardInterlock(self, int_interlock):
-        HardInterlockList = ['Sobre-corrente na carga 1', 'N/A',                   \
-                             'Sobre-tensao no DC-Link do modulo 1',                \
-                             'Sub-tensao no DC-Link do modulo 1',                  \
-                             'Falha no rele de entrada do DC-Link do modulo 1',    \
-                             'Falha no fusivel de entrada do DC-Link do modulo 1', \
-                             'Falha nos drivers do modulo 1',                      \
-                             'Sobre-temperatura no modulo 1',                      \
-                             'Sobre-corrente na carga 2', 'N/A',                   \
-                             'Sobre-tensao no DC-Link do modulo 2',                \
-                             'Sub-tensao no DC-Link do modulo 2',                  \
-                             'Falha no rele de entrada do DC-Link do modulo 2',    \
-                             'Falha no fusivel de entrada do DC-Link do modulo 2', \
-                             'Falha nos drivers do modulo 2',                      \
-                             'Sobre-temperatura no modulo 2',                      \
-                             'Sobre-corrente na carga 3', 'N\A',                   \
-                             'Sobre-tensao no DC-Link do modulo 3',                \
-                             'Sub-tensao no DC-Link do modulo 3',                  \
-                             'Falha no rele de entrada no DC-Link do modulo 3',    \
-                             'Falha no fusivel de entrada do DC-Link do modulo 3', \
-                             'Falha nos drivers do modulo 3',                      \
-                             'Sobre-temperatura no modulo 3',                      \
-                             'Sobre-corrente na carga 4', 'N/A',                   \
-                             'Sobre-tensao no DC-Link do modulo 4',                \
-                             'Sub-tensao no DC-Link do modulo 4',                  \
-                             'Falha no rele de entrada do DC-Link do modulo 4',    \
-                             'Falha no fusivel de entrada do DC-Link do modulo 4', \
-                             'Falha nos drivers do modulo 4',                      \
-                             'Sobre-temperatura no modulo 4']
-        op_bin = 1
-        ActiveHardInterlocks = []
-
-        print('Hard Interlocks ativos:')
-
-        for i in range(len('{0:b}'.format(int_interlock))):
-            if (int_interlock & (op_bin << i)) == 2**i:
-                ActiveHardInterlocks.append(HardInterlockList[i])
-                print(HardInterlockList[i])
-        print('-------------------------------------------------------------------')
-
-        return ActiveHardInterlocks
 
     def _send_to_server(self, item):
         client = ElpWebClient()

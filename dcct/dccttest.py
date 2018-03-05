@@ -115,7 +115,7 @@ class DCCTTest(QThread):
                     self.update_gui.emit('Testando DCCTs com corrente de ' + str(self._load_current[i]) + 'A')
                     time.sleep(30) # Alterar para 30s
                     print(self.FBP.Read_iMod3())
-                    print(self.FBP.Read_iMod3())
+                    print(self.FBP.Read_iMod4())
                     current_DCCT1.append(self.FBP.Read_iMod3())
                     current_DCCT2.append(self.FBP.Read_iMod4())
 
