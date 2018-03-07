@@ -62,7 +62,7 @@ for j in config:
             idc_list = idc_list[0]
         else:
             for k in ps_iout:
-                ps_iout[ps_iout.index(k)] = int(k)
+                idc_list[idc_list.index(k)] = int(k)
 
     elif config[config.index(j)][0] == 'Nbits':
         nbits = config[config.index(j)][1]
@@ -77,7 +77,6 @@ for j in config:
 ################################################################################
 print('Confirme os dados:\n')
 print('Porta de comunicação:                    ' + str(drs_port))
-print('Endereço do UDC:                         ' + str(drs_addr))
 print('Endereço do multímetro:                  ' + str(mult_addr))
 print('Lista de Bastidores:                     ' + str(bastidor_list))
 print('Lista de módulos para teste individual:  ' + str(individual_module_list))
