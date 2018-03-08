@@ -96,7 +96,11 @@ class PowerSupplyTest(QThread):
         MeasVout   = [[]  for k in range(4)]
         MeasTemp   = [[]  for l in range(4)]
         MeasCurr   = [[[] for m in range(5)] for n in range(4)]
-        compare_current = [3, -3, 5, 10, -10]
+        compare_current = [3, -3, 5, 10, -10] # alterar compare_current[0] e compare_current[1] para [3, -3]
+
+        LimDCLink = [14, 16] # valores limite para o DC Link
+        LimVout   = [0.6, 1] # valores limite para tensão de saída alterar para LimVout[0] = 0.6 e LimVout[1] =  1
+        LimTemp   = 90      # valor limite para temperatura
 
         # If serial connection is lost
         if not self._serial_port.is_open:
@@ -142,26 +146,29 @@ class PowerSupplyTest(QThread):
                 time.sleep(1)
             '''##########################################################################'''
 
-            self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks())
-            self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks())
+            self.FBP.Read_ps_SoftInterlocks()
+            self.FBP.Read_ps_HardInterlocks()
 
             self.FBP.TurnOn(0b1111)   # liga todos os módulos
             time.sleep(5)
             self.FBP.OpenLoop(0b1111) # todos os módulos em malha aberta
             #self.FBP.OpMode(2)        # coloca a fonte no modo WfmRef para setar as correntes individualmente
 
-            '''#################### Teste em Malha Aberta com 20% #######################'''
+            '''################### Teste em Malha Aberta com 5.5% #######################'''
             '''##########################################################################'''
-            self.update_gui.emit('Iniciando teste com módulos em malha aberta a 20%...')
+            self.update_gui.emit('Iniciando teste com módulos em malha aberta a 5.5%...')
             for module in range(4):
                 if module == 0:
-                    self.FBP.SetISlowRefx4(20, 0, 0, 0)
+                    self.FBP.SetISlowRefx4(5.5, 0, 0, 0) # ciclo de trabalho alterado para 5.5%
                 elif module == 1:
-                    self.FBP.SetISlowRefx4(0, 20, 0, 0)
+                    self.FBP.SetISlowRefx4(0, 5.5, 0, 0) # ciclo de trabalho alterado para 5.5%
                 elif module == 2:
-                    self.FBP.SetISlowRefx4(0, 0, 20, 0)
+                    self.FBP.SetISlowRefx4(0, 0, 5.5, 0) # ciclo de trabalho alterado para 5.5%
                 elif module == 3:
-                    self.FBP.SetISlowRefx4(0, 0, 0, 20)
+                    self.FBP.SetISlowRefx4(0, 0, 0, 5.5) # ciclo de trabalho alterado para 5.5%
+
+                # o teste original pedia um ciclo de trabalho de 20%, contudo foi necessário
+                # alterá-lo para 5.5% devido a uma alteração na carga
 
                 time.sleep(2)
 
@@ -189,21 +196,25 @@ class PowerSupplyTest(QThread):
                 time.sleep(2)
             '''##########################################################################'''
 
-            self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks())
-            self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks())
+            self.FBP.Read_ps_SoftInterlocks()
+            self.FBP.Read_ps_HardInterlocks()
 
-            '''#################### Teste em Malha Aberta com -20% ######################'''
+            '''#################### Teste em Malha Aberta com -5.5% #####################'''
             '''##########################################################################'''
-            self.update_gui.emit('Iniciando teste com módulos em malha aberta a -20%...')
+            self.update_gui.emit('Iniciando teste com módulos em malha aberta a -5.5%...')
             for module in range(4):
                 if module == 0:
-                    self.FBP.SetISlowRefx4(-20, 0, 0, 0)
+                    self.FBP.SetISlowRefx4(-5.5, 0, 0, 0) # ciclo de trabalho alterado para -5.5%
                 elif module == 1:
-                    self.FBP.SetISlowRefx4(0, -20, 0, 0)
+                    self.FBP.SetISlowRefx4(0, -5.5, 0, 0) # ciclo de trabalho alterado para -5.5%
                 elif module == 2:
-                    self.FBP.SetISlowRefx4(0, 0, -20, 0)
+                    self.FBP.SetISlowRefx4(0, 0, -5.5, 0) # ciclo de trabalho alterado para -5.5%
                 elif module == 3:
-                    self.FBP.SetISlowRefx4(0, 0, 0, -20)
+                    self.FBP.SetISlowRefx4(0, 0, 0, -5.5) # ciclo de trabalho alterado para -5.5%
+
+                # o teste original pedia um ciclo de trabalho de -20%, contudo foi necessário
+                # alterá-lo para -5.5% devido a uma alteração na carga
+
                 time.sleep(2)
 
                 MeasureList = self._save_CurrentMeasurement(module)
@@ -228,8 +239,8 @@ class PowerSupplyTest(QThread):
                 time.sleep(2)
             '''##########################################################################'''
 
-            self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks())
-            self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks())
+            self.FBP.Read_ps_SoftInterlocks()
+            self.FBP.Read_ps_HardInterlocks()
 
             '''#################### Teste em Malha Fechada com 5A #######################'''
             '''##########################################################################'''
@@ -271,8 +282,8 @@ class PowerSupplyTest(QThread):
                 time.sleep(2)
             '''##########################################################################'''
 
-            self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks())
-            self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks())
+            self.FBP.Read_ps_SoftInterlocks()
+            self.FBP.Read_ps_HardInterlocks()
 
             '''################### Teste em Malha Fechada com 10A #######################'''
             '''##########################################################################'''
@@ -303,21 +314,12 @@ class PowerSupplyTest(QThread):
             '''##########################################################################'''
 
             print('Interlocks Ativos: ')
-            for softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
-                if softinterlock == None:
-                    print('None')
-                else:
-                    print(softinterlock)
-            for hardinterlock in self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()):
-                if hardinterlock == None:
-                    print('None')
-                else:
-                    print(hardinterlock)
-            print('--------------------------------------------\n')
+            self.FBP.Read_ps_SoftInterlocks()
+            self.FBP.Read_ps_HardInterlocks()
 
             self.update_gui.emit('Realizando medidas de tensão do DC-Link, tensão de saída e temperatura')
             for o in range(8):
-                time.sleep(30)#Alterar tempo
+                time.sleep(30) # alterar tempo para 30s
                 MeasDCLink[0].append(self.FBP.Read_vDCMod1())
                 time.sleep(0.1)
                 MeasDCLink[1].append(self.FBP.Read_vDCMod2())
@@ -371,22 +373,12 @@ class PowerSupplyTest(QThread):
             time.sleep(0.1)
             '''##########################################################################'''
 
-            print('Interlocks Ativos: ')
-            for softinterlock in self._read_SoftInterlock(self.FBP.Read_ps_SoftInterlocks()):
-                if softinterlock == None:
-                    print('None')
-                else:
-                    print(softinterlock)
-            for hardinterlock in self._read_HardInterlock(self.FBP.Read_ps_HardInterlocks()):
-                if hardinterlock == None:
-                    print('None')
-                else:
-                    print(hardinterlock)
-            print('--------------------------------------------\n')
+            self.FBP.Read_ps_SoftInterlocks()
+            self.FBP.Read_ps_HardInterlocks()
 
             self.update_gui.emit('Realizando medidas de tensão do DC-Link, tensão de saída e temperatura')
             for p in range(8):
-                time.sleep(30)# alterar tempo
+                time.sleep(30) # alterar tempo para 30s
                 MeasDCLink[0].append(self.FBP.Read_vDCMod1())
                 time.sleep(0.1)
                 MeasDCLink[1].append(self.FBP.Read_vDCMod2())
@@ -447,7 +439,7 @@ class PowerSupplyTest(QThread):
 
                 '''-------------------------------------------------------------'''
                 for c in MeasDCLink[module]:
-                    if (14 <= round(c)) and (round(c) <= 16):
+                    if (LimDCLink[0] <= round(c)) and (round(c) <= LimDCLink[1]):
                         if test[5]:
                             test[5] = True
                     else:
@@ -460,7 +452,7 @@ class PowerSupplyTest(QThread):
 
                 '''-------------------------------------------------------------'''
                 for d in MeasTemp[module]:
-                    if d < 90:
+                    if d < LimTemp:
                         if test[6]:
                             test[6] = True
                     else:
@@ -472,21 +464,21 @@ class PowerSupplyTest(QThread):
                 '''-------------------------------------------------------------'''
 
                 '''-------------------------------------------------------------'''
-                for e in range(0, len(MeasVout) - 8):
-                    if 10 < MeasVout[module][e] < 12:
+                for e in range(0, len(MeasVout[module]) - 8):
+                    if (LimVout[0] < MeasVout[module][e]) and (MeasVout[module][e] < LimVout[1]):
                         if test[7]:
                             test[7] = True
                     else:
                         test[7] = False
                 if test[7]:
-                    self.update_gui.emit('      Aprovado no teste 1 de leitura da tensão de saída')
+                    self.update_gui.emit('      Aprovado no teste 1 de leitura da tensão de saída ')
                 else:
                     self.update_gui.emit('      Reprovado no teste 1 de leitura da tensão de saída')
                 '''-------------------------------------------------------------'''
 
                 '''-------------------------------------------------------------'''
-                for f in range(8, len(MeasVout)):
-                    if -12 < MeasVout[module][f] < -10:
+                for f in range(8, len(MeasVout[module])):
+                    if (-LimVout[1] < MeasVout[module][f]) and (MeasVout[module][f] < -LimVout[0]):
                         if test[8]:
                             test[8] = True
                     else:
@@ -517,7 +509,9 @@ class PowerSupplyTest(QThread):
                 log.temperatura1            = MeasTemp[module][15]
                 log.iout_add_20_duty_cycle  = MeasCurr[module][0][0]
                 log.iout_less_20_duty_cycle = MeasCurr[module][1][0]
-                log.details = ''
+
+                log.details = 'SoftInterlocks ativos: ' + str(self.FBP.Read_ps_SoftInterlocks()) + \
+                              ' HardInterlocks ativos: ' + str(self.FBP.Read_ps_HardInterlocks())
 
                 send_to_server_result = self._send_to_server(log)
 
@@ -569,6 +563,29 @@ class PowerSupplyTest(QThread):
 
         return Measurement
 
+    def _send_to_server(self, item):
+        client = ElpWebClient()
+        client_data = item.data
+        print(client_data)
+        client_method = item.method
+        client_response = client.do_request(client_method, client_data)
+        print(client_response)
+        server_status = self._parse_response(client_response)
+        return server_status
+
+    def _parse_response(self, response):
+        res_key = 'StatusCode'
+        err_key = 'error'
+
+        if res_key in response.keys() and err_key not in response.keys():
+            return True
+        else:
+            return False
+
+    def run(self):
+        self._test_sequence()
+        #pass
+
     def _read_SoftInterlock(self, int_interlock):
         SoftInterlockList = ['N/A', 'Sobre-tensão na carga 1', 'N/A', \
                              'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A',\
@@ -582,13 +599,9 @@ class PowerSupplyTest(QThread):
         op_bin = 1
         ActiveSoftInterlocks = []
 
-        print('Soft Interlocks ativos:')
-
         for i in range(len('{0:b}'.format(int_interlock))):
             if (int_interlock & (op_bin << i)) == 2**i:
                 ActiveSoftInterlocks.append(SoftInterlockList[i])
-                print(SoftInterlockList[i])
-        print('-------------------------------------------------------------------')
 
         return ActiveSoftInterlocks
 
@@ -624,35 +637,8 @@ class PowerSupplyTest(QThread):
         op_bin = 1
         ActiveHardInterlocks = []
 
-        print('Hard Interlocks ativos:')
-
         for i in range(len('{0:b}'.format(int_interlock))):
             if (int_interlock & (op_bin << i)) == 2**i:
                 ActiveHardInterlocks.append(HardInterlockList[i])
-                print(HardInterlockList[i])
-        print('-------------------------------------------------------------------')
 
         return ActiveHardInterlocks
-
-    def _send_to_server(self, item):
-        client = ElpWebClient()
-        client_data = item.data
-        print(client_data)
-        client_method = item.method
-        client_response = client.do_request(client_method, client_data)
-        print(client_response)
-        server_status = self._parse_response(client_response)
-        return server_status
-
-    def _parse_response(self, response):
-        res_key = 'StatusCode'
-        err_key = 'error'
-
-        if res_key in response.keys() and err_key not in response.keys():
-            return True
-        else:
-            return False
-
-    def run(self):
-        self._test_sequence()
-        #pass
