@@ -4,8 +4,8 @@ from datetime     import datetime
 import time
 import visa
 
-drs  = SerialDRS()
-now  = datetime.now()
+drs = SerialDRS()
+now = datetime.now()
 
 
 ################################################################################
@@ -34,7 +34,7 @@ for j in config:
         mult_addr = mult_addr.replace('\n', '')
         mult_addr = mult_addr.split(',')
 
-        if len(dso_addr) == 1:
+        if len(mult_addr) == 1:
             mult_addr = mult_addr[0]
 
     elif config[config.index(j)][0] == 'BastidorList':
@@ -42,32 +42,53 @@ for j in config:
         bastidor_list = bastidor_list.replace('\n', '')
         bastidor_list = bastidor_list.split(',')
 
-        if len(bastidor) == 1:
-            bastidor_list = bastidor_list[0]
+        if type(bastidor_list) is not list:
+            bastidor_list = aux
+            bastidor_list = []
+            bastidor_list.append(aux)
 
     elif config[config.index(j)][0] == 'IndividualModuleList':
         individual_module_list = config[config.index(j)][1]
         individual_module_list = individual_module_list.replace('\n', '')
         individual_module_list = individual_module_list.split(',')
 
-        if len(individual_module_list) == 1:
-            individual_module_list = individual_module_list[0]
+        if type(individual_module_list) is not list:
+            individual_module_list = aux
+            individual_module_list = []
+            individual_module_list.append(aux)
 
     elif config[config.index(j)][0] == 'ReferenceValueList':
         idc_list = config[config.index(j)][1]
         idc_list = idc_list.replace('\n', '')
         idc_list = idc_list.split(',')
 
-        if len(idc_list) == 1:
-            idc_list = idc_list[0]
+        if type(idc_list) is not list:
+            idc_list = aux
+            idc_list = []
+            idc_list.append(float(aux))
         else:
-            for k in ps_iout:
+            for k in idc_list:
                 idc_list[idc_list.index(k)] = int(k)
+
+    elif config[config.index(j)][0] == 'ChannelList':
+        channel_list = config[config.index(j)][1]
+        channel_list = channel_list.replace('\n', '')
+        channel_list = channel_list.split(',')
+
+        if type(channel_list) is not list:
+            channel_list = aux
+            channel_list = []
+            channel_list.append(aux)
+
+    elif config[config.index(j)][0] == 'WarmUpTime':
+        warmup_time = config[config.index(j)][1]
+        warmup_time = warmup_time.replace('\n', '')
+        warmup_time = int(warmup_time)
 
     elif config[config.index(j)][0] == 'Nbits':
         nbits = config[config.index(j)][1]
         nbits = nbits.replace('\n', '')
-        nbits = nbits.split(',')
+        nbits = int(nbits)
 ################################################################################
 ################################################################################
 
@@ -80,7 +101,9 @@ print('Porta de comunicação:                    ' + str(drs_port))
 print('Endereço do multímetro:                  ' + str(mult_addr))
 print('Lista de Bastidores:                     ' + str(bastidor_list))
 print('Lista de módulos para teste individual:  ' + str(individual_module_list))
-print('Lista de valores de corrente de saída:   ' + str(ps_iout))
+print('Lista de valores de corrente de saída:   ' + str(idc_list))
+print('Lista de canais do multimetro:           ' + str(channel_list))
+print('Tempo de WarmUp dos módulos de potência: ' + str(warmup_time))
 print('Número de bits para o teste:             ' + str(nbits))
 
 ctrl = input('\nOs dados estão corretos?(y/n): ')
@@ -91,23 +114,8 @@ ctrl = input('\nOs dados estão corretos?(y/n): ')
 ################################################################################
 ############################# FUNÇÕES INTERNAS #################################
 ################################################################################
-def config_multimeter(channel):
-    rm   = visa.ResourceManager()
-    inst = rm.open_resource(mult_addr)
-
-    del inst.timeout
-
-    inst.write('CONF:VOLT:DC (@'           + channel + ')')
-    time.sleep(1)
-    inst.write('SENS:VOLT:DC:NPLC 200, (@' + channel + ')')
-    time.sleep(1)
-
-def read_multimeter():
-    inst.write('READ?')
-    return str(float(inst.read()))
-
 def init_module(drs_port, drs_addr, module, idc):
-    print('Inicializando módulo...')
+    print('\nInicializando módulo...')
     drs.Connect(drs_port)
     time.sleep(1)
     drs.SetSlaveAdd(drs_addr)
@@ -185,46 +193,77 @@ def ref_increment(module, idc, nbits, count):
         return ans
 ################################################################################
 ################################################################################
+
+
+################################################################################
+############################# INICIO DO TESTE ##################################
+################################################################################
+if ctrl == 'y':
+    for bastidor in bastidor_list:
+        drs_addr = bastidor_list.index(bastidor) + 1
+
+        for module in individual_module_list:
+            ################################################################################
+            ######################## CONFIGURANDO O MULTIMETRO #############################
+            ################################################################################
+            channel = channel_list[individual_module_list.index(module) + \
+                      bastidor_list.index(bastidor)                     + \
+                      bastidor_list.index(bastidor)*3]
+
+            rm   = visa.ResourceManager()
+            inst = rm.open_resource(mult_addr)
+
+            del inst.timeout
+
+            inst.write('CONF:VOLT:DC (@'           + channel + ')')
+            time.sleep(0.5)
+            inst.write('SENS:VOLT:DC:NPLC 200, (@' + channel + ')')
+            time.sleep(0.5)
+            ################################################################################
+            ################################################################################
+
+
+            for idc in idc_list:
+                _file = open('Resolucao_' + module + '_NS' + bastidor + '.csv', 'a')
+                _file.write('IDC = ' + str(idc) + 'A\n')
+                _file.write('time stamp;VDC;Ref;temp\n')
+
+                init_module(drs_port, drs_addr, module, idc)
+                print('Aguardando tempo de WarmUp...')
+                time.sleep(warmup_time)
+                print('Inicio do teste do ' + module + ', IDC = ' + str(idc) + 'A:')
+                print(str(datetime.now()))
+
+                for i in range(30):
+                    data = ref_increment(module, idc, nbits, i)
+                    time.sleep(5)
+
+                    for j in range(5):
+                        inst.write('READ?')
+                        read = str(float(inst.read()))
+                        _file.write(str(datetime.now()) + ';'       +\
+                                    read.replace('.', ',') + ';'    +\
+                                    data[0].replace('.', ',') + ';' +\
+                                    data[1].replace('.', ',') + '\n')
+
+                print('Fim do teste: ')
+                print(str(datetime.now()))
+
+                if module == 'modulo 1':
+                    drs.TurnOff(1)
+                elif module == 'modulo 2':
+                    drs.TurnOff(2)
+                elif module == 'modulo 3':
+                    drs.TurnOff(4)
+                elif module == 'modulo 4':
+                    drs.TurnOff(8)
+
+                _file.close()
+            inst.close()
+################################################################################
+############################### FIM DO TESTE ###################################
 ################################################################################
 
 
-for bastidor in bastidor_list:
-    drs_addr = bastidor_list.index(bastidor) + 1
-
-    for module in individual_module_list:
-        config_multimeter(channel_list[individual_module_list.index(module)  + \
-                                       bastidor_list.index(bastidor) + \
-                                       bastidor_list.index(bastidor)*3])
-
-        for idc in idc_list:
-            _file = open('Resolucao_' + module + '_NS' + bastidor + '.csv', 'a')
-            _file.write('IDC = ' + str(idc) + 'A\n')
-            _file.write('time stamp;VDC;Ref;temp\n')
-
-            init_module(drs_port, drs_addr, module, idc)
-            print('Aguardando tempo de WarmUp...')
-            time.sleep(WarmUpTime)
-            print('Inicio do teste do ' + module + ', IDC = ' + str(idc) + 'A:')
-            print(str(datetime.now()))
-
-            for i in range(30):
-                data = ref_increment(module, idc, nbits, i)
-                time.sleep(5)
-
-                for j in range(5):
-                    read = read_multimeter()
-                    _file.write(str(datetime.now()) + ';' + read.replace('.', ',') + ';' + data[0].replace('.', ',') + ';' + data[1].replace('.', ',') + '\n')
-
-            print('Fim do teste: ')
-            print(str(datetime.now()))
-
-            if module == 'modulo 1':
-                drs.TurnOff(1)
-            elif module == 'modulo 2':
-                drs.TurnOff(2)
-            elif module == 'modulo 3':
-                drs.TurnOff(4)
-            elif module == 'modulo 4':
-                drs.TurnOff(8)
-
-            _file.close()
+else:
+    print('Corrija os dados e reinicie o teste!')
