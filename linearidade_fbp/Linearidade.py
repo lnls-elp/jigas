@@ -42,21 +42,30 @@ for j in config:
         bastidor_list = bastidor_list.replace('\n', '')
         bastidor_list = bastidor_list.split(',')
 
-        if len(bastidor_list) == 1:
-            bastidor_list = bastidor_list[0]
+        if type(bastidor_list) is not list:
+            bastidor_list = aux
+            bastidor_list = []
+            bastidor_list.append(aux)
 
     elif config[config.index(j)][0] == 'IndividualModuleList':
         individual_module_list = config[config.index(j)][1]
         individual_module_list = individual_module_list.replace('\n', '')
         individual_module_list = individual_module_list.split(',')
 
-        if len(individual_module_list) == 1:
-            individual_module_list = individual_module_list[0]
+        if type(individual_module_list) is not list:
+            individual_module_list = aux
+            individual_module_list = []
+            individual_module_list.append(aux)
 
     elif config[config.index(j)][0] == 'ChannelList':
         channel_list = config[config.index(j)][1]
         channel_list = channel_list.replace('\n', '')
         channel_list = channel_list.split(',')
+
+        if type(channel_list) is not list:
+            channel_list = aux
+            channel_list = []
+            channel_list.append(aux)
 
     elif config[config.index(j)][0] == 'WarmUpTime':
         warmup_time = config[config.index(j)][1]
@@ -204,17 +213,27 @@ if ctrl == 'y':
             print('Inicio do teste do ' + module + ':')
             print(str(datetime.now()))
 
-            for i in range(200):
-                ref_increment(module, -10, i, 0.1)
-                time.sleep(120)
+            for i in range(201):
+                data = ref_increment(module, -10, i, 0.1)
+                time.sleep(1) # alterar para 120
 
                 inst.write('READ?')
                 read = str(float(inst.read()))
                 _file.write(str(datetime.now()) + ';' + read.replace('.', ',') +\
                             ';' + data[0].replace('.', ',')                    +\
                             ';' + data[1].replace('.', ',') + '\n')
+
+            if module == 'modulo 1':
+                drs.TurnOff(1)
+            elif module == 'modulo 2':
+                drs.TurnOff(2)
+            elif module == 'modulo 3':
+                drs.TurnOff(4)
+            elif module == 'modulo 4':
+                drs.TurnOff(8)
+
             _file.close()
-            
+
             print('Fim do teste: ')
             print(str(datetime.now()))
 ################################################################################
