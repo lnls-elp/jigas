@@ -91,7 +91,7 @@ for j in config:
         if type(channel_freq) is not list:
             channel_freq = aux
             channel_freq = []
-            channel_freq.append(aux)
+            channel_freq.append(str(aux))
 
     elif config[config.index(j)][0] == 'ChannelRMS':
         channel_rms = config[config.index(j)][1]
@@ -101,7 +101,7 @@ for j in config:
         if type(channel_rms) is not list:
             channel_rms = aux
             channel_rms = []
-            channel_rms.append(aux)
+            channel_rms.append(str(aux))
 ################################################################################
 ################################################################################
 
@@ -127,7 +127,7 @@ ctrl = input('\nOs dados estão corretos?(y/n): ')
 ################################################################################
 ############################# FUNÇÕES INTERNAS #################################
 ################################################################################
-def init_module(drs_port, drs_addr, module, amplitude):
+def init_module(drs_port, drs_addr, module, ctrl_loop, amplitude):
     print('\nInicializando módulo...')
     drs.Connect(drs_port)
     time.sleep(0.5)
@@ -184,40 +184,113 @@ def freq_increment(offset, frequency):
 ############################# INICIO DO TESTE ##################################
 ################################################################################
 if ctrl == 'y':
-    drs_addr = ''
     for a in bastidor_list:
         bastidor = a[0]
         drs_addr = a[1]
 
         for module in individual_module_list:
-            ################################################################################
-            ######################## CONFIGURANDO O MULTIMETRO #############################
-            ################################################################################
-            channel = channel_list[individual_module_list.index(module) + \
-                      bastidor_list.index(bastidor)                     + \
-                      bastidor_list.index(bastidor)*3]
+            for loop in ctrl_loop:
+                ################################################################################
+                ######################## CONFIGURANDO O MULTIMETRO #############################
+                ################################################################################
+                rm   = visa.ResourceManager()
+                inst = rm.open_resource(mult_addr)
 
-            rm   = visa.ResourceManager()
-            inst = rm.open_resource(mult_addr)
+                del inst.timeout
 
-            del inst.timeout
+                inst.write('CONF:FREQ (@'             + channel_freq[0] + ')')
+                time.sleep(0.5)
+                inst.write('SENS:FREQ:RANG:LOW 3, (@' + channel_freq[0] + ')')
+                time.sleep(0.5)
 
-            inst.write('CONF:FREQ (@'              + channel_freq + ')')
-            time.sleep(0.5)
-            inst.write('CONF:VOLT:AC (@'           + channel_rms  + ')')
-            time.sleep(0.5)
-            inst.write('SENS:FREQ:RANG:LOW 3, (@'  + channel_freq + ')')
-            time.sleep(0.5)
-            inst.write('SENS:VOLT:AC:NPLC 200:BAND 3, (@' + channel_rms  + ')')
-            time.sleep(0.5)
-            ################################################################################
-            ################################################################################
-            inst.write('READ?')
-            print (str(inst.read()))
+                inst.write('CONF:VOLT:AC (@'           + channel_rms[0] + ')')
+                time.sleep(0.5)
+                inst.write('SENS:VOLT:AC:BAND 3, (@'   + channel_rms[0] + ')')
+                time.sleep(0.5)
 
+                if loop == 'open':
+                    inst.write('CALC:SCALE:GAIN 1, (@'    + channel_rms[0] + ')')
+                    time.sleep(0.5)
+                    inst.write('CALC:SCALE:STATE ON, (@'  + channel_rms[0] + ')')
+                    time.sleep(0.5)
+                    inst.write('ROUT:SCAN (@' + channel_rms[0] + ',' + channel_freq[0] + ')')
+
+                    print('\nInício do teste de resposta em frequência em malha aberta...')
+                    print('\nPor favor, selecione:')
+                    print('                       -O ganho do amplificador diferencial para 1')
+                    print('                       -A frequência de corte do amplificador diferencial para 100kHz')
+                    pause = input('\nTecle enter para continuar')
+
+                elif loop == 'closed':
+                    inst.write('CALC:SCALE:GAIN 0.01, (@' + channel_rms[0] + ')')
+                    time.sleep(0.5)
+                    inst.write('CALC:SCALE:STATE ON, (@'  + channel_rms[0] + ')')
+                    time.sleep(0.5)
+                    inst.write('ROUT:SCAN (@' + channel_rms[0] + ',' + channel_freq[0] + ')')
+
+                    print('\nInício do teste de resposta em frequência em malha fechada...')
+                    print('\nPor favor, selecione:')
+                    print('                       -O ganho do amplificador diferencial para 100')
+                    print('                       -A frequência de corte do amplificador diferencial para >1MHz')
+                    pause = input('\nTecle enter para continuar')
+                ################################################################################
+                ################################################################################
+                for idc in idc_list:
+                    _file = open('RespFrequencia_' + module + '_NS' + bastidor + '.csv', 'a')
+                    _file.write('IDC = ' + str(idc) + 'A\n')
+                    _file.write('time stamp;Set Frequency [Hz];Read Frequency [Hz];Irms [A]\n')
+
+                    if loop == 'open':
+                        init_module(drs_port, drs_addr, loop, module, 10)
+                    elif loop == 'closed':
+                        init_module(drs_port, drs_addr, loop, module, 0.1)
+
+                    for i in range(1, 5):
+                        for j in range(1, 10):
+                            if (j*(10**i)) > 10000:
+                                pass
+                            else:
+                                frequency = j*(10**i)
+
+                                print('\nTestando módulo com idc = '  + idc\
+                                       + ', frequência = ' + frequency + '...')
+
+                                freq_increment(idc, frequency)
+                                time.sleep(5)
+
+                                inst.write('READ?')
+                                read = inst.read()
+                                read = read.split(',')
+                                read[0] = str(float(read[0]))
+                                read[1] = str(float(read[1]))
+
+                                print('Frequência lida: ' + read[0])
+                                print('Irms lida:       ' + read[1])
+
+                                _file.write(str(datetime.now()) + ';' + \
+                                            str(frequency)      + ';' + \
+                                            read[0].replace('.', ',') + \
+                                            read[1].replace('.', ',') + '\n')
+
+                    print('Fim do teste: ')
+                    print(str(datetime.now()))
+
+                    if module == 'modulo 1':
+                        drs.TurnOff(1)
+                    elif module == 'modulo 2':
+                        drs.TurnOff(2)
+                    elif module == 'modulo 3':
+                        drs.TurnOff(4)
+                    elif module == 'modulo 4':
+                        drs.TurnOff(8)
+
+                    _file.close()
+
+            inst.close()
 ################################################################################
 ############################### FIM DO TESTE ###################################
 ################################################################################
+
 
 else:
     print('Corrija os dados e reinicie o teste!')

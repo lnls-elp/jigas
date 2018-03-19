@@ -215,7 +215,7 @@ if ctrl == 'y':
 
             for i in range(201):
                 data = ref_increment(module, -10, i, 0.1)
-                time.sleep(1) # alterar para 120
+                time.sleep(120) # alterar para 120
 
                 inst.write('READ?')
                 read = str(float(inst.read()))
