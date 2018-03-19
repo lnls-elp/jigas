@@ -186,7 +186,7 @@ def freq_increment(offset, frequency):
 if ctrl == 'y':
     for a in bastidor_list:
         bastidor = a[0]
-        drs_addr = a[1]
+        drs_addr = int(a[1])
 
         for module in individual_module_list:
             for loop in ctrl_loop:
@@ -241,9 +241,9 @@ if ctrl == 'y':
                     _file.write('time stamp;Set Frequency [Hz];Read Frequency [Hz];Irms [A]\n')
 
                     if loop == 'open':
-                        init_module(drs_port, drs_addr, loop, module, 10)
+                        init_module(drs_port, drs_addr, module, loop, 10)
                     elif loop == 'closed':
-                        init_module(drs_port, drs_addr, loop, module, 0.1)
+                        init_module(drs_port, drs_addr, module, loop, 0.1)
 
                     for i in range(1, 5):
                         for j in range(1, 10):
@@ -252,8 +252,8 @@ if ctrl == 'y':
                             else:
                                 frequency = j*(10**i)
 
-                                print('\nTestando módulo com idc = '  + idc\
-                                       + ', frequência = ' + frequency + '...')
+                                print('\nTestando módulo com idc = '  + str(idc)\
+                                      + 'A' + ', frequência = ' + str(frequency) + 'Hz...')
 
                                 freq_increment(idc, frequency)
                                 time.sleep(5)
@@ -270,7 +270,7 @@ if ctrl == 'y':
                                 _file.write(str(datetime.now()) + ';' + \
                                             str(frequency)      + ';' + \
                                             read[0].replace('.', ',') + \
-                                            read[1].replace('.', ',') + '\n')
+                                            ';' + read[1].replace('.', ',') + '\n')
 
                     print('Fim do teste: ')
                     print(str(datetime.now()))
