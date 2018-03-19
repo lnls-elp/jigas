@@ -64,7 +64,8 @@ class DCCTTest(QThread):
         result = (False, False)     # Result for communication test and aux power supply
 
         try:
-            self.FBP.Write_sigGen_Aux(1)
+            print('##########################')
+            print(self.FBP.Write_sigGen_Aux(1))
             time.sleep(5)
 
             test_package = self.FBP.Read_ps_Model()
@@ -99,7 +100,8 @@ class DCCTTest(QThread):
                 list_log.append(DCCTLog())
                 list_log.append(DCCTLog())
 
-                self.FBP.Write_sigGen_Aux(1) # Usando 1 modulo de potência
+                print('##########################')
+                print(self.FBP.Write_sigGen_Aux(1)) # Usando 1 modulo de potência
                 time.sleep(5)
 
                 current_DCCT1.append(self.FBP.Read_iMod3()) # medidas de corrente com fonte desligada
