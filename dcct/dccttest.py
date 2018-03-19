@@ -115,6 +115,9 @@ class DCCTTest(QThread):
                 self.update_gui.emit('Malha fechada')
                 time.sleep(1)
 
+                self.Read_ps_SoftInterlocks()
+                self.Read_ps_HardInterlocks()
+
                 for i in range(1, len(self._load_current)):
                     self.FBP.SetISlowRef(self._load_current[i])
                     self.update_gui.emit('Testando DCCTs com corrente de ' + str(self._load_current[i]) + 'A')
@@ -123,6 +126,9 @@ class DCCTTest(QThread):
                     print(self.FBP.Read_iMod4())
                     current_DCCT1.append(self.FBP.Read_iMod3())
                     current_DCCT2.append(self.FBP.Read_iMod4())
+
+                self.Read_ps_SoftInterlocks()
+                self.Read_ps_HardInterlocks()
 
                 current_DCCT.append(current_DCCT1)
                 current_DCCT.append(current_DCCT2)
