@@ -74,6 +74,10 @@ class DCCTTest(QThread):
                 result = (True,True)
             else:
                 result = (False, False)
+
+            self.FBP.Read_ps_SoftInterlocks()
+            self.FBP.Read_ps_HardInterlocks()
+
         except:
             result = (False, False)
 
@@ -100,9 +104,12 @@ class DCCTTest(QThread):
                 list_log.append(DCCTLog())
                 list_log.append(DCCTLog())
 
-                print('##########################')
-                print(self.FBP.Write_sigGen_Aux(1)) # Usando 1 modulo de potência
-                time.sleep(5)
+                #print('##########################')
+                #print(self.FBP.Write_sigGen_Aux(1)) # Usando 1 modulo de potência
+                #time.sleep(5)
+
+                self.FBP.Read_ps_SoftInterlocks()
+                self.FBP.Read_ps_HardInterlocks()
 
                 current_DCCT1.append(self.FBP.Read_iMod3()) # medidas de corrente com fonte desligada
                 current_DCCT2.append(self.FBP.Read_iMod4()) # medidas de corrente com fonte desligada
