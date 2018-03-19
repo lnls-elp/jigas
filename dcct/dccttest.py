@@ -65,6 +65,8 @@ class DCCTTest(QThread):
 
         try:
             self.FBP.Write_sigGen_Aux(1)
+            time.sleep(5)
+
             test_package = self.FBP.Read_ps_Model()
 
             if (test_package[0] == 0) and (test_package[1] == 17) and (test_package[2] == 512) and (test_package[3] == 14) and (test_package[4] == 223):
@@ -98,6 +100,7 @@ class DCCTTest(QThread):
                 list_log.append(DCCTLog())
 
                 self.FBP.Write_sigGen_Aux(1) # Usando 1 modulo de potência
+                time.sleep(5)
 
                 current_DCCT1.append(self.FBP.Read_iMod3()) # medidas de corrente com fonte desligada
                 current_DCCT2.append(self.FBP.Read_iMod4()) # medidas de corrente com fonte desligada
