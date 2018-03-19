@@ -64,7 +64,10 @@ class DCCTTest(QThread):
         result = (False, False)     # Result for communication test and aux power supply
 
         try:
-            self.FBP.Write_sigGen_Aux(1)
+            print('##########################')
+            print(self.FBP.Write_sigGen_Aux(1))
+            time.sleep(5)
+
             test_package = self.FBP.Read_ps_Model()
 
             if (test_package[0] == 0) and (test_package[1] == 17) and (test_package[2] == 512) and (test_package[3] == 14) and (test_package[4] == 223):
@@ -97,7 +100,9 @@ class DCCTTest(QThread):
                 list_log.append(DCCTLog())
                 list_log.append(DCCTLog())
 
-                self.FBP.Write_sigGen_Aux(1) # Usando 1 modulo de potência
+                print('##########################')
+                print(self.FBP.Write_sigGen_Aux(1)) # Usando 1 modulo de potência
+                time.sleep(5)
 
                 current_DCCT1.append(self.FBP.Read_iMod3()) # medidas de corrente com fonte desligada
                 current_DCCT2.append(self.FBP.Read_iMod4()) # medidas de corrente com fonte desligada
@@ -110,6 +115,9 @@ class DCCTTest(QThread):
                 self.update_gui.emit('Malha fechada')
                 time.sleep(1)
 
+                self.Read_ps_SoftInterlocks()
+                self.Read_ps_HardInterlocks()
+
                 for i in range(1, len(self._load_current)):
                     self.FBP.SetISlowRef(self._load_current[i])
                     self.update_gui.emit('Testando DCCTs com corrente de ' + str(self._load_current[i]) + 'A')
@@ -118,6 +126,9 @@ class DCCTTest(QThread):
                     print(self.FBP.Read_iMod4())
                     current_DCCT1.append(self.FBP.Read_iMod3())
                     current_DCCT2.append(self.FBP.Read_iMod4())
+
+                self.Read_ps_SoftInterlocks()
+                self.Read_ps_HardInterlocks()
 
                 current_DCCT.append(current_DCCT1)
                 current_DCCT.append(current_DCCT2)
