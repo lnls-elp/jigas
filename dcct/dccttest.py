@@ -148,6 +148,7 @@ class DCCTTest(QThread):
                     for i in range(1, len(self._load_current)):
                         self.FBP.SetISlowRef(self._load_current[i])
                         self.update_gui.emit('Testando DCCTs com corrente de ' + str(self._load_current[i]) + 'A')
+                        self.update_gui.emit('            Corrente de saída do módulo padrão: ' + str(self.FBP.Read_iMod1()) + 'A')
                         time.sleep(30) # Alterar para 30s
                         print(self.FBP.Read_iMod3())
                         print(self.FBP.Read_iMod4())
