@@ -412,7 +412,10 @@ class HRADCTest(QThread):
                     log_hradc_serverstatus = self._send_to_server(log_hradc)
                     log_dm_serverstatus = self._send_to_server(log_dm)
 
-                    log_res.append(log_hradc.test_result)
+                    if (log_hradc.test_result == "Reprovado") or (log_dm.test_result == "Reprovado"):
+                        log_res.append("Reprovado")
+                    else:
+                        log_res.append("Aprovado")
 
                 else:
                     print('Salvando log de placa reprovada e enviando ao servidor...')
