@@ -133,7 +133,7 @@ class DCCTTest(QThread):
 
                 if self.FBP.Read_ps_OnOff() is not 1:
                     print('ERRO! O MÓDULO NÃO LIGOU CORRETAMENTE!!!')
-                    self.update_gui.emit('O módulo da Jiga não ligou corretamente. Reinicie o teste!!!')
+                    self.update_gui.emit('O módulo da Jiga não ligou corretamente. Desligue a jiga reinicie o teste!!!')
 
                 else:
                     self.update_gui.emit('Fonte ligada')
@@ -147,8 +147,14 @@ class DCCTTest(QThread):
 
                     for i in range(1, len(self._load_current)):
                         self.FBP.SetISlowRef(self._load_current[i])
+                        time.sleep(1)
+
                         self.update_gui.emit('Testando DCCTs com corrente de ' + str(self._load_current[i]) + 'A')
-                        self.update_gui.emit('            Corrente de saída do módulo padrão: ' + str(self.FBP.Read_iMod1()) + 'A')
+                        self.update_gui.emit('            Corrente de saida do modulo padrao: ' + str(round(self.FBP.Read_iMod1())) + 'A')
+
+                        if self._load_current[i] is not round(self.FBP.Read_iMod1()):
+                            self.update_gui.emit('\nMAU FUNCIONAMENTO NO TESTE: CIRCUITO ABERTO OU DEFEITO NO MODULO PADRAO\n')
+
                         time.sleep(30) # Alterar para 30s
                         print(self.FBP.Read_iMod3())
                         print(self.FBP.Read_iMod4())
@@ -211,7 +217,7 @@ class DCCTTest(QThread):
 
                 if self.FBP.Read_ps_OnOff() is not 1:
                     print('ERRO! O MÓDULO NÃO LIGOU CORRETAMENTE!!!')
-                    self.update_gui.emit('O módulo da Jiga não ligou corretamente. Reinicie o teste!!!')
+                    self.update_gui.emit('O módulo da Jiga não ligou corretamente. Desligue a jiga e reinicie o teste!!!')
 
                 else:
                     self.update_gui.emit('Fonte ligada')
@@ -225,7 +231,14 @@ class DCCTTest(QThread):
 
                     for i in range(1, len(self._load_current)):
                         self.FBP.SetISlowRef(self._load_current[i])
+                        time.sleep(1)
+
                         self.update_gui.emit('Testando DCCTs com corrente de ' + str(self._load_current[i]) + 'A')
+                        self.update_gui.emit('            Corrente de saida do modulo padrao: ' + str(round(self.FBP.Read_iMod1())) + 'A')
+
+                        if self._load_current[i] is not round(self.FBP.Read_iMod1()):
+                            self.update_gui.emit('\nMAU FUNCIONAMENTO NO TESTE: CIRCUTO ABERTO OU DEFEITO NO MODULO PADRAO')
+
                         time.sleep(30) # Alterar para 30s
                         current_DCCT1.append(self.FBP.Read_iMod3())
 
