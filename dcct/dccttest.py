@@ -152,10 +152,16 @@ class DCCTTest(QThread):
                         self.update_gui.emit('Testando DCCTs com corrente de ' + str(self._load_current[i]) + 'A')
                         self.update_gui.emit('            Corrente de saida do modulo padrao: ' + str(round(self.FBP.Read_iMod1())) + 'A')
 
-                        if self._load_current[i] is not round(self.FBP.Read_iMod1()):
+                        compare_mod1 = round(self.FBP.Read_iMod1())
+
+                        if not self._load_current[i] == compare_mod1:
+                            self.update_gui.emit(str(self._load_current[i]))
+                            self.update_gui.emit(str(compare_mod1))
                             self.update_gui.emit('\nMAU FUNCIONAMENTO NO TESTE: CIRCUITO ABERTO OU DEFEITO NO MODULO PADRAO\n')
 
                         time.sleep(30) # Alterar para 30s
+                        self.update_gui.emit('            Corrente DCCT1: ' + str(self.FBP.Read_iMod3()) + 'A')
+                        self.update_gui.emit('            Corrente DCCT2: ' + str(self.FBP.Read_iMod4()) + 'A')
                         print(self.FBP.Read_iMod3())
                         print(self.FBP.Read_iMod4())
                         current_DCCT1.append(self.FBP.Read_iMod3())
@@ -236,10 +242,15 @@ class DCCTTest(QThread):
                         self.update_gui.emit('Testando DCCTs com corrente de ' + str(self._load_current[i]) + 'A')
                         self.update_gui.emit('            Corrente de saida do modulo padrao: ' + str(round(self.FBP.Read_iMod1())) + 'A')
 
-                        if self._load_current[i] is not round(self.FBP.Read_iMod1()):
-                            self.update_gui.emit('\nMAU FUNCIONAMENTO NO TESTE: CIRCUTO ABERTO OU DEFEITO NO MODULO PADRAO')
+                        compare_mod1 = round(self.FBP.Read_iMod1())
+
+                        if not self._load_current[i] == compare_mod1:
+                            self.update_gui.emit(str(self._load_current[i]))
+                            self.update_gui.emit(str(compare_mod1))
+                            self.update_gui.emit('\nMAU FUNCIONAMENTO NO TESTE: CIRCUITO ABERTO OU DEFEITO NO MODULO PADRAO\n')
 
                         time.sleep(30) # Alterar para 30s
+                        self.update_gui.emit('            Corrente DCCT1: ' + str(self.FBP.Read_iMod3()) + 'A')
                         current_DCCT1.append(self.FBP.Read_iMod3())
 
                     for j in range(0, len(self._load_current)):
