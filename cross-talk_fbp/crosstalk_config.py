@@ -10,7 +10,7 @@ BAMC_list = [['1041182345',1,
             ['modulo 2', '202'],
             ['modulo 3', '203'],
             ['modulo 4', '204']]]]
-WarmUpTime = 1
+WarmUpTime = 10800
 StepTime = 60
 IDC_SetTestList = [10, 0, -10]
-IDC_TestCurrentList = [0, 10, 0, -10, 0]
+IDC_SetCurrentList = [0, 10, 0, -10, 0]
