@@ -175,7 +175,7 @@ class PowerModuleTest(QThread):
                 # '3-'  + soft + '-' + hard + '  '
                 #----------------------------------------------------------------
 
-                time.sleep(120) # Alterar para 2 min
+                time.sleep(30) # Alterar para 2 min
             else:
                 self.FBP.TurnOn(sum_mod)
                 time.sleep(1)
@@ -198,7 +198,7 @@ class PowerModuleTest(QThread):
                 # + index + '-' + soft + '-' + hard + '  '
                 #---------------------------------------------------------------
 
-                time.sleep(120) # Alterar para 2 min
+                time.sleep(30) # Alterar para 2 min
 
             if serial[0] != None:
                 mod_result1[0].append(self.FBP.Read_iMod1())
@@ -230,6 +230,15 @@ class PowerModuleTest(QThread):
                 time.sleep(0.1)
                 self.update_gui.emit('')
 
+            # ADAPTAÇÃO PARA CORRIGIR PROBLEMA NA CARGA 3 - REMOVER
+            self.FBP.SetISlowRef(0.25 * set_current * 1.13)
+            time.sleep(0.5)
+            self.FBP.SetISlowRef(0.5 * set_current * 1.13)
+            time.sleep(0.5)
+            self.FBP.SetISlowRef(set_current * 1.13)
+            time.sleep(10)
+            ########################################################
+
             if serial[2] != None:
                 mod_result1[2].append(self.FBP.Read_iMod3())
                 self.update_gui.emit('       corrente de saída do módulo 3: ' + str(mod_result1[2][load_current.index(set_current)]))
@@ -244,6 +253,15 @@ class PowerModuleTest(QThread):
                 self.update_gui.emit('       tensão de entrada do módulo 3: ' + str(mod_result4[2][load_current.index(set_current)]))
                 time.sleep(0.1)
                 self.update_gui.emit('')
+
+            # ADAPTAÇÃO PARA CORRIGIR PROBLEMA NA CARGA 3 - REMOVER
+            self.FBP.SetISlowRef(0.25 * set_current)
+            time.sleep(0.5)
+            self.FBP.SetISlowRef(0.5 * set_current)
+            time.sleep(0.5)
+            self.FBP.SetISlowRef(set_current)
+            time.sleep(10)
+            ########################################################
 
             if serial[3] != None:
                 mod_result1[3].append(self.FBP.Read_iMod4())

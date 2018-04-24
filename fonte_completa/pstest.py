@@ -62,14 +62,16 @@ class PowerSupplyTest(QThread):
                 if i == 0:
                     print('Configurando UDC da Fonte...')
                     self.FBP.SetSlaveAdd(1)      # Endereço do controlador
+                    time.sleep(0.5)
                     self.FBP.Config_nHRADC(4)
                 elif i == 1:
                     print('Configurando UDC da jiga...')
                     self.FBP.SetSlaveAdd(5)      # Endereço do controlador
+                    time.sleep(0.5)
                     self.FBP.Write_sigGen_Aux(0) # Usando 4 fontes no bastidor
                                                  # em teste e 0 na jiga bastidor
 
-                time.sleep(1)
+                time.sleep(5)
                 test_package = self.FBP.Read_ps_Model()
 
                 if (test_package[0] == 0)   and (test_package[1] == 17) and \
@@ -81,6 +83,11 @@ class PowerSupplyTest(QThread):
             except:
                 print('ERRO!!!')
                 test.append(False)
+
+            print('###########################################################')
+            print('Interlocks no teste de comunicação:')
+            self.FBP.Read_ps_SoftInterlocks()
+            self.FBP.Read_ps_HardInterlocks()
 
         if test == [True, True]:
             result = (True, True)
