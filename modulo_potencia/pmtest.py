@@ -232,11 +232,11 @@ class PowerModuleTest(QThread):
 
             # ADAPTAÇÃO PARA CORRIGIR PROBLEMA NA CARGA 3 - REMOVER
             if not set_current == 'turnedOff':
-                self.FBP.SetISlowRef(0.25 * set_current * 1.13)
+                self.FBP.SetISlowRef(0.25 * set_current * 1.02)
                 time.sleep(0.5)
-                self.FBP.SetISlowRef(0.5 * set_current * 1.13)
+                self.FBP.SetISlowRef(0.5 * set_current * 1.02)
                 time.sleep(0.5)
-                self.FBP.SetISlowRef(set_current * 1.13)
+                self.FBP.SetISlowRef(set_current * 1.02)
                 time.sleep(10)
             ########################################################
 
