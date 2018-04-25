@@ -231,12 +231,13 @@ class PowerModuleTest(QThread):
                 self.update_gui.emit('')
 
             # ADAPTAÇÃO PARA CORRIGIR PROBLEMA NA CARGA 3 - REMOVER
-            self.FBP.SetISlowRef(0.25 * set_current * 1.13)
-            time.sleep(0.5)
-            self.FBP.SetISlowRef(0.5 * set_current * 1.13)
-            time.sleep(0.5)
-            self.FBP.SetISlowRef(set_current * 1.13)
-            time.sleep(10)
+            if not set_current == 'turnedOff':
+                self.FBP.SetISlowRef(0.25 * set_current * 1.13)
+                time.sleep(0.5)
+                self.FBP.SetISlowRef(0.5 * set_current * 1.13)
+                time.sleep(0.5)
+                self.FBP.SetISlowRef(set_current * 1.13)
+                time.sleep(10)
             ########################################################
 
             if serial[2] != None:
@@ -255,12 +256,13 @@ class PowerModuleTest(QThread):
                 self.update_gui.emit('')
 
             # ADAPTAÇÃO PARA CORRIGIR PROBLEMA NA CARGA 3 - REMOVER
-            self.FBP.SetISlowRef(0.25 * set_current)
-            time.sleep(0.5)
-            self.FBP.SetISlowRef(0.5 * set_current)
-            time.sleep(0.5)
-            self.FBP.SetISlowRef(set_current)
-            time.sleep(10)
+            if not set_current == 'turnedOff':
+                self.FBP.SetISlowRef(0.25 * set_current)
+                time.sleep(0.5)
+                self.FBP.SetISlowRef(0.5 * set_current)
+                time.sleep(0.5)
+                self.FBP.SetISlowRef(set_current)
+                time.sleep(10)
             ########################################################
 
             if serial[3] != None:
