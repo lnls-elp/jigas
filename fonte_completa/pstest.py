@@ -262,7 +262,7 @@ class PowerSupplyTest(QThread):
             self.update_gui.emit('Iniciando teste com módulos em malha fechada a 5A...')
 
             for module in range(4):
-                self.FBP.ClosedLoop(2**module)
+                self.FBP.ClosedLoop(15)
                 time.sleep(1)
                 if module == 0:
                     self.FBP.SetISlowRefx4(5, 0, 0, 0)
@@ -293,7 +293,7 @@ class PowerSupplyTest(QThread):
                 if module == 0 or module == 1 or module == 2 or module == 3:
                     self.FBP.SetISlowRefx4(0, 0, 0, 0)
                 time.sleep(2)
-                self.FBP.OpenLoop(2**module)
+                self.FBP.OpenLoop(15)
                 time.sleep(2)
             '''##########################################################################'''
 
