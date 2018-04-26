@@ -161,21 +161,25 @@ class PowerSupplyTest(QThread):
             self.FBP.OpenLoop(0b1111) # todos os módulos em malha aberta
             #self.FBP.OpMode(2)        # coloca a fonte no modo WfmRef para setar as correntes individualmente
 
-            '''################### Teste em Malha Aberta com 5.5% #######################'''
+            '''################## Teste em Malha Aberta com 21.5% #######################'''
             '''##########################################################################'''
-            self.update_gui.emit('Iniciando teste com módulos em malha aberta a 5.5%...')
+            self.update_gui.emit('Iniciando teste com módulos em malha aberta a 21.5%...')
             for module in range(4):
                 if module == 0:
-                    self.FBP.SetISlowRefx4(5.5, 0, 0, 0) # ciclo de trabalho alterado para 5.5%
-                elif module == 1:
-                    self.FBP.SetISlowRefx4(0, 5.5, 0, 0) # ciclo de trabalho alterado para 5.5%
-                elif module == 2:
-                    self.FBP.SetISlowRefx4(0, 0, 5.5, 0) # ciclo de trabalho alterado para 5.5%
-                elif module == 3:
-                    self.FBP.SetISlowRefx4(0, 0, 0, 5.5) # ciclo de trabalho alterado para 5.5%
+                    self.FBP.SetISlowRefx4(21.5, 0, 0, 0) # ciclo de trabalho
+                elif module == 1:                         # alterado para 21.5%
+                    self.FBP.SetISlowRefx4(0, 21.5, 0, 0) # ciclo de trabalho
+                elif module == 2:                         # alterado para 21.5%
+                    self.FBP.SetISlowRefx4(0, 0, 21.5 * 1.05, 0) # ciclo de trabalho
+                elif module == 3:                                # alterado para 22,575%
+                    self.FBP.SetISlowRefx4(0, 0, 0, 21.5) # ciclo de trabalho
+                                                          # alterado para 21.5%
 
-                # o teste original pedia um ciclo de trabalho de 20%, contudo foi necessário
-                # alterá-lo para 5.5% devido a uma alteração na carga
+                # o teste original pedia um ciclo de trabalho de 20%, contudo
+                # foi necessário alterá-lo para 21.5% devido a uma alteração
+                # na carga, a carga 3 está diferente das demais, de forma que
+                # seu ciclo de trabalho deve ser maior para atingir o mesmo
+                # valor de corrente
 
                 time.sleep(2)
 
@@ -206,21 +210,25 @@ class PowerSupplyTest(QThread):
             self.FBP.Read_ps_SoftInterlocks()
             self.FBP.Read_ps_HardInterlocks()
 
-            '''#################### Teste em Malha Aberta com -5.5% #####################'''
+            '''################## Teste em Malha Aberta com -21.5% ######################'''
             '''##########################################################################'''
-            self.update_gui.emit('Iniciando teste com módulos em malha aberta a -5.5%...')
+            self.update_gui.emit('Iniciando teste com módulos em malha aberta a -21.5%...')
             for module in range(4):
                 if module == 0:
-                    self.FBP.SetISlowRefx4(-5.5, 0, 0, 0) # ciclo de trabalho alterado para -5.5%
-                elif module == 1:
-                    self.FBP.SetISlowRefx4(0, -5.5, 0, 0) # ciclo de trabalho alterado para -5.5%
-                elif module == 2:
-                    self.FBP.SetISlowRefx4(0, 0, -5.5, 0) # ciclo de trabalho alterado para -5.5%
-                elif module == 3:
-                    self.FBP.SetISlowRefx4(0, 0, 0, -5.5) # ciclo de trabalho alterado para -5.5%
+                    self.FBP.SetISlowRefx4(-21.5, 0, 0, 0) # ciclo de trabalho
+                elif module == 1:                          # alterado para 21.5%
+                    self.FBP.SetISlowRefx4(0, -21.5, 0, 0) # ciclo de trabalho
+                elif module == 2:                          # alterado para 21.5%
+                    self.FBP.SetISlowRefx4(0, 0, -21.5 * 1.05, 0) # ciclo de trabalho
+                elif module == 3:                                 # alterado para -22,575%
+                    self.FBP.SetISlowRefx4(0, 0, 0, -21.5) # ciclo de trabalho
+                                                           # alterado para 21.5%
 
-                # o teste original pedia um ciclo de trabalho de -20%, contudo foi necessário
-                # alterá-lo para -5.5% devido a uma alteração na carga
+                # o teste original pedia um ciclo de trabalho de 20%, contudo
+                # foi necessário alterá-lo para 21.5% devido a uma alteração
+                # na carga, a carga 3 está diferente das demais, de forma que
+                # seu ciclo de trabalho deve ser maior para atingir o mesmo
+                # valor de corrente
 
                 time.sleep(2)
 
