@@ -103,10 +103,10 @@ class PowerSupplyTest(QThread):
         MeasVout   = [[]  for k in range(4)]
         MeasTemp   = [[]  for l in range(4)]
         MeasCurr   = [[[] for m in range(5)] for n in range(4)]
-        compare_current = [3, -3, 5, 10, -10] # alterar compare_current[0] e compare_current[1] para [3, -3]
+        compare_current = [4, -4, 5, 10, -10] # [0] e [1] alterados para adequação do novo ciclo de trabalho
 
         LimDCLink = [14, 16] # valores limite para o DC Link
-        LimVout   = [5, 6] # valores limite para tensão de saída alterar para LimVout[0] = 0.6 e LimVout[1] =  1
+        LimVout   = [5, 7] # valores limite para tensão de saída alterar para LimVout[0] = 0.6 e LimVout[1] =  1
         LimTemp   = 90      # valor limite para temperatura
 
         # If serial connection is lost
@@ -476,6 +476,11 @@ class PowerSupplyTest(QThread):
                     self.update_gui.emit('      Aprovado no teste de leitura da temperatura')
                 else:
                     self.update_gui.emit('      Reprovado no teste de leitura da temperatura')
+                    print('*****************************************************************')
+                    print('REPROVAÇÃO NO TESTE DE TEMPERATURA')
+                    print('modulo' + str(module + 1))
+                    print(d)
+                    print('*****************************************************************')
                 '''-------------------------------------------------------------'''
 
                 '''-------------------------------------------------------------'''

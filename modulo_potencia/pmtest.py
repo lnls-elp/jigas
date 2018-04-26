@@ -315,10 +315,10 @@ class PowerModuleTest(QThread):
 
                     if round(mod_result2[serial.index(item)][0]) == 0     and \
                        round(mod_result2[serial.index(item)][1]) == 0     and \
-                             2 < mod_result2[serial.index(item)][2] < 3   and \
+                             2 < mod_result2[serial.index(item)][2] < 3.5   and \
                              5 < mod_result2[serial.index(item)][3] < 6   and \
                              -6 < mod_result2[serial.index(item)][4] < -5 and \
-                             -3 < mod_result2[serial.index(item)][5] < -2:
+                             -3.5 < mod_result2[serial.index(item)][5] < -2:
                         test[1] = True
                     else:
                         test[1] = False
