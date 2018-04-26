@@ -106,7 +106,7 @@ class PowerSupplyTest(QThread):
         compare_current = [3, -3, 5, 10, -10] # alterar compare_current[0] e compare_current[1] para [3, -3]
 
         LimDCLink = [14, 16] # valores limite para o DC Link
-        LimVout   = [0.6, 1] # valores limite para tensão de saída alterar para LimVout[0] = 0.6 e LimVout[1] =  1
+        LimVout   = [5, 6] # valores limite para tensão de saída alterar para LimVout[0] = 0.6 e LimVout[1] =  1
         LimTemp   = 90      # valor limite para temperatura
 
         # If serial connection is lost
