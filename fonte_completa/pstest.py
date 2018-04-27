@@ -468,20 +468,28 @@ class PowerSupplyTest(QThread):
                 '''-------------------------------------------------------------'''
 
                 print('\n\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+                self.update_gui.emit('\n\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
                 print('test[6]: ' + str(test[6]))
+                self.update_gui.emit('test[6]: ' + str(test[6]))
                 cont = 0
                 for d in MeasTemp[module]:
                     print('\nmedida ' + str(cont))
+                    self.update_gui.emit('\nmedida ' + str(cont))
                     cont = cont + 1
                     print(test[6])
+                    self.update_gui.emit(str(test[6]))
                     print(d)
+                    self.update_gui.emit(str(d))
                     if d < LimTemp:
                         print('Temperatura dentro do limite')
+                        self.update_gui.emit('Temperatura dentro do limite')
                         if test[6]:
                             print('Teste anterior Ok')
+                            self.update_gui.emit('Teste anterior Ok')
                             test[6] = True
                     else:
                         print('Temperatura fora do limite')
+                        self.update_gui.emit('Temperatura fora do limite')
                         test[6] = False
                 if test[6]:
                     self.update_gui.emit('      Aprovado no teste de leitura da temperatura')
@@ -492,6 +500,12 @@ class PowerSupplyTest(QThread):
                     print('modulo' + str(module + 1))
                     print(d)
                     print('*****************************************************************')
+
+                    self.update_gui.emit('*****************************************************************')
+                    self.update_gui.emit('REPROVAÇÃO NO TESTE DE TEMPERATURA')
+                    self.update_gui.emit('modulo' + str(module + 1))
+                    self.update_gui.emit(str(d))
+                    self.update_gui.emit('*****************************************************************')
                 '''-------------------------------------------------------------'''
                 print('\n')
                 '''-------------------------------------------------------------'''
