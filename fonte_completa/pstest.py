@@ -474,6 +474,7 @@ class PowerSupplyTest(QThread):
                     print('\nmedida ' + str(cont))
                     cont = cont + 1
                     print(test[6])
+                    print(d)
                     if d < LimTemp:
                         print('Temperatura dentro do limite')
                         if test[6]:
