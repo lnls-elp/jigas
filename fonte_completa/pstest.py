@@ -334,7 +334,7 @@ class PowerSupplyTest(QThread):
 
             self.update_gui.emit('Realizando medidas de tensão do DC-Link, tensão de saída e temperatura')
             for o in range(8):
-                time.sleep(30) # alterar tempo para 30s
+                time.sleep(1) # alterar tempo para 30s
                 MeasDCLink[0].append(self.FBP.Read_vDCMod1())
                 time.sleep(0.1)
                 MeasDCLink[1].append(self.FBP.Read_vDCMod2())
@@ -393,7 +393,7 @@ class PowerSupplyTest(QThread):
 
             self.update_gui.emit('Realizando medidas de tensão do DC-Link, tensão de saída e temperatura')
             for p in range(8):
-                time.sleep(30) # alterar tempo para 30s
+                time.sleep(1) # alterar tempo para 30s
                 MeasDCLink[0].append(self.FBP.Read_vDCMod1())
                 time.sleep(0.1)
                 MeasDCLink[1].append(self.FBP.Read_vDCMod2())
@@ -466,11 +466,21 @@ class PowerSupplyTest(QThread):
                 '''-------------------------------------------------------------'''
 
                 '''-------------------------------------------------------------'''
+
+                print('\n\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+                print('test[6]: ' + str(test[6]))
+                cont = 0
                 for d in MeasTemp[module]:
+                    print('\nmedida ' + str(cont))
+                    cont = cont + 1
+                    print(test[6])
                     if d < LimTemp:
+                        print('Temperatura dentro do limite')
                         if test[6]:
+                            print('Teste anterior Ok')
                             test[6] = True
                     else:
+                        print('Temperatura fora do limite')
                         test[6] = False
                 if test[6]:
                     self.update_gui.emit('      Aprovado no teste de leitura da temperatura')
@@ -482,7 +492,7 @@ class PowerSupplyTest(QThread):
                     print(d)
                     print('*****************************************************************')
                 '''-------------------------------------------------------------'''
-
+                print('\n')
                 '''-------------------------------------------------------------'''
                 for e in range(0, len(MeasVout[module]) - 8):
                     if (LimVout[0] < MeasVout[module][e]) and (MeasVout[module][e] < LimVout[1]):

@@ -197,7 +197,12 @@ class PowerModuleTest(QThread):
                 # self._active_interlocks = self._active_interlocks\
                 # + index + '-' + soft + '-' + hard + '  '
                 #---------------------------------------------------------------
-
+                if abs(self.FBP.Read_iMod1()) > 12 or \
+                   abs(self.FBP.Read_iMod2()) > 12 or \
+                   abs(self.FBP.Read_iMod3()) > 12 or \
+                   abs(self.FBP.Read_iMod4()) > 12:
+                    self.update_gui.emit('ERRO DE LEITURA DAS CORRENTES, DESLIGUE A JIGA E REINICIE O TESTE')
+                    break
                 time.sleep(30) # Alterar para 2 min
 
             if serial[0] != None:
