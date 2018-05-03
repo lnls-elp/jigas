@@ -334,7 +334,7 @@ class PowerSupplyTest(QThread):
 
             self.update_gui.emit('Realizando medidas de tensão do DC-Link, tensão de saída e temperatura')
             for o in range(8):
-                time.sleep(10) # alterar tempo para 30s
+                time.sleep(1) # alterar tempo para 30s
                 MeasDCLink[0].append(self.FBP.Read_vDCMod1())
                 time.sleep(0.1)
                 MeasDCLink[1].append(self.FBP.Read_vDCMod2())
@@ -393,7 +393,7 @@ class PowerSupplyTest(QThread):
 
             self.update_gui.emit('Realizando medidas de tensão do DC-Link, tensão de saída e temperatura')
             for p in range(8):
-                time.sleep(10) # alterar tempo para 30s
+                time.sleep(1) # alterar tempo para 30s
                 MeasDCLink[0].append(self.FBP.Read_vDCMod1())
                 time.sleep(0.1)
                 MeasDCLink[1].append(self.FBP.Read_vDCMod2())
@@ -469,22 +469,26 @@ class PowerSupplyTest(QThread):
                 '''-------------------------------------------------------------'''
 
                 for d in MeasTemp[module]:
-                    if d < LimTemp:
+                    if d <= LimTemp:
                         if test[6]:
                             test[6] = True
-                    else:
-                        if d == 127:
-                            test[6] = True
-                            temp_exceeded = 127
 
+                    elif d == 127:
+                        temp_exceeded = 127
                         test[6] = False
-                        temp_exceeded = d
+
+                    elif (d >= LimTemp) and (d != 127):
+                        # if d == 127:
+                            # test[6] = True
+                            # temp_exceeded = 127
+                        test[6] = False
 
                 if test[6]:
                     self.update_gui.emit('      Aprovado no teste de leitura da temperatura')
                 else:
                     if temp_exceeded == 127:
                         self.update_gui.emit('      Aprovado no teste de leitura da temperatura com ressalvas')
+                        test[6] = True
                     else:
                         self.update_gui.emit('      Reprovado no teste de leitura de temperatura')
                 '''-------------------------------------------------------------'''
@@ -515,7 +519,9 @@ class PowerSupplyTest(QThread):
                 else:
                     self.update_gui.emit('      Reprovado no teste 2 de leitura da tensão de saída')
                 '''-------------------------------------------------------------'''
-
+                print('\n')
+                print(test)
+                print('\n')
                 if test == [True for g in range(9)]:
                     if result:
                         result = True
