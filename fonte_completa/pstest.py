@@ -334,7 +334,7 @@ class PowerSupplyTest(QThread):
 
             self.update_gui.emit('Realizando medidas de tensão do DC-Link, tensão de saída e temperatura')
             for o in range(8):
-                time.sleep(1) # alterar tempo para 30s
+                time.sleep(10) # alterar tempo para 30s
                 MeasDCLink[0].append(self.FBP.Read_vDCMod1())
                 time.sleep(0.1)
                 MeasDCLink[1].append(self.FBP.Read_vDCMod2())
@@ -393,7 +393,7 @@ class PowerSupplyTest(QThread):
 
             self.update_gui.emit('Realizando medidas de tensão do DC-Link, tensão de saída e temperatura')
             for p in range(8):
-                time.sleep(1) # alterar tempo para 30s
+                time.sleep(10) # alterar tempo para 30s
                 MeasDCLink[0].append(self.FBP.Read_vDCMod1())
                 time.sleep(0.1)
                 MeasDCLink[1].append(self.FBP.Read_vDCMod2())
