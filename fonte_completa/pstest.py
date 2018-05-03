@@ -334,7 +334,7 @@ class PowerSupplyTest(QThread):
 
             self.update_gui.emit('Realizando medidas de tensão do DC-Link, tensão de saída e temperatura')
             for o in range(8):
-                time.sleep(1) # alterar tempo para 30s
+                time.sleep(10) # alterar tempo para 30s
                 MeasDCLink[0].append(self.FBP.Read_vDCMod1())
                 time.sleep(0.1)
                 MeasDCLink[1].append(self.FBP.Read_vDCMod2())
@@ -393,7 +393,7 @@ class PowerSupplyTest(QThread):
 
             self.update_gui.emit('Realizando medidas de tensão do DC-Link, tensão de saída e temperatura')
             for p in range(8):
-                time.sleep(1) # alterar tempo para 30s
+                time.sleep(10) # alterar tempo para 30s
                 MeasDCLink[0].append(self.FBP.Read_vDCMod1())
                 time.sleep(0.1)
                 MeasDCLink[1].append(self.FBP.Read_vDCMod2())
@@ -433,6 +433,7 @@ class PowerSupplyTest(QThread):
 
                 test = [True for p in range(9)]
                 n = 0
+                temp_exceeded = 0
 
                 self.update_gui.emit('')
                 self.update_gui.emit('Verificando resultados do módulo '\
@@ -540,7 +541,7 @@ class PowerSupplyTest(QThread):
                               ' HardInterlocks ativos: ' + str(self.FBP.Read_ps_HardInterlocks())
 
                 if temp_exceeded == 127:
-                    log.details = log.details + ' - PROBLEMAS COM A LEITURA DE TEMPERATURA (read 127°C)'
+                    log.details = log.details + ' (false_read 127 degrees Celsius)'
 
                 send_to_server_result = self._send_to_server(log)
 
