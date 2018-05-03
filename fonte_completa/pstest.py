@@ -107,7 +107,7 @@ class PowerSupplyTest(QThread):
 
         LimDCLink = [14, 16] # valores limite para o DC Link
         LimVout   = [5, 7] # valores limite para tensão de saída alterar para LimVout[0] = 0.6 e LimVout[1] =  1
-        LimTemp   = 90      # valor limite para temperatura
+        LimTemp   = 60      # valor limite para temperatura
 
         # If serial connection is lost
         if not self._serial_port.is_open:
@@ -200,7 +200,7 @@ class PowerSupplyTest(QThread):
                 print('mod4: ' + str(self.FBP.Read_iMod4()) + '\n')
                 time.sleep(0.1)
 
-                #self.FBP.ConfigWfmRef(module+1, 0) # ajusta 0 o ciclo de trabalho apenas para o modulo testado
+                # self.FBP.ConfigWfmRef(module+1, 0) # ajusta 0 o ciclo de trabalho apenas para o modulo testado
                 if module == 0 or module == 1 or module == 2 or module == 3:
                     self.FBP.SetISlowRefx4(0, 0, 0, 0)
 
@@ -467,48 +467,29 @@ class PowerSupplyTest(QThread):
 
                 '''-------------------------------------------------------------'''
 
-                print('\n\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
-                self.update_gui.emit('\n\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
-                print('test[6]: ' + str(test[6]))
-                self.update_gui.emit('test[6]: ' + str(test[6]))
-                cont = 0
                 for d in MeasTemp[module]:
-                    print('\nmedida ' + str(cont))
-                    self.update_gui.emit('\nmedida ' + str(cont))
-                    cont = cont + 1
-                    print(test[6])
-                    self.update_gui.emit(str(test[6]))
-                    print(d)
-                    self.update_gui.emit(str(d))
                     if d < LimTemp:
-                        print('Temperatura dentro do limite')
-                        self.update_gui.emit('Temperatura dentro do limite')
                         if test[6]:
-                            print('Teste anterior Ok')
-                            self.update_gui.emit('Teste anterior Ok')
                             test[6] = True
                     else:
-                        print('Temperatura fora do limite')
-                        self.update_gui.emit('Temperatura fora do limite')
+                        if d == 127:
+                            test[6] = True
+                            temp_exceeded = 127
+
                         test[6] = False
+                        temp_exceeded = d
+
                 if test[6]:
                     self.update_gui.emit('      Aprovado no teste de leitura da temperatura')
                 else:
-                    self.update_gui.emit('      Reprovado no teste de leitura da temperatura')
-                    print('*****************************************************************')
-                    print('REPROVAÇÃO NO TESTE DE TEMPERATURA')
-                    print('modulo' + str(module + 1))
-                    print(d)
-                    print('*****************************************************************')
+                    if temp_exceeded == 127:
+                        self.update_gui.emit('      Aprovado no teste de leitura da temperatura com ressalvas')
+                    else:
+                        self.update_gui.emit('      Reprovado no teste de leitura de temperatura')
+                '''-------------------------------------------------------------'''
 
-                    self.update_gui.emit('*****************************************************************')
-                    self.update_gui.emit('REPROVAÇÃO NO TESTE DE TEMPERATURA')
-                    self.update_gui.emit('modulo' + str(module + 1))
-                    self.update_gui.emit(str(d))
-                    self.update_gui.emit('*****************************************************************')
                 '''-------------------------------------------------------------'''
-                print('\n')
-                '''-------------------------------------------------------------'''
+
                 for e in range(0, len(MeasVout[module]) - 8):
                     if (LimVout[0] < MeasVout[module][e]) and (MeasVout[module][e] < LimVout[1]):
                         if test[7]:
@@ -557,6 +538,9 @@ class PowerSupplyTest(QThread):
 
                 log.details = 'SoftInterlocks ativos: ' + str(self.FBP.Read_ps_SoftInterlocks()) + \
                               ' HardInterlocks ativos: ' + str(self.FBP.Read_ps_HardInterlocks())
+
+                if temp_exceeded == 127:
+                    log.details = log.details + ' - PROBLEMAS COM A LEITURA DE TEMPERATURA (read 127°C)'
 
                 send_to_server_result = self._send_to_server(log)
 
