@@ -159,7 +159,15 @@ class PowerSupplyTest(QThread):
             self.FBP.TurnOn(0b1111)   # liga todos os módulos
             time.sleep(5)
             self.FBP.OpenLoop(0b1111) # todos os módulos em malha aberta
-            #self.FBP.OpMode(2)        # coloca a fonte no modo WfmRef para setar as correntes individualmente
+
+            if (abs(self.FBP.Read_iMod1()) > 12) or \
+               (abs(self.FBP.Read_iMod2()) > 12) or \
+               (abs(self.FBP.Read_iMod3()) > 12) or \
+               (abs(self.FBP.Read_iMod4()) > 12):
+                self.update_gui.emit('ERRO! REINICIE O TESTE E AS FONTES')
+                time.sleep(10)
+                raise NameError('ERRO! REINICIE O TESTE E AS FONTES')
+            time.sleep(1)
 
             '''################## Teste em Malha Aberta com 21.5% #######################'''
             '''##########################################################################'''
@@ -182,6 +190,15 @@ class PowerSupplyTest(QThread):
                 # valor de corrente
 
                 time.sleep(2)
+
+                if (abs(self.FBP.Read_iMod1()) > 12) or \
+                   (abs(self.FBP.Read_iMod2()) > 12) or \
+                   (abs(self.FBP.Read_iMod3()) > 12) or \
+                   (abs(self.FBP.Read_iMod4()) > 12):
+                    self.update_gui.emit('ERRO! REINICIE O TESTE E AS FONTES')
+                    time.sleep(10)
+                    raise NameError('ERRO! REINICIE O TESTE E AS FONTES')
+                time.sleep(1)
 
                 MeasureList = self._save_CurrentMeasurement(module)
 
@@ -273,6 +290,15 @@ class PowerSupplyTest(QThread):
                 elif module == 3:
                     self.FBP.SetISlowRefx4(0, 0, 0, 5)
                 time.sleep(2)
+
+                if (abs(self.FBP.Read_iMod1()) > 12) or \
+                   (abs(self.FBP.Read_iMod2()) > 12) or \
+                   (abs(self.FBP.Read_iMod3()) > 12) or \
+                   (abs(self.FBP.Read_iMod4()) > 12):
+                    self.update_gui.emit('ERRO! REINICIE O TESTE E AS FONTES')
+                    time.sleep(10)
+                    raise NameError('ERRO! REINICIE O TESTE E AS FONTES')
+                time.sleep(1)
 
                 MeasureList = self._save_CurrentMeasurement(module)
 

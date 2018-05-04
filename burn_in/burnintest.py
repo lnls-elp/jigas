@@ -120,7 +120,9 @@ class BurnInTest(QThread):
         print('##################################################')
         print('##################################################')
 
-        for set_current in [5, -5]: # alterar para 10 e -10, adequação à carga da WEG
+        test_current = [5, -5] # alterar para 10 e -10, adequação à carga da WEG
+
+        for set_current in test_current:
             for ps_turnOn in self._serial_number:
                 if self.test_communication(self._serial_number.index(ps_turnOn) + 1):
                     self.FBP.SetSlaveAdd(self._serial_number.index(ps_turnOn) + 1)
@@ -156,9 +158,9 @@ class BurnInTest(QThread):
                        (round(self.FBP.Read_iMod2()) == 0) or \
                        (round(self.FBP.Read_iMod3()) == 0) or \
                        (round(self.FBP.Read_iMod4()) == 0):
-                        self.update_gui.emit('ERRO! REINICIE O TESTE!')
+                        self.update_gui.emit('ERRO! REINICIE O TESTE E AS FONTES')
                         time.sleep(10)
-                        raise NameError('ERRO! REINICIE O TESTE!')
+                        raise NameError('ERRO! REINICIE O TESTE E AS FONTES')
 
                 else:
                     self.update_gui.emit('Endereço não encontrado')
@@ -250,7 +252,7 @@ class BurnInTest(QThread):
                                 self.update_gui.emit('')
                                 '''################################################################'''
 
-                                if set_current == 7:
+                                if set_current == test_current[0]:
                                     log = PowerSupplyLog()
                                     log.test_type = self.test['Burn-In']
                                     log.id_canal_power_supply = i + 1
@@ -278,7 +280,7 @@ class BurnInTest(QThread):
 
                                     result = self._send_to_server(log)
 
-                                elif set_current == -7:
+                                elif set_current == test_current[1]:
                                     log = PowerSupplyLog()
                                     log.test_type = self.test['Burn-In']
                                     log.id_canal_power_supply = i + 1
@@ -437,7 +439,10 @@ class BurnInTest(QThread):
         return ActiveHardInterlocks
 
     def _auto_tuning(self, current, module):
-        duty = [20, 50]
+        if current > 0:
+            duty = [20, 50]
+        elif current < 0:
+            duty = [-20, -50]
         iout = []
 
         print('\n####################### Auto tuning #######################\n')
@@ -509,19 +514,19 @@ class BurnInTest(QThread):
         print(m)
 
         if m == 0:
-            self.update_gui.emit('ERRO! REINICIE O TESTE')
+            self.update_gui.emit('ERRO! REINICIE O TESTE E AS FONTES')
             time.sleep(10)
-            raise NameError('ERRO! REINICIE O TESTE')
+            raise NameError('ERRO! REINICIE O TESTE E AS FONTES')
 
         b = (-m) * duty[0] + iout[0]
         set_duty = (current - b)/m
         set_duty = round(set_duty, 2)
         print(set_duty)
 
-        if set_duty > 95:
-            self.update_gui.emit('ERRO! REINICIE O TESTE')
+        if abs(set_duty) > 95:
+            self.update_gui.emit('ERRO! REINICIE O TESTE E AS FONTES')
             time.sleep(10)
-            raise NameError('ERRO! REINICIE O TESTE')
+            raise NameError('ERRO! REINICIE O TESTE E AS FONTES')
 
         return set_duty
 
