@@ -449,6 +449,8 @@ class BurnInTest(QThread):
         elif current < 0:
             duty = [-20, -50]
         iout = []
+        vout = []
+        iref = []
 
         print('\n####################### Auto tuning #######################\n')
         if module == 1:
@@ -458,11 +460,19 @@ class BurnInTest(QThread):
             self.FBP.SetISlowRefx4(duty[0], 0, 0, 0)
             time.sleep(5)
             iout.append(self.FBP.Read_iMod1())
+            time.sleep(0.1)
+            vout.append(self.FBP.Read_vOutMod1())
+            time.sleep(0.1)
+            iref.append(self.FBP.Read_iRef1())
             time.sleep(1)
 
             self.FBP.SetISlowRefx4(duty[1], 0, 0, 0)
             time.sleep(5)
             iout.append(self.FBP.Read_iMod1())
+            time.sleep(0.1)
+            vout.append(self.FBP.Read_vOutMod1())
+            time.sleep(0.1)
+            iref.append(self.FBP.Read_iRef1())
             time.sleep(1)
             self.FBP.TurnOff(1)
             time.sleep(0b0001)
@@ -474,11 +484,19 @@ class BurnInTest(QThread):
             self.FBP.SetISlowRefx4(0, duty[0], 0, 0)
             time.sleep(5)
             iout.append(self.FBP.Read_iMod2())
+            time.sleep(0.1)
+            vout.append(self.FBP.Read_vOutMod2())
+            time.sleep(0.1)
+            iref.append(self.FBP.Read_iRef2())
             time.sleep(1)
 
             self.FBP.SetISlowRefx4(0, duty[1], 0, 0)
             time.sleep(5)
             iout.append(self.FBP.Read_iMod2())
+            time.sleep(0.1)
+            vout.append(self.FBP.Read_vOutMod2())
+            time.sleep(0.1)
+            iref.append(self.FBP.Read_iRef2())
             time.sleep(1)
             self.FBP.TurnOff(0b0010)
             time.sleep(1)
@@ -490,11 +508,19 @@ class BurnInTest(QThread):
             self.FBP.SetISlowRefx4(0, 0, duty[0], 0)
             time.sleep(5)
             iout.append(self.FBP.Read_iMod3())
+            time.sleep(0.1)
+            vout.append(self.FBP.Read_vOutMod3())
+            time.sleep(0.1)
+            iref.append(self.FBP.Read_iRef3())
             time.sleep(1)
 
             self.FBP.SetISlowRefx4(0, 0, duty[1], 0)
             time.sleep(5)
             iout.append(self.FBP.Read_iMod3())
+            time.sleep(0.1)
+            vout.append(self.FBP.Read_vOutMod3())
+            time.sleep(0.1)
+            iref.append(self.FBP.Read_iRef3())
             time.sleep(1)
             self.FBP.TurnOff(0b0100)
             time.sleep(1)
@@ -506,16 +532,32 @@ class BurnInTest(QThread):
             self.FBP.SetISlowRefx4(0, 0, 0, duty[0])
             time.sleep(5)
             iout.append(self.FBP.Read_iMod4())
+            time.sleep(0.1)
+            vout.append(self.FBP.Read_vOutMod4())
+            time.sleep(0.1)
+            iref.append(self.FBP.Read_iRef4())
             time.sleep(1)
 
             self.FBP.SetISlowRefx4(0, 0, 0, duty[1])
             time.sleep(5)
             iout.append(self.FBP.Read_iMod4())
+            time.sleep(0.1)
+            vout.append(self.FBP.Read_vOutMod4())
+            time.sleep(0.1)
+            iref.append(self.FBP.Read_iRef4())
             time.sleep(1)
             self.FBP.TurnOff(0b1000)
             time.sleep(1)
 
+        print('iref:')
+        print(iref)
+        print('corrente de saída:')
+        print(iout)
+        print('tensão de saída:')
+        print(vout)
+
         m = (iout[1] - iout[0])/(duty[1] - duty[0])
+        print('coef. angular:')
         print(m)
 
         if m == 0:
@@ -526,6 +568,7 @@ class BurnInTest(QThread):
         b = (-m) * duty[0] + iout[0]
         set_duty = (current - b)/m
         set_duty = round(set_duty, 2)
+        print('duty cicle:')
         print(set_duty)
 
         if abs(set_duty) > 95:
