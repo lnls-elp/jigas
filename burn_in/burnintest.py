@@ -120,7 +120,7 @@ class BurnInTest(QThread):
         print('##################################################')
         print('##################################################')
 
-        test_current = [5, -5] # alterar para 10 e -10, adequação à carga da WEG
+        test_current = [7, -7] # alterar para 10 e -10, adequação à carga da WEG
 
         for set_current in test_current:
             for ps_turnOn in self._serial_number:
@@ -166,7 +166,7 @@ class BurnInTest(QThread):
                     self.update_gui.emit('Endereço não encontrado')
                     print('Endereço não encontrado')
 
-            for a in range(5): # alterar para 72
+            for a in range(72): # alterar para 72
                 for ps_under_test in self._serial_number:
                     result = True
                     ps = PowerSupply()
@@ -320,7 +320,7 @@ class BurnInTest(QThread):
                 else:
                     result = False
 
-                time.sleep(10) #Alterar para 600
+                time.sleep(600) #Alterar para 600
 
         self.test_complete.emit(result)
         self.update_gui.emit('FIM DO TESTE!')
