@@ -60,7 +60,7 @@ class BurnInTest(QThread):
         try:
             self.FBP.Config_nHRADC(4) # alterar para 4
             # self.FBP.Write_sigGen_Aux(1) # alterar para 4
-            time.sleep(1)
+            time.sleep(5)
             test_package = self.FBP.Read_ps_Model()
             time.sleep(1)
 
@@ -94,7 +94,7 @@ class BurnInTest(QThread):
         time.sleep(0.5)
 
         self.FBP.SetSlaveAdd(ps_address)
-        time.sleep(0.5)
+        time.sleep(1)
 
         if self.test_communication(ps_address):
             self.FBP.SetRSAddress(self._ps_address)
@@ -124,16 +124,18 @@ class BurnInTest(QThread):
             for ps_turnOn in self._serial_number:
                 if self.test_communication(self._serial_number.index(ps_turnOn) + 1):
                     self.FBP.SetSlaveAdd(self._serial_number.index(ps_turnOn) + 1)
+                    time.sleep(1)
                     self.FBP.Config_nHRADC(4) # alterar para 4
+                    time.sleep(5)
 
                     self.update_gui.emit('Realizando auto-tuning dos módulos de potência...')
-                    self.update_gui.emit('                          auto-tuning módulo 1...')
+                    self.update_gui.emit('                                                         auto-tuning módulo 1...')
                     duty_mod1 = self._auto_tuning(set_current, 1)
-                    self.update_gui.emit('                          auto-tuning módulo 2...')
+                    self.update_gui.emit('                                                         auto-tuning módulo 2...')
                     duty_mod2 = self._auto_tuning(set_current, 2)
-                    self.update_gui.emit('                          auto-tuning módulo 3...')
+                    self.update_gui.emit('                                                         auto-tuning módulo 3...')
                     duty_mod3 = self._auto_tuning(set_current, 3)
-                    self.update_gui.emit('                          auto-tuning módulo 4...')
+                    self.update_gui.emit('                                                         auto-tuning módulo 4...')
                     duty_mod4 = self._auto_tuning(set_current, 4)
 
                     self.update_gui.emit('Ligando fontes e setando correntes para ' + str(set_current) + ' A')
@@ -146,11 +148,23 @@ class BurnInTest(QThread):
                     time.sleep(0.5)
                     self.current_state.emit(str(set_current) + 'A')
 
+                    if (abs(self.FBP.Read_iMod1()) > 12) or \
+                       (abs(self.FBP.Read_iMod2()) > 12) or \
+                       (abs(self.FBP.Read_iMod3()) > 12) or \
+                       (abs(self.FBP.Read_iMod4()) > 12) or \
+                       (round(self.FBP.Read_iMod1()) == 0) or \
+                       (round(self.FBP.Read_iMod2()) == 0) or \
+                       (round(self.FBP.Read_iMod3()) == 0) or \
+                       (round(self.FBP.Read_iMod4()) == 0):
+                        self.update_gui.emit('ERRO! REINICIE O TESTE!')
+                        time.sleep(10)
+                        raise NameError('ERRO! REINICIE O TESTE!')
+
                 else:
                     self.update_gui.emit('Endereço não encontrado')
                     print('Endereço não encontrado')
 
-            for a in range(72): #alterar para 72
+            for a in range(72): # alterar para 72
                 for ps_under_test in self._serial_number:
                     result = True
                     ps = PowerSupply()
@@ -189,7 +203,7 @@ class BurnInTest(QThread):
                                 '''################################################################'''
                                 self.update_gui.emit('          Tensão de saída: ' + str(MeasureList[1]))
                                 if set_current > 0:
-                                    if 2 <= round(MeasureList[1]) <= 5:
+                                    if 1 <= round(MeasureList[1]) <= 14:
                                         self.update_gui.emit('          Leitura da tensão de saída OK')
                                         if test:
                                             test = True
@@ -198,7 +212,7 @@ class BurnInTest(QThread):
                                         self.update_gui.emit('          Leitura da tensão de saída NOK')
 
                                 elif set_current < 0:
-                                    if -5 <= round(MeasureList[1]) <= -2:
+                                    if -14 <= round(MeasureList[1]) <= -1:
                                         self.update_gui.emit('          Leitura da tensão de saída OK')
                                         if test:
                                             test = True
@@ -212,7 +226,7 @@ class BurnInTest(QThread):
                                 '''########## Verificando resultado da tensão de entrada ##########'''
                                 '''################################################################'''
                                 self.update_gui.emit('          Tensão de entrada: ' + str(MeasureList[2]))
-                                if 10 <= round(MeasureList[2]) <= 16:
+                                if 6 <= round(MeasureList[2]) <= 16:
                                     self.update_gui.emit('          Leitura da tensão de entrada OK')
                                     if test:
                                         test = True
@@ -226,7 +240,7 @@ class BurnInTest(QThread):
                                 '''############# Verificando resultado da temperatura #############'''
                                 '''################################################################'''
                                 self.update_gui.emit('          Temperatura: ' + str(MeasureList[3]))
-                                if (MeasureList[3] < 100) or (MeasureList[3] == 127):
+                                if (MeasureList[3] < 110) or (MeasureList[3] == 127):
                                     self.update_gui.emit('          Leitura da temperatura OK')
                                     if test:
                                         test = True
@@ -304,7 +318,7 @@ class BurnInTest(QThread):
                 else:
                     result = False
 
-                time.sleep(600) #Alterar para 600
+                time.sleep(300) #Alterar para 600
 
         self.test_complete.emit(result)
         self.update_gui.emit('FIM DO TESTE!')
@@ -312,6 +326,7 @@ class BurnInTest(QThread):
 
     def _save_AllMeasurements(self, address, module):
         self.FBP.SetSlaveAdd(address)
+        time.sleep(1)
         Measurement = []
 
         if module == 0:
@@ -426,10 +441,10 @@ class BurnInTest(QThread):
         iout = []
 
         print('\n####################### Auto tuning #######################\n')
-        self.FBP.TurnOn(module)
         if module == 1:
             print('\nIniciando auto-tuning do modulo 1...')
-            self.FBP.TurnOn(1)
+            self.FBP.TurnOn(0b0001)
+            time.sleep(1)
             self.FBP.SetISlowRefx4(duty[0], 0, 0, 0)
             time.sleep(5)
             iout.append(self.FBP.Read_iMod1())
@@ -440,10 +455,12 @@ class BurnInTest(QThread):
             iout.append(self.FBP.Read_iMod1())
             time.sleep(1)
             self.FBP.TurnOff(1)
+            time.sleep(0b0001)
 
         elif module == 2:
             print('\nIniciando auto-tuning do modulo 2...')
-            self.FBP.TurnOn(2)
+            self.FBP.TurnOn(0b0010)
+            time.sleep(1)
             self.FBP.SetISlowRefx4(0, duty[0], 0, 0)
             time.sleep(5)
             iout.append(self.FBP.Read_iMod2())
@@ -453,11 +470,13 @@ class BurnInTest(QThread):
             time.sleep(5)
             iout.append(self.FBP.Read_iMod2())
             time.sleep(1)
-            self.FBP.TurnOff(2)
+            self.FBP.TurnOff(0b0010)
+            time.sleep(1)
 
         elif module == 3:
             print('\nIniciando auto-tuning do modulo 3...')
-            self.FBP.TurnOn(4)
+            self.FBP.TurnOn(0b0100)
+            time.sleep(1)
             self.FBP.SetISlowRefx4(0, 0, duty[0], 0)
             time.sleep(5)
             iout.append(self.FBP.Read_iMod3())
@@ -467,11 +486,13 @@ class BurnInTest(QThread):
             time.sleep(5)
             iout.append(self.FBP.Read_iMod3())
             time.sleep(1)
-            self.FBP.TurnOff(4)
+            self.FBP.TurnOff(0b0100)
+            time.sleep(1)
 
         elif module == 4:
             print('\nIniciando auto-tuning do modulo 4...')
-            self.FBP.TurnOn(8)
+            self.FBP.TurnOn(0b1000)
+            time.sleep(1)
             self.FBP.SetISlowRefx4(0, 0, 0, duty[0])
             time.sleep(5)
             iout.append(self.FBP.Read_iMod4())
@@ -481,13 +502,27 @@ class BurnInTest(QThread):
             time.sleep(5)
             iout.append(self.FBP.Read_iMod4())
             time.sleep(1)
-            self.FBP.TurnOff(8)
+            self.FBP.TurnOff(0b1000)
+            time.sleep(1)
 
         m = (iout[1] - iout[0])/(duty[1] - duty[0])
         print(m)
-        b = (-m) * duty[0] + iout[0]
 
+        if m == 0:
+            self.update_gui.emit('ERRO! REINICIE O TESTE')
+            time.sleep(10)
+            raise NameError('ERRO! REINICIE O TESTE')
+
+        b = (-m) * duty[0] + iout[0]
         set_duty = (current - b)/m
+        set_duty = round(set_duty, 2)
+        print(set_duty)
+
+        if set_duty > 95:
+            self.update_gui.emit('ERRO! REINICIE O TESTE')
+            time.sleep(10)
+            raise NameError('ERRO! REINICIE O TESTE')
+
         return set_duty
 
     def _send_to_server(self, item):
