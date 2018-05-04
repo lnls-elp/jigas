@@ -166,7 +166,7 @@ class BurnInTest(QThread):
                     self.update_gui.emit('Endereço não encontrado')
                     print('Endereço não encontrado')
 
-            for a in range(72): # alterar para 72
+            for a in range(5): # alterar para 72
                 for ps_under_test in self._serial_number:
                     result = True
                     ps = PowerSupply()
@@ -320,11 +320,16 @@ class BurnInTest(QThread):
                 else:
                     result = False
 
-                time.sleep(300) #Alterar para 600
+                time.sleep(10) #Alterar para 600
 
         self.test_complete.emit(result)
         self.update_gui.emit('FIM DO TESTE!')
-        self.FBP.TurnOff(0b1111)
+
+        for ps_turnOff in self._serial_number:
+            self.FBP.SetSlaveAdd(self._serial_number.index(ps_turnOff) + 1)
+            time.sleep(1)
+            self.FBP.TurnOff(15)
+            time.sleep(1)
 
     def _save_AllMeasurements(self, address, module):
         self.FBP.SetSlaveAdd(address)
