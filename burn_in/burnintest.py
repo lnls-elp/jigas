@@ -445,9 +445,9 @@ class BurnInTest(QThread):
 
     def _auto_tuning(self, current, module):
         if current > 0:
-            duty = [20, 50]
+            duty = [20, 30]
         elif current < 0:
-            duty = [-20, -50]
+            duty = [-20, -30]
         iout = []
         vout = []
         iref = []
@@ -464,7 +464,7 @@ class BurnInTest(QThread):
             vout.append(self.FBP.Read_vOutMod1())
             time.sleep(0.1)
             iref.append(self.FBP.Read_iRef1())
-            time.sleep(300)
+            time.sleep(5)
 
             self.FBP.SetISlowRefx4(duty[1], 0, 0, 0)
             time.sleep(5)
@@ -475,7 +475,7 @@ class BurnInTest(QThread):
             iref.append(self.FBP.Read_iRef1())
             time.sleep(1)
             self.FBP.TurnOff(1)
-            time.sleep(300)
+            time.sleep(5)
 
         elif module == 2:
             print('\nIniciando auto-tuning do modulo 2...')
@@ -488,7 +488,7 @@ class BurnInTest(QThread):
             vout.append(self.FBP.Read_vOutMod2())
             time.sleep(0.1)
             iref.append(self.FBP.Read_iRef2())
-            time.sleep(300)
+            time.sleep(5)
 
             self.FBP.SetISlowRefx4(0, duty[1], 0, 0)
             time.sleep(5)
@@ -499,7 +499,7 @@ class BurnInTest(QThread):
             iref.append(self.FBP.Read_iRef2())
             time.sleep(1)
             self.FBP.TurnOff(0b0010)
-            time.sleep(300)
+            time.sleep(5)
 
         elif module == 3:
             print('\nIniciando auto-tuning do modulo 3...')
@@ -512,7 +512,7 @@ class BurnInTest(QThread):
             vout.append(self.FBP.Read_vOutMod3())
             time.sleep(0.1)
             iref.append(self.FBP.Read_iRef3())
-            time.sleep(300)
+            time.sleep(5)
 
             self.FBP.SetISlowRefx4(0, 0, duty[1], 0)
             time.sleep(5)
@@ -523,7 +523,7 @@ class BurnInTest(QThread):
             iref.append(self.FBP.Read_iRef3())
             time.sleep(1)
             self.FBP.TurnOff(0b0100)
-            time.sleep(300)
+            time.sleep(5)
 
         elif module == 4:
             print('\nIniciando auto-tuning do modulo 4...')
@@ -536,7 +536,7 @@ class BurnInTest(QThread):
             vout.append(self.FBP.Read_vOutMod4())
             time.sleep(0.1)
             iref.append(self.FBP.Read_iRef4())
-            time.sleep(300)
+            time.sleep(5)
 
             self.FBP.SetISlowRefx4(0, 0, 0, duty[1])
             time.sleep(5)
@@ -547,7 +547,7 @@ class BurnInTest(QThread):
             iref.append(self.FBP.Read_iRef4())
             time.sleep(1)
             self.FBP.TurnOff(0b1000)
-            time.sleep(300)
+            time.sleep(5)
 
         print('iref:')
         print(iref)
