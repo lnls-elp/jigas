@@ -171,23 +171,23 @@ class PowerSupplyTest(QThread):
 
             '''################## Teste em Malha Aberta com 21.5% #######################'''
             '''##########################################################################'''
-            self.update_gui.emit('Iniciando teste com módulos em malha aberta a 21.5%...')
+            self.update_gui.emit('Iniciando teste com módulos a 4A...')
+            self.FBP.ClosedLoop(15)
+            time.sleep(1)
             for module in range(4):
                 if module == 0:
-                    self.FBP.SetISlowRefx4(21.5, 0, 0, 0) # ciclo de trabalho
-                elif module == 1:                         # alterado para 21.5%
-                    self.FBP.SetISlowRefx4(0, 21.5, 0, 0) # ciclo de trabalho
-                elif module == 2:                         # alterado para 21.5%
-                    self.FBP.SetISlowRefx4(0, 0, 21.5 * 1.05, 0) # ciclo de trabalho
-                elif module == 3:                                # alterado para 22,575%
-                    self.FBP.SetISlowRefx4(0, 0, 0, 21.5) # ciclo de trabalho
-                                                          # alterado para 21.5%
+                    self.FBP.SetISlowRefx4(4, 0, 0, 0) # ciclo de trabalho
+                elif module == 1:                      # alterado para 21.5%
+                    self.FBP.SetISlowRefx4(0, 4, 0, 0) # ciclo de trabalho
+                elif module == 2:                      # alterado para 21.5%
+                    self.FBP.SetISlowRefx4(0, 0, 4, 0) # ciclo de trabalho
+                elif module == 3:                      # alterado para 22,575%
+                    self.FBP.SetISlowRefx4(0, 0, 0, 4) # ciclo de trabalho
+                                                       # alterado para 21.5%
 
                 # o teste original pedia um ciclo de trabalho de 20%, contudo
-                # foi necessário alterá-lo para 21.5% devido a uma alteração
-                # na carga, a carga 3 está diferente das demais, de forma que
-                # seu ciclo de trabalho deve ser maior para atingir o mesmo
-                # valor de corrente
+                # foi necessário alter o teste para trabalhar em malha aberta
+                # devido a uma alteração na carga
 
                 time.sleep(2)
 
@@ -229,23 +229,23 @@ class PowerSupplyTest(QThread):
 
             '''################## Teste em Malha Aberta com -21.5% ######################'''
             '''##########################################################################'''
-            self.update_gui.emit('Iniciando teste com módulos em malha aberta a -21.5%...')
+            self.update_gui.emit('Iniciando teste com módulos a -4A...')
+            self.FBP.ClosedLoop(15)
+            time.sleep(1)
             for module in range(4):
                 if module == 0:
-                    self.FBP.SetISlowRefx4(-21.5, 0, 0, 0) # ciclo de trabalho
-                elif module == 1:                          # alterado para 21.5%
-                    self.FBP.SetISlowRefx4(0, -21.5, 0, 0) # ciclo de trabalho
-                elif module == 2:                          # alterado para 21.5%
-                    self.FBP.SetISlowRefx4(0, 0, -21.5 * 1.05, 0) # ciclo de trabalho
-                elif module == 3:                                 # alterado para -22,575%
-                    self.FBP.SetISlowRefx4(0, 0, 0, -21.5) # ciclo de trabalho
-                                                           # alterado para 21.5%
+                    self.FBP.SetISlowRefx4(-4, 0, 0, 0) # ciclo de trabalho
+                elif module == 1:                      # alterado para 21.5%
+                    self.FBP.SetISlowRefx4(0, -4, 0, 0) # ciclo de trabalho
+                elif module == 2:                      # alterado para 21.5%
+                    self.FBP.SetISlowRefx4(0, 0, -4, 0) # ciclo de trabalho
+                elif module == 3:                      # alterado para 22,575%
+                    self.FBP.SetISlowRefx4(0, 0, 0, -4) # ciclo de trabalho
+                                                       # alterado para 21.5%
 
                 # o teste original pedia um ciclo de trabalho de 20%, contudo
-                # foi necessário alterá-lo para 21.5% devido a uma alteração
-                # na carga, a carga 3 está diferente das demais, de forma que
-                # seu ciclo de trabalho deve ser maior para atingir o mesmo
-                # valor de corrente
+                # foi necessário alter o teste para trabalhar em malha aberta
+                # devido a uma alteração na carga
 
                 time.sleep(2)
 
@@ -360,7 +360,7 @@ class PowerSupplyTest(QThread):
 
             self.update_gui.emit('Realizando medidas de tensão do DC-Link, tensão de saída e temperatura')
             for o in range(8):
-                time.sleep(10) # alterar tempo para 30s
+                time.sleep(30) # alterar tempo para 30s
                 MeasDCLink[0].append(self.FBP.Read_vDCMod1())
                 time.sleep(0.1)
                 MeasDCLink[1].append(self.FBP.Read_vDCMod2())
@@ -419,7 +419,7 @@ class PowerSupplyTest(QThread):
 
             self.update_gui.emit('Realizando medidas de tensão do DC-Link, tensão de saída e temperatura')
             for p in range(8):
-                time.sleep(10) # alterar tempo para 30s
+                time.sleep(30) # alterar tempo para 30s
                 MeasDCLink[0].append(self.FBP.Read_vDCMod1())
                 time.sleep(0.1)
                 MeasDCLink[1].append(self.FBP.Read_vDCMod2())
