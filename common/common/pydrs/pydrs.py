@@ -11,6 +11,9 @@ import struct
 import glob
 import serial
 import time
+import csv
+import math
+import numpy as np
 
 from datetime import datetime
 
@@ -44,36 +47,73 @@ ListHRADCInputType = ['Vin_bipolar','Vin_unipolar_p','Vin_unipolar_n','Iin_bipol
                       'Vref_unipolar_n','GND_unipolar','Temp','Reserved0','Reserved1','Reserved2']
 
 ListPSModels = ['FBP_100kHz', 'FBP_Parallel_100kHz', 'FAC_ACDC_10kHz', 'FAC_DCDC_20kHz',
-	            'FAC_Full_ACDC_10kHz', 'FAC_Full_DCDC_20kHz', 'FAP_ACDC',
-	            'FAP_DCDC_20kHz', 'TEST_HRPWM', 'TEST_HRADC', 'JIGA_HRADC',
-	            'FAP_DCDC_15kHz_225A', 'FBPx4_100kHz', 'FAP_6U_DCDC_20kHz',
-	            'JIGA_BASTIDOR']
+                'FAC_Full_ACDC_10kHz', 'FAC_Full_DCDC_20kHz', 'FAP_ACDC',
+                'FAP_DCDC_20kHz', 'TEST_HRPWM', 'TEST_HRADC', 'JIGA_HRADC',
+                'FAP_DCDC_15kHz_225A', 'FBPx4_100kHz', 'FAP_6U_DCDC_20kHz',
+                'JIGA_BASTIDOR']
 
-ListVar_v2_1 = ['ps_status','ps_setpoint','ps_reference','wfmref_selected',
-                'wfmref_sync_mode','wfmref_gain','wfmref_offset',
-                'p_wfmref_start','p_wfmref_end','p_wfmref_idx']
-ListFunc_v2_1 = ['turn_on','turn_off','open_loop','closed_loop','cfg_op_mode',
-                 'cfg_ps_model','reset_interlocks','remote_interface',
+ListPSModels_v2_1 = ['Empty','FBP','FBP_DCLink','FAC_ACDC','FAC_DCDC']
+ListVar_v2_1 = ['ps_status','ps_setpoint','ps_reference','firmware_version',
+                'counter_set_slowref','counter_sync_pulse','siggen_enable',
+                'siggen_type','siggen_num_cycles','siggen_n','siggen_freq',
+                'siggen_amplitude','siggen_offset','siggen_aux_param',
+                'wfmref_selected','wfmref_sync_mode','wfmref_gain',
+                'wfmref_offset','p_wfmref_start','p_wfmref_end','p_wfmref_idx']
+
+ListFunc_v2_1 = ['turn_on','turn_off','open_loop','closed_loop','select_op_mode',
+                 'select_ps_model','reset_interlocks','remote_interface',
                  'set_serial_address','set_serial_termination','unlock_udc',
                  'lock_udc','cfg_buf_samples','enable_buf_samples',
                  'disable_buf_samples','sync_pulse','set_slowref',
-                 'set_slowref_fbp']
+                 'set_slowref_fbp','reset_counters','scale_wfmref',
+                 'select_wfmref','save_wfmref','reset_wfmref','cfg_siggen',
+                 'set_siggen','enable_siggen','disable_siggen','set_slowref_readback',
+                 'set_slowref_fbp_readback','set_param','get_param',
+                 'save_param_eeprom','load_param_eeprom', 'save_param_bank',
+                 'load_param_bank','set_dsp_coeffs','get_dsp_coeff',
+                 'save_dsp_coeffs_eeprom', 'load_dsp_coeffs_eeprom',
+                 'save_dsp_modules_eeprom', 'load_dsp_modules_eeprom','reset_udc']
+
+ListOpMode_v2_1 = ['Off','Interlock','Initializing','SlowRef','SlowRefSync',
+                   'Cycle','RmpWfm','MigWfm','FastRef']
+
+ListParameters = ['PS_Name','PS_Model','Num_PS_Modules','Command_Interface',
+                  'RS485_Baudrate','RS485_Address','RS485_Termination',
+                  'UDCNet_Address','Ethernet_IP','Ethernet_Subnet_Mask',
+                  'Freq_ISR_Controller','Freq_TimeSlicer','Max_Ref','Min_Ref',
+                  'Max_Ref_OpenLoop','Min_Ref_OpenLoop','Max_SlewRate_SlowRef',
+                  'Max_SlewRate_SigGen_Amp','Max_SlewRate_SigGen_Offset',
+                  'Max_SlewRate_WfmRef','PWM_Freq','PWM_DeadTime',
+                  'PWM_Max_Duty','PWM_Min_Duty','PWM_Max_Duty_OpenLoop',
+                  'PWM_Min_Duty_OpenLoop','PWM_Lim_Duty_Share',
+                  'HRADC_Num_Boards','HRADC_Freq_SPICLK','HRADC_Freq_Sampling',
+                  'HRADC_Enable_Heater','HRADC_Enable_Monitor',
+                  'HRADC_Type_Transducer','HRADC_Gain_Transducer',
+                  'HRADC_Offset_Transducer','SigGen_Type','SigGen_Num_Cycles',
+                  'SigGen_Freq','SigGen_Amplitude','SigGen_Offset',
+                  'SigGen_Aux_Param','WfmRef_ID_WfmRef','WfmRef_SyncMode',
+                  'WfmRef_Gain','WfmRef_Offset','Analog_Var_Max','Analog_Var_Min']
+
 
 ListBCBFunc = ['ClearPof', 'SetPof', 'ReadPof', 'EnableBuzzer', 'DisableBuzzer',
-                'SendUartData', 'GetUartData', 'ClearUartBuffer', 'SendCanData',
-                'GetCanData', 'GetI2cData']
+                'SendUartData', 'GetUartData', 'SendCanData', 'GetCanData',
+                'GetI2cData']
 
-typeFormat = {'uint16_t': 'BBHHB', 'uint32_t': 'BBHIB', 'float': 'BBHfB'}
+typeFormat = {'uint8_t': 'BBHBB', 'uint16_t': 'BBHHB', 'uint32_t': 'BBHIB',
+              'float': 'BBHfB'}
 bytesFormat = {'Uint16': 'H', 'Uint32': 'L', 'Uint64': 'Q', 'float': 'f'}
 
-typeSize   = {'uint16_t': 7, 'uint32_t': 9, 'float': 9}
+typeSize   = {'uint8_t': 6, 'uint16_t': 7, 'uint32_t': 9, 'float': 9}
 ufmOffset = {'serial': 0, 'calibdate': 4, 'variant': 9, 'rburden': 10,
              'calibtemp': 12, 'vin_gain': 14, 'vin_offset': 16,
              'iin_gain': 18, 'iin_offset': 20, 'vref_p': 22, 'vref_n': 24,
              'gnd': 26}
-hradcVariant = ['HRADC-FBP','HRADC-FAX']
+hradcVariant = ['HRADC-FBP','HRADC-FAX-A','HRADC-FAX-B','HRADC-FAX-C','HRADC-FAX-D']
 hradcInputTypes = ['GND', 'Vref_bipolar_p', 'Vref_bipolar_n', 'Temp',
                        'Vin_bipolar_p', 'Vin_bipolar_n', 'Iin_bipolar_p','Iin_bipolar_n']
+
+NUM_MAX_COEFFS_DSP = 12
+
 class SerialDRS(object):
 
     ser = serial.Serial()
@@ -113,6 +153,20 @@ class SerialDRS(object):
         hex_value = struct.pack('f', value)
         return hex_value.decode('ISO-8859-1')
 
+    # Converte lista de float  para hexadecimal
+    def float_list_to_hex(self, value_list):
+        hex_list = b''
+        for value in value_list:
+            hex_list = hex_list + struct.pack('f', value)
+        return hex_list.decode('ISO-8859-1')
+
+    def format_list_size(self, in_list, max_size):
+        out_list = in_list[0:max_size]
+        if max_size > len(in_list):
+            for i in range(max_size - len(in_list)):
+                out_list.append(0)
+        return out_list
+
     # Converte double para hexadecimal
     def double_to_hex(self,value):
         hex_value = struct.pack('H',value)
@@ -139,6 +193,7 @@ class SerialDRS(object):
     # Função de leitura de variável
     def read_var(self,var_id):
         send_msg = self.checksum(self.SlaveAdd+self.ComReadVar+var_id)
+        self.ser.reset_input_buffer()
         self.ser.write(send_msg.encode('ISO-8859-1'))
 
     def is_open(self):
@@ -178,6 +233,7 @@ class SerialDRS(object):
         payload_size = self.size_to_hex(1) #Payload: ID
         send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('turn_on'))
         send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        print(send_msg.encode('ISO-8859-1'))
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
 
@@ -586,6 +642,7 @@ class SerialDRS(object):
         print(reply_msg)
         print(len(reply_msg))
         val = struct.unpack('BBHLLHHHHHHfffffffffB',reply_msg)
+        print(val)
         boardData = self.InitHRADC_BoardData(val[3]+val[4]*pow(2,32),val[5],
                                              val[6],val[7],val[8],val[9],
                                              hradcVariant[val[10]],val[11],
@@ -597,6 +654,70 @@ class SerialDRS(object):
         time.sleep(0.5)
 
         return boardData
+
+    def UpdateHRADC_BoardData(self,hradcID):
+        variant = len(hradcVariant)
+        while variant >= len(hradcVariant) or variant < 0:
+            variant = int(input("Enter HRADC variant number:\n  0: HRADC-FBP\n  1: HRADC-FAX-A\n  2: HRADC-FAX-B\n  3: HRADC-FAX-C\n  4: HRADC-FAX-D\n\n>>> "))
+        variant = hradcVariant[variant]
+
+        boardData = self.ReadHRADC_BoardData(hradcID)
+        boardData['variant'] = variant
+        boardData['vin_offset'] = np.float32(0)
+        boardData['iin_offset'] = np.float32(0)
+
+        if variant == 'HRADC-FAX-A':
+            boardData['rburden'] = np.float32(0)
+            boardData['vin_gain'] = np.float32(5.0/6.0)
+            boardData['iin_gain'] = np.float32(5.0/6.0)
+            print(boardData['vin_gain'])
+            print(boardData['variant'])
+
+        elif variant == 'HRADC-FAX-B':
+            boardData['rburden'] = np.float32(0)
+            boardData['vin_gain'] = np.float32(1)
+            boardData['iin_gain'] = np.float32(1)
+            print(boardData['vin_gain'])
+            print(boardData['variant'])
+
+        elif variant == 'HRADC-FAX-C':
+            boardData['rburden'] = np.float32(5)
+            boardData['vin_gain'] = np.float32(1)
+            boardData['iin_gain'] = np.float32(1)
+            print(boardData['vin_gain'])
+            print(boardData['variant'])
+
+        elif variant == 'HRADC-FAX-D':
+            boardData['rburden'] = np.float32(1)
+            boardData['vin_gain'] = np.float32(1)
+            boardData['iin_gain'] = np.float32(1)
+            print(boardData['vin_gain'])
+            print(boardData['variant'])
+
+        print('\n\nBoard data from HRADC of slot #' + str(hradcID) + ' is about to be overwritten by the following data:')
+        print(boardData)
+
+        i = input('\n Do you want to proceed? [y/n]: ')
+
+        if i is 'Y' or i is 'y':
+            self.ConfigHRADCOpMode(hradcID,1)
+            time.sleep(0.1)
+            self.EraseHRADC_UFM(hradcID)
+            time.sleep(0.5)
+            self.ResetHRADCBoards(1)
+            time.sleep(0.5)
+            self.ResetHRADCBoards(0)
+            time.sleep(1.5)
+            self.WriteHRADC_BoardData(hradcID,boardData)
+            boardData_new = self.ReadHRADC_BoardData(hradcID)
+            print(boardData_new)
+            print(boardData)
+            if boardData_new == boardData:
+                print('\n\n ### Operation was successful !!! ### \n\n')
+            else:
+                print('\n\n ### Operation failed !!! ### \n\n')
+
+        return [boardData, boardData_new]
 
     def GetHRADCs_BoardData(self,numHRADC):
         boardData_list = []
@@ -789,13 +910,6 @@ class SerialDRS(object):
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
 
-    def ClearUartBuffer(self):
-        payload_size   = self.size_to_hex(1) #Payload: ID
-        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListBCBFunc.index('ClearUartBuffer'))
-        send_msg       = self.checksum(self.SlaveAdd+send_packet)
-        self.ser.write(send_msg.encode('ISO-8859-1'))
-        return self.ser.read(6)
-
     def SendCanData(self):
         payload_size   = self.size_to_hex(1) #Payload: ID
         send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListBCBFunc.index('SendCanData'))
@@ -817,6 +931,33 @@ class SerialDRS(object):
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
 
+    def read_ps_status(self):
+        self.read_var(self.index_to_hex(ListVar_v2_1.index('ps_status')))
+        reply_msg = self.ser.read(7)
+        val = struct.unpack('BBHHB',reply_msg)
+        status = {}
+        status['state'] =     ListOpMode_v2_1[(val[3] & 0b0000000000001111)]
+        status['open_loop'] = (val[3] & 0b0000000000010000) >> 4
+        status['interface'] = (val[3] & 0b0000000001100000) >> 5
+        status['active'] =    (val[3] & 0b0000000010000000) >> 7
+        status['model'] =     ListPSModels_v2_1[(val[3] & 0b0001111100000000) >> 8]
+        status['unlocked'] =  (val[3] & 0b0010000000000000) >> 13
+        print(status)
+        return status
+
+    def set_ps_name(self,ps_name):
+        if type(ps_name) == str:
+            for n in range(len(ps_name)):
+                self.set_param('PS_Name', n, float(ord(ps_name[n])))
+            for i in range(n+1,64):
+                self.set_param('PS_Name', i, float(ord(" ")))
+
+    def get_ps_name(self):
+        ps_name = ""
+        for n in range(64):
+            ps_name = ps_name + chr(int(self.get_param('PS_Name', n)))
+        return ps_name
+
     def set_slowref(self,setpoint):
         payload_size   = self.size_to_hex(1+4) #Payload: ID + iSlowRef
         hex_setpoint   = self.float_to_hex(setpoint)
@@ -836,18 +977,294 @@ class SerialDRS(object):
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
 
+    def set_slowref_readback(self,setpoint):
+        payload_size   = self.size_to_hex(1+4) #Payload: ID + iSlowRef
+        hex_setpoint   = self.float_to_hex(setpoint)
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('set_slowref_readback'))+hex_setpoint
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        reply_msg = self.ser.read(9)
+        val = struct.unpack('BBHfB',reply_msg)
+        return val[3]
+
+    def set_slowref_fbp_readback(self, iRef1 = 0, iRef2 = 0, iRef3 = 0, iRef4 = 0):
+        payload_size = self.size_to_hex(1+4*4) #Payload: ID + 4*iRef
+        hex_iRef1    = self.float_to_hex(iRef1)
+        hex_iRef2    = self.float_to_hex(iRef2)
+        hex_iRef3    = self.float_to_hex(iRef3)
+        hex_iRef4    = self.float_to_hex(iRef4)
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('set_slowref_fbp_readback'))+hex_iRef1+hex_iRef2+hex_iRef3+hex_iRef4
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        reply_msg = self.ser.read(21)
+        if(len(reply_msg) == 6):
+            return reply_msg
+        else:
+            val = struct.unpack('BBHffffB',reply_msg)
+            return [val[3],val[4],val[5],val[6]]
+
+    def set_param(self, param_id, n, value):
+        payload_size = self.size_to_hex(1+2+2+4) #Payload: ID + param id + [n] + value
+        if type(param_id) == str:
+            hex_id       = self.double_to_hex(ListParameters.index(param_id))
+        if type(param_id) == int:
+            hex_id       = self.double_to_hex(param_id)
+        hex_n        = self.double_to_hex(n)
+        hex_value    = self.float_to_hex(value)
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('set_param'))+hex_id+hex_n+hex_value
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        reply_msg = self.ser.read(6)
+        if reply_msg[4] == 8:
+            print('Invalid parameter')
+        return reply_msg
+
+    def get_param(self, param_id, n = 0):
+        payload_size = self.size_to_hex(1+2+2) #Payload: ID + param id + [n]
+        if type(param_id) == str:
+            hex_id       = self.double_to_hex(ListParameters.index(param_id))
+        if type(param_id) == int:
+            hex_id       = self.double_to_hex(param_id)
+        hex_n        = self.double_to_hex(n)
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('get_param'))+hex_id+hex_n
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        reply_msg = self.ser.read(9)
+        if len(reply_msg) == 9:
+            val = struct.unpack('BBHfB',reply_msg)
+            return val[3]
+        else:
+            #print('Invalid parameter')
+            return float('nan')
+
+    def save_param_eeprom(self, param_id, n = 0):
+        payload_size = self.size_to_hex(1+2+2) #Payload: ID + param id + [n] + value
+        if type(param_id) == str:
+            hex_id       = self.double_to_hex(ListParameters.index(param_id))
+        if type(param_id) == int:
+            hex_id       = self.double_to_hex(param_id)
+        hex_n        = self.double_to_hex(n)
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('save_param_eeprom'))+hex_id+hex_n
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        reply_msg = self.ser.read(6)
+        if reply_msg[4] == 8:
+            print('Invalid parameter')
+        return reply_msg
+
+    def load_param_eeprom(self, param_id, n = 0):
+        payload_size = self.size_to_hex(1+2+2) #Payload: ID + param id + [n]
+        if type(param_id) == str:
+            hex_id       = self.double_to_hex(ListParameters.index(param_id))
+        if type(param_id) == int:
+            hex_id       = self.double_to_hex(param_id)
+        hex_n        = self.double_to_hex(n)
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('load_param_eeprom'))+hex_id+hex_n
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        reply_msg = self.ser.read(6)
+        if reply_msg[4] == 8:
+            print('Invalid parameter')
+        return reply_msg
+
+    def save_param_bank(self):
+        payload_size   = self.size_to_hex(1) #Payload: ID
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('save_param_bank'))
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def load_param_bank(self):
+        payload_size   = self.size_to_hex(1) #Payload: ID
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('load_param_bank'))
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def set_param_bank(self, param_file):
+        fbp_param_list = []
+        with open(param_file,newline='') as f:
+            reader = csv.reader(f)
+            for row in reader:
+                fbp_param_list.append(row)
+
+        for param in fbp_param_list:
+            if str(param[0]) == 'PS_Name':
+                print(str(param[0]) + "[0]: " + str(param[1]))
+                print(self.set_ps_name(str(param[1])))
+            else:
+                for n in range(64):
+                    try:
+                        print(str(param[0]) + "["+ str(n) + "]: " + str(param[n+1]))
+                        print(self.set_param(str(param[0]),n,float(param[n+1])))
+                    except:
+                        break
+        self.save_param_bank()
+
+    def get_param_bank(self):
+        timeout_old = self.ser.timeout
+        self.ser.timeout = 0.05
+
+        for param in ListParameters:
+            for n in range(64):
+                if param == 'PS_Name':
+                    print('PS_Name: ' + self.get_ps_name())
+                    break
+                else:
+                    p = self.get_param(param,n)
+                    if math.isnan(p):
+                        break
+                    print(param + "[" + str(n) + "]: " + str(p))
+
+        self.ser.timeout = timeout_old
+
+    def set_dsp_coeffs(self, dsp_class, dsp_id, coeffs_list = [0,0,0,0,0,0,0,0,0,0,0,0]):
+        coeffs_list_full = self.format_list_size(coeffs_list, NUM_MAX_COEFFS_DSP)
+        payload_size = self.size_to_hex(1+2+2+4*NUM_MAX_COEFFS_DSP)
+        hex_dsp_class= self.double_to_hex(dsp_class)
+        hex_dsp_id   = self.double_to_hex(dsp_id)
+        hex_coeffs    = self.float_list_to_hex(coeffs_list_full)
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('set_dsp_coeffs'))+hex_dsp_class+hex_dsp_id+hex_coeffs
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def get_dsp_coeff(self, dsp_class, dsp_id, coeff):
+        payload_size = self.size_to_hex(1+2+2+2)
+        hex_dsp_class= self.double_to_hex(dsp_class)
+        hex_dsp_id   = self.double_to_hex(dsp_id)
+        hex_coeff    = self.double_to_hex(coeff)
+        print((ListFunc_v2_1.index('get_dsp_coeff')))
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('get_dsp_coeff'))+hex_dsp_class+hex_dsp_id+hex_coeff
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        reply_msg = self.ser.read(9)
+        print('reply_msg:')
+        print(reply_msg)
+        val = struct.unpack('BBHfB',reply_msg)
+        return val[3]
+
+    def save_dsp_coeffs_eeprom(self, dsp_class, dsp_id):
+        payload_size = self.size_to_hex(1+2+2)
+        hex_dsp_class= self.double_to_hex(dsp_class)
+        hex_dsp_id   = self.double_to_hex(dsp_id)
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('save_dsp_coeffs_eeprom'))+hex_dsp_class+hex_dsp_id
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def load_dsp_coeffs_eeprom(self, dsp_class, dsp_id):
+        payload_size = self.size_to_hex(1+2+2)
+        hex_dsp_class= self.double_to_hex(dsp_class)
+        hex_dsp_id   = self.double_to_hex(dsp_id)
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('load_dsp_coeffs_eeprom'))+hex_dsp_class+hex_dsp_id
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def save_dsp_modules_eeprom(self):
+        payload_size   = self.size_to_hex(1) #Payload: ID
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('save_dsp_modules_eeprom'))
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def load_dsp_modules_eeprom(self):
+        payload_size   = self.size_to_hex(1) #Payload: ID
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('load_dsp_modules_eeprom'))
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def reset_udc(self):
+        payload_size   = self.size_to_hex(1) #Payload: ID
+        send_packet    = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('reset_udc'))
+        send_msg       = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+
     def run_bsmp_func(self,id_func,print_msg = 0):
         payload_size = self.size_to_hex(1) #Payload: ID
         send_packet  = self.ComFunction+payload_size+self.index_to_hex(id_func)
         send_msg     = self.checksum(self.SlaveAdd+send_packet)
-        print(send_msg)
-        print(send_msg.encode('ISO-8859-1'))
         self.ser.write(send_msg.encode('ISO-8859-1'))
         reply_msg = self.ser.read(6)
         if print_msg:
             print(reply_msg)
         return reply_msg
 
+    def run_bsmp_func_all_ps(self,p_func,add_list,arg = None,delay = 0.5):
+        old_add = self.GetSlaveAdd()
+        for add in add_list:
+            self.SetSlaveAdd(add)
+            if arg == None:
+                p_func()
+            else:
+                p_func(arg)
+            time.sleep(delay)
+        self.SetSlaveAdd(old_add)
+
+    def sync_pulse(self):
+        payload_size = self.size_to_hex(1) #Payload: ID
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('sync_pulse'))
+        send_msg     = self.checksum(self.BCastAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def select_op_mode(self,op_mode):
+        payload_size = self.size_to_hex(1+2) #Payload: ID + enable
+        hex_op_mode  = self.double_to_hex(ListOpMode_v2_1.index(op_mode))
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('select_op_mode'))+hex_op_mode
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def set_serial_termination(self,term_enable):
+        payload_size = self.size_to_hex(1+2) #Payload: ID + enable
+        hex_enable  = self.double_to_hex(term_enable)
+        send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('set_serial_termination'))+hex_enable
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def cfg_siggen(self,sig_type,num_cycles,freq,amplitude,offset,aux0,aux1,aux2,aux3):
+        payload_size   = self.size_to_hex(1+2+2+4+4+4+4*4)
+        hex_sig_type   = self.double_to_hex(sig_type)
+        hex_num_cycles = self.double_to_hex(num_cycles)
+        hex_freq       = self.float_to_hex(freq)
+        hex_amplitude  = self.float_to_hex(amplitude)
+        hex_offset     = self.float_to_hex(offset)
+        hex_aux0       = self.float_to_hex(aux0)
+        hex_aux1       = self.float_to_hex(aux1)
+        hex_aux2       = self.float_to_hex(aux2)
+        hex_aux3       = self.float_to_hex(aux3)
+        send_packet    = self.ComFunction + payload_size + self.index_to_hex(ListFunc_v2_1.index('cfg_siggen')) + hex_sig_type + hex_num_cycles + hex_freq + hex_amplitude + hex_offset + hex_aux0 + hex_aux1 + hex_aux2 + hex_aux3
+        send_msg      = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def set_siggen(self,freq,amplitude,offset):
+        payload_size   = self.size_to_hex(1+4+4+4)
+        hex_freq       = self.float_to_hex(freq)
+        hex_amplitude  = self.float_to_hex(amplitude)
+        hex_offset     = self.float_to_hex(offset)
+        send_packet    = self.ComFunction + payload_size + self.index_to_hex(ListFunc_v2_1.index('set_siggen')) + hex_freq + hex_amplitude + hex_offset
+        send_msg      = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def enable_siggen(self):
+        payload_size = self.size_to_hex(1) #Payload: ID
+        send_packet  = self.ComFunction+payload_size + self.index_to_hex(ListFunc_v2_1.index('enable_siggen'))
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
+
+    def disable_siggen(self):
+        payload_size = self.size_to_hex(1) #Payload: ID
+        send_packet  = self.ComFunction+payload_size + self.index_to_hex(ListFunc_v2_1.index('disable_siggen'))
+        send_msg     = self.checksum(self.SlaveAdd+send_packet)
+        self.ser.write(send_msg.encode('ISO-8859-1'))
+        return self.ser.read(6)
     '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     ======================================================================
                 Métodos de Leitura de Valores das Variáveis BSMP
@@ -862,6 +1279,25 @@ class SerialDRS(object):
             print(reply_msg)
         val = struct.unpack(typeFormat[type_var],reply_msg)
         return val[3]
+
+    def read_bsmp_variable_gen(self,id_var,size_bytes,print_msg = 0):
+        self.read_var(self.index_to_hex(id_var))
+        reply_msg = self.ser.read(size_bytes+5)
+        if print_msg:
+            print(reply_msg)
+        return reply_msg
+
+    def read_udc_arm_version(self):
+        self.read_var(self.index_to_hex(3))
+        reply_msg = self.ser.read(133)
+        val = struct.unpack('16s',reply_msg[4:20])
+        return val[0].decode('utf-8')
+
+    def read_udc_c28_version(self):
+        self.read_var(self.index_to_hex(3))
+        reply_msg = self.ser.read(133)
+        val = struct.unpack('16s',reply_msg[20:36])
+        return val[0].decode('utf-8')
 
     def Read_iLoad1(self):
         self.read_var(self.index_to_hex(ListVar.index('iLoad1')))
@@ -1424,3 +1860,6 @@ class SerialDRS(object):
 
     def SetSlaveAdd(self,address):
         self.SlaveAdd = struct.pack('B',address).decode('ISO-8859-1')
+
+    def GetSlaveAdd(self):
+        return struct.unpack('B',self.SlaveAdd.encode())[0]
