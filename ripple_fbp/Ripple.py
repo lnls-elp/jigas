@@ -41,8 +41,9 @@ ctrl = input('\nOs dados estão corretos?(y/n): ')
 ################################################################################
 if (ctrl == 'y'):
     drs.Connect(drs_port)
-    pause = input('\nConecte os cabos de medição para iniciar o teste\n')
     for module in individual_module_list:
+        if individual_module_list.index(module) == 0:
+            pause = input('\nConecte os cabos de medição para iniciar o teste\n')
         if not module == None:
             module_name = 'modulo ' + str(individual_module_list.index(module) + 1)
             try:
@@ -79,8 +80,8 @@ if (ctrl == 'y'):
                 print('Iniciando teste com a corrente de ' + str(set_iout) + 'A\n')
                 drs.set_slowref(set_iout)
 
-                print('Aguardando 60 segundos para maior estabilidade da medida...\n')
-                time.sleep(1) # WarmUpTime
+                print('Aguardando ' + str(test_config.WarmUpTime) + ' segundos para maior estabilidade da medida...\n')
+                time.sleep(test_config.WarmUpTime) # WarmUpTime
 
                 while round(drs.read_bsmp_variable(27, 'float')) != set_iout:
                     print('Corrente de saída errada')
@@ -89,7 +90,7 @@ if (ctrl == 'y'):
                 print('Iniciando processo de escala automática do osciloscópio...\n')
                 dso.auto_scale(3)
                 print('Realizando medidas...\n')
-                vpp_list = dso.single_shot(1,3) # modificar para (10,3)
+                vpp_list = dso.single_shot(test_config.Measurements, 3)
                 print('Obtendo resultados e salvando imagem da tela...\n')
 
                 pic_name = module_name + '_' + str(set_iout) + 'A_iso'
@@ -119,12 +120,13 @@ if (ctrl == 'y'):
                 print('Fim do teste!!!')
 
     drs.Connect(drs_port)
-    pause = input('\nConecte os cabos de medição para iniciar o teste\n')
     for module in group_module_list:
+        if group_module_list.index(module) == 0:
+            pause = input('\nConecte os cabos de medição para iniciar o teste\n')
         if not module == None:
             module_name = 'modulo ' + str(group_module_list.index(module) + 1)
             try:
-                if not individual_module_list[group_module_list.index(module) + 1] == None:
+                if not group_module_list[group_module_list.index(module) + 1] == None:
                     next_module = 'modulo ' + str(group_module_list.index(module) + 2)
                 else:
                     next_module = None
@@ -163,8 +165,8 @@ if (ctrl == 'y'):
                 time.sleep(0.5)
                 print('Iniciando teste com a corrente de ' + str(set_iout) + 'A\n')
                 drs.set_slowref(set_iout)
-                print('Aguardando 60 segundos para maior estabilidade da medida...\n')
-                time.sleep(1) # WarmUpTime
+                print('Aguardando ' + str(test_config.WarmUpTime) + ' segundos para maior estabilidade da medida...\n')
+                time.sleep(test_config.WarmUpTime) # WarmUpTime
 
                 while round(drs.read_bsmp_variable(27, 'float')) != set_iout:
                     print('Corrente de saída errada')
@@ -173,7 +175,7 @@ if (ctrl == 'y'):
                 print('Iniciando processo de escala automática do osciloscópio...\n')
                 dso.auto_scale(3)
                 print('Realizando medidas...\n')
-                vpp_list = dso.single_shot(1,3)
+                vpp_list = dso.single_shot(test_config.Measurements, 3)
                 print('Obtendo resultados e salvando imagem da tela...\n')
 
                 pic_name = module_name + '_' + str(set_iout) + 'A_con'
@@ -194,7 +196,7 @@ if (ctrl == 'y'):
                 _file.write('\n')
                 _file.close()
 
-            for i in group_module_list:
+            for i in range(1, 5):
                 drs.SetSlaveAdd(i)
                 time.sleep(0.5)
                 drs.turn_off()
