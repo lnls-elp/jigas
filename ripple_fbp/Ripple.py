@@ -134,7 +134,7 @@ if (ctrl == 'y'):
                 next_module = None
 
             print('Iniciando medidas conjuntas do ' + module_name + '...\n')
-            for i in range(1,5):
+            for i in group_module_list:
                 drs.SetSlaveAdd(i)
                 time.sleep(0.5)
                 drs.turn_on()
@@ -196,7 +196,7 @@ if (ctrl == 'y'):
                 _file.write('\n')
                 _file.close()
 
-            for i in range(1, 5):
+            for i in group_module_list:
                 drs.SetSlaveAdd(i)
                 time.sleep(0.5)
                 drs.turn_off()
