@@ -233,7 +233,6 @@ class SerialDRS(object):
         payload_size = self.size_to_hex(1) #Payload: ID
         send_packet  = self.ComFunction+payload_size+self.index_to_hex(ListFunc_v2_1.index('turn_on'))
         send_msg     = self.checksum(self.SlaveAdd+send_packet)
-        print(send_msg.encode('ISO-8859-1'))
         self.ser.write(send_msg.encode('ISO-8859-1'))
         return self.ser.read(6)
 
