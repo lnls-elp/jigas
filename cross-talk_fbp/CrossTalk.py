@@ -1,159 +1,151 @@
 from common.pydrs import SerialDRS
-from datetime import datetime
+from datetime     import datetime
+
 import time
+import visa
+
+# Arquivo de configuração
+import test_config
 
 drs = SerialDRS()
 now = datetime.now()
 
-drs_port = 'COM11'
+# https://www.topster.pt/texto-para-ascii/doom.html
 
-BastidorList = ['1041182343', '1041182349']
-module_list  = ['modulo 1', 'modulo 2', 'modulo 3', 'modulo 4']
+print(' _____ ______  _   _ ______  _____    _____  _     ______ ' )
+print('|  __ \| ___ \| | | || ___ )|  _  |  |  ___|| |    | ___ )' )
+print('| |  \/| |_/ /| | | || |_/ /| | | |  | |__  | |    | |_/ /' )
+print('| | __ |    / | | | ||  __/ | | | |  |  __| | |    |  __/ ' )
+print('| |_\ \| |\ \ | |_| || |    \ \_/ /  | |___ | |____| |    ' )
+print(' \____/\_| \_| \___/ \_|     \___/   \____/ \_____/\_|    ' )
+
+print(' _____                                  _____         _  _     _               ')
+print('/  __ \                                |_   _|       | || |   (_)              ')
+print('| /  \/ _ __   ___   ___   ___  ______   | |    __ _ | || | __ _  _ __    __ _ ')
+print('| |    |  __| / _ \ / __| / __||______|  | |   / _` || || |/ /| ||  _ \  / _  |')
+print('| \__/\| |   | (_) |\__ \ \__ \          | |  | (_| || ||   < | || | | || (_| |')
+print(' \____/|_|    \___/ |___/ |___/          \_/   \__,_||_||_|\_\|_||_| |_| \__, |')
+print('                                                                          __/ |')
+print('                                                                         |___/ ')
+time.sleep(3)
 
 
-PS_List =        [1, 2, 3, 4]
-SetTestList =    [10, 0, -10]
-SetCurrentList = [0, 10, 0, -10, 0]
+################################################################################
+###################### CONFIRMANDO DADOS DE CONFIGURAÇÃO #######################
+################################################################################
+drs_port = test_config.COMPort
+mult_addr = test_config.InstAddr
+bastidor_list = test_config.BastidorList
+individual_module_list = test_config.IndividualModuleList
+idc_set_test_list = test_config.IDC_SetTestList
+idc_set_current_list = test_config.IDC_SetCurrentList
+channel_list = test_config.ChannelList
+step_time = test_config.StepTime
+warm_up = test_config.WarmUpTime
+################################################################################
+################################################################################
 
-WarmUpTime = 2*3600
-StepTime   = 60
 
-# o teste dura 50 horas (em média) com um WarmUpTime de 2 horas e um StepTime de 60 min
+################################################################################
+###################### CONFIRMANDO DADOS DE CONFIGURAÇÃO #######################
+################################################################################
+print('Confirme os dados:\n')
+print('Porta de comunicação:                    ' + str(drs_port))
+print('Endereço do multímetro:                  ' + str(mult_addr))
+print('Bastidores:                              ' + str(bastidor_list))
+print('Lista de módulos para teste:             ' + str(individual_module_list))
+print('Lista de valores de corrente de teste:   ' + str(idc_set_test_list))
+print('Lista de valores de corrente auxiliares: ' + str(idc_set_current_list))
+print('Lista de canais do multímetro:           ' + str(channel_list))
+print('Tempo de degrau de corrente:             ' + str(step_time))
+print('Tempo de aquecimento dos módulos:        ' + str(warm_up))
+ctrl = input('\nOs dados estão corretos?(y/n): ')
+################################################################################
+################################################################################
 
-print(str(now.day) + ',' + str(now.hour) + ':' + str(now.minute))
 
-for bastidor in BastidorList:
-	print('\nConfigurando DRS e ligando módulos de potência do bastidor NS.:' + str(bastidor) + '...\n')
-	drs.Connect(drs_port)
-	time.sleep(1)
-	drs.SetSlaveAdd(BastidorList.index(bastidor) + 1)
-	time.sleep(1)
-	drs.Config_nHRADC(4)
-	time.sleep(5)
-	drs.TurnOn(0b1111)
-	time.sleep(1)
-	drs.ClosedLoop(0b1111)
-	time.sleep(1)
+################################################################################
+############################# INICIO DO TESTE ##################################
+################################################################################
+if ctrl == 'y':
+    drs.Connect(drs_port)
+    for k in range(len(bastidor_list)):
+        channels = ''
+        for l in channel_list[k]:
+            channels = channels + str(l) + ','
 
-#########################################################################
-'''                    Inicio do teste de Cross Talk                  '''
+        for module in individual_module_list[k]:
+            auxiliary_module_list = []
+            for i in individual_module_list[k]:
+                auxiliary_module_list.append(i)
+            auxiliary_module_list.remove(module)
 
-for module in module_list:
+            print(auxiliary_module_list)
+            for module_ in individual_module_list[k]:
+                drs.SetSlaveAdd(module_)
+                time.sleep(0.5)
+                drs.turn_on()
+                time.sleep(0.5)
+                drs.closed_loop()
+            ################################################################################
+            ######################## CONFIGURANDO O MULTIMETRO #############################
+            ################################################################################
+            rm   = visa.ResourceManager()
+            inst = rm.open_resource(test_config.InstAddr)
 
-	for test_current in SetTestList:
+            del inst.timeout
 
-		if module_list.index(module) == 0:
-			for bastidor in BastidorList:
-				drs.SetSlaveAdd(BastidorList.index(bastidor) + 1)
-				time.sleep(1)
-				drs.SetISlowRefx4(test_current, 0, 0, 0)
-			time.sleep(WarmUpTime)
+            inst.write('CONF:VOLT:DC (@'          + channels + ')')
+            time.sleep(0.5)
+            inst.write('SENS:VOLT:DC:NPLC 10, (@' + channels + ')')
+            time.sleep(0.5)
+            inst.write('ROUT:SCAN (@'             + channels + ')')
+            time.sleep(0.5)
+            ################################################################################
+            ################################################################################
 
-			for bastidor in BastidorList:
-				drs.SetSlaveAdd(BastidorList.index(bastidor) + 1)
-				time.sleep(1)
-				print('Início de teste:')
-				print('			bastidor NS.:' + bastidor)
-				print('			' + module)
-				for aux_current in SetCurrentList:
-					drs.SetISlowRefx4(test_current, aux_current, aux_current, aux_current)
-					time.sleep(0.5)
-					print('Modulo 1: ' + str(drs.Read_iMod1()))
-					time.sleep(0.5)
-					print('Modulo 2: ' + str(drs.Read_iMod2()))
-					time.sleep(0.5)
-					print('Modulo 3: ' + str(drs.Read_iMod3()))
-					time.sleep(0.5)
-					print('Modulo 4: ' + str(drs.Read_iMod4()))
-					time.sleep(0.5)
-					print('\n')
-					time.sleep(StepTime)
+            for idc in idc_set_test_list:
+                drs.SetSlaveAdd(module)
+                time.sleep(0.5)
+                drs.set_slowref(idc)
 
-		if module_list.index(module) == 1:
-			for bastidor in BastidorList:
-				drs.SetSlaveAdd(BastidorList.index(bastidor) + 1)
-				time.sleep(1)
-				drs.SetISlowRefx4(0, test_current, 0, 0)
-			time.sleep(WarmUpTime)
+                print('Aguardando tempo de WarmUp...')
+                time.sleep(warm_up)
 
-			for bastidor in BastidorList:
-				drs.SetSlaveAdd(BastidorList.index(bastidor) + 1)
-				time.sleep(1)
-				print('Início de teste:')
-				print('			bastidor NS.:' + bastidor)
-				print('			' + module)
-				for aux_current in SetCurrentList:
-					drs.SetISlowRefx4(aux_current, test_current, aux_current, aux_current)
-					time.sleep(0.5)
-					print('Modulo 1: ' + str(drs.Read_iMod1()))
-					time.sleep(0.5)
-					print('Modulo 2: ' + str(drs.Read_iMod2()))
-					time.sleep(0.5)
-					print('Modulo 3: ' + str(drs.Read_iMod3()))
-					time.sleep(0.5)
-					print('Modulo 4: ' + str(drs.Read_iMod4()))
-					time.sleep(0.5)
-					print('\n')
-					time.sleep(StepTime)
+                _file = open('CrossTalk_' + str(module) + '_idc_' + str(idc) + '_NS' + str(bastidor_list[k]) + '.csv', 'a')
+                _file.write('time stamp')
 
-		if module_list.index(module) == 2:
-			for bastidor in BastidorList:
-				drs.SetSlaveAdd(BastidorList.index(bastidor) + 1)
-				time.sleep(1)
-				drs.SetISlowRefx4(0, 0, test_current, 0)
-			time.sleep(WarmUpTime)
+                channels_write = channels.split(',')
 
-			for bastidor in BastidorList:
-				drs.SetSlaveAdd(BastidorList.index(bastidor) + 1)
-				time.sleep(1)
-				print('Início de teste:')
-				print('			bastidor NS.:' + bastidor)
-				print('			' + module)
-				for aux_current in SetCurrentList:
-					drs.SetISlowRefx4(aux_current, aux_current, test_current, aux_current)
-					time.sleep(0.5)
-					print('Modulo 1: ' + str(drs.Read_iMod1()))
-					time.sleep(0.5)
-					print('Modulo 2: ' + str(drs.Read_iMod2()))
-					time.sleep(0.5)
-					print('Modulo 3: ' + str(drs.Read_iMod3()))
-					time.sleep(0.5)
-					print('Modulo 4: ' + str(drs.Read_iMod4()))
-					time.sleep(0.5)
-					print('\n')
-					time.sleep(StepTime)
+                for m in channels_write:
+                    _file.write(';' + 'CH ' + str(m))
+                _file.write('\n')
 
-		if module_list.index(module) == 3:
-			for bastidor in BastidorList:
-				drs.SetSlaveAdd(BastidorList.index(bastidor) + 1)
-				time.sleep(1)
-				drs.SetISlowRefx4(0, 0, 0, test_current)
-			time.sleep(WarmUpTime)
+                for step in idc_set_current_list:
+                    for aux in auxiliary_module_list:
+                        drs.SetSlaveAdd(aux)
+                        time.sleep(0.5)
+                        drs.set_slowref(step)
+                        time.sleep(0.5)
+                    time.sleep(1)
 
-			for bastidor in BastidorList:
-				drs.SetSlaveAdd(BastidorList.index(bastidor) + 1)
-				time.sleep(1)
-				print('Início de teste:')
-				print('			bastidor NS.:' + bastidor)
-				print('			' + module)
-				for aux_current in SetCurrentList:
-					drs.SetISlowRefx4(aux_current, aux_current, aux_current, test_current)
-					time.sleep(0.5)
-					print('Modulo 1: ' + str(drs.Read_iMod1()))
-					time.sleep(0.5)
-					print('Modulo 2: ' + str(drs.Read_iMod2()))
-					time.sleep(0.5)
-					print('Modulo 3: ' + str(drs.Read_iMod3()))
-					time.sleep(0.5)
-					print('Modulo 4: ' + str(drs.Read_iMod4()))
-					time.sleep(0.5)
-					print('\n')
-					time.sleep(StepTime)
+                    for n in range(step_time):
+                        _file.write(str(datetime.now()))
 
-for bastidor in BastidorList:
-	drs.SetSlaveAdd(BastidorList.index(bastidor) + 1)
-	time.sleep(1)
-	drs.TurnOff(0b1111)
+                        inst.write('READ?')
+                        read = inst.read()
+                        read = read.split(',')
 
-print(str(now.day) + ',' + str(now.hour) + ':' + str(now.minute))
-#########################################################################
+                        for value in read:
+                            _file.write(';' + value.replace('.', ','))
+
+                        time.sleep(1)
+
+            for module__ in individual_module_list[k]:
+                drs.SetSlaveAdd(module__)
+                time.sleep(0.5)
+                drs.turn_off()
+            inst.close()
+
+else:
+    print('Corrija os dados e reinicie o teste!')

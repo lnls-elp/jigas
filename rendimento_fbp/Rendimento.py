@@ -23,7 +23,6 @@ output_current_channel = test_config.OutputCurrentChannel
 input_voltage_channel = test_config.InputVoltageChannel
 output_voltage_channel = test_config.OutputVoltageChannel
 warm_up = test_config.WarmUpTime
-
 ################################################################################
 ################################################################################
 
