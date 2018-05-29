@@ -1,212 +1,211 @@
 from common.pydrs import SerialDRS
 from DSOX_3024A import DSOX_3024A_USB
+
 import time
-import test_config
-
-drs = SerialDRS()
-dso = DSOX_3024A_USB()
-
-################################################################################
-####################### LENDO ARQUIVO DE CONFIGURAÇÃO ##########################
-################################################################################
-drs_port = test_config.COMPort
-dso_addr = test_config.InstAddr
-dso_file = test_config.InstFileConfig
-bastidor = test_config.Bastidor
-individual_module_list = test_config.IndividualModuleList
-group_module_list = test_config.GroupModuleList
-ps_iout = test_config.ReferenceValueList
-################################################################################
-################################################################################
 
 
-################################################################################
-###################### CONFIRMANDO DADOS DE CONFIGURAÇÃO #######################
-################################################################################
-print('Confirme os dados:\n')
-print('Porta de comunicação:                                  ' + str(drs_port))
-print('Endereço do osciloscópio:                              ' + str(dso_addr))
-print('Arquivo de configuração do osciloscópio:               ' + str(dso_file))
-print('Bastidor testado:                                      ' + str(bastidor))
-print('Lista de endereços dos módulos para teste individual:  ' + str(individual_module_list))
-print('Lista de endereços dos módulos para teste conjunto:    ' + str(group_module_list))
-print('Lista de valores de corrente de saída:                 ' + str(ps_iout))
+import sys
+sys.path.insert(0, '../test_config/')
 
-ctrl = input('\nOs dados estão corretos?(y/n): ')
-################################################################################
-################################################################################
+from test_config import RippleConfig
 
-################################################################################
-############################### ROTINA DE TESTE ################################
-################################################################################
-if (ctrl == 'y'):
-    drs.Connect(drs_port)
-    for module in individual_module_list:
-        if individual_module_list.index(module) == 0:
-            pause = input('\nConecte os cabos de medição para iniciar o teste\n')
-        if not module == None:
-            module_name = 'modulo ' + str(individual_module_list.index(module) + 1)
-            try:
-                if not individual_module_list[individual_module_list.index(module) + 1] == None:
-                    next_module = 'modulo ' + str(individual_module_list.index(module) + 2)
-            except:
-                next_module = None
 
-            print('Iniciando medidas isoladas do ' + module_name + '...\n')
+class Ripple(object):
+    def __init__(self):
+        self.drs = SerialDRS()
+        self.dso = DSOX_3024A_USB()
+        self.cfg = RippleConfig()
 
-            drs.SetSlaveAdd(module)
-            time.sleep(0.5)
-            drs.turn_on()
-            time.sleep(0.5)
-            drs.closed_loop()
-            time.sleep(0.5)
 
-            dso.connect(dso_addr)
-            time.sleep(1)
-            dso.setup_config(dso_file)
-            time.sleep(5)
+    def ripple_test(self):
+        ################################################################################
+        ###################### CONFIRMANDO DADOS DE CONFIGURAÇÃO #######################
+        ################################################################################
+        print('Confirme os dados:\n')
+        print('Porta de comunicação:                                 ' + str(self.cfg.com_port))
+        print('Endereço do osciloscópio:                             ' + str(self.cfg.dso_addr))
+        print('Arquivo de configuração do osciloscópio:              ' + str(self.cfg.dso_file))
+        print('Bastidor testado:                                     ' + str(self.cfg.bastidor))
+        print('Lista de endereços dos módulos para teste individual: ' + str(self.cfg.individual_module_list))
+        print('Lista de endereços dos módulos para teste conjunto:   ' + str(self.cfg.group_module_list))
+        print('Lista de valores de corrente de saída:                ' + str(self.cfg.ps_iout))
+        print('Tempo de WarmUp dos módulos de potência:              ' + str(self.cfg.warmup_time))
 
-            _file = open('ripple_results_iso.csv', 'a')
+        ctrl = input('\nOs dados estão corretos?(y/n): ')
+        ################################################################################
+        ################################################################################
 
-            _file.write('NS bastidor: ' + str(bastidor) + '\n')
-            _file.write(module_name + '\n')
-            _file.write("\nCH1: corrente @ 10 Hz - 3 kHz;'1:100\n")
-            _file.write("CH2: corrente @ 10 Hz - 500 kHz;'1:1\n")
-            _file.write("CH3: tensão @ 10 Hz - 1 MHz;'1:1\n")
-            _file.write('\ncorrente;CH1_App;CH2_App;CH3_Vpp;CH1_Arms;CH2_Arms;CH3_Vrms\n')
-            _file.close()
+        ################################################################################
+        ############################### ROTINA DE TESTE ################################
+        ################################################################################
+        if (ctrl == 'y'):
+            self.drs.Connect(self.cfg.com_port)
+            for module in self.cfg.individual_module_list:
+                if self.cfg.individual_module_list.index(module) == 0:
+                    pause = input('\nConecte os cabos de medição para iniciar o teste\n')
+                if not module == None:
+                    module_name = 'modulo ' + str(self.cfg.individual_module_list.index(module) + 1)
+                    try:
+                        if not self.cfg.individual_module_list[self.cfg.individual_module_list.index(module) + 1] == None:
+                            next_module = 'modulo ' + str(self.cfg.individual_module_list.index(module) + 2)
+                    except:
+                        next_module = None
 
-            for set_iout in ps_iout:
-                print('Iniciando teste com a corrente de ' + str(set_iout) + 'A\n')
-                drs.set_slowref(set_iout)
+                    print('Iniciando medidas isoladas do ' + module_name + '...\n')
 
-                print('Aguardando ' + str(test_config.WarmUpTime) + ' segundos para maior estabilidade da medida...\n')
-                time.sleep(test_config.WarmUpTime) # WarmUpTime
+                    self.drs.SetSlaveAdd(module)
+                    time.sleep(0.5)
+                    self.drs.turn_on()
+                    time.sleep(0.5)
+                    self.drs.closed_loop()
+                    time.sleep(0.5)
 
-                while round(drs.read_bsmp_variable(27, 'float')) != set_iout:
-                    print('Corrente de saída errada')
+                    self.dso.connect(self.cfg.dso_addr)
+                    time.sleep(1)
+                    self.dso.setup_config(self.cfg.dso_file)
                     time.sleep(5)
 
-                print('Iniciando processo de escala automática do osciloscópio...\n')
-                dso.auto_scale(3)
-                print('Realizando medidas...\n')
-                vpp_list = dso.single_shot(test_config.Measurements, 3)
-                print('Obtendo resultados e salvando imagem da tela...\n')
+                    _file = open('ripple_results_iso.csv', 'a')
 
-                pic_name = module_name + '_' + str(set_iout) + 'A_iso'
+                    _file.write('NS self.cfg.bastidor: ' + str(self.cfg.bastidor) + '\n')
+                    _file.write(module_name + '\n')
+                    _file.write("\nCH1: corrente @ 10 Hz - 3 kHz;'1:100\n")
+                    _file.write("CH2: corrente @ 10 Hz - 500 kHz;'1:1\n")
+                    _file.write("CH3: tensão @ 10 Hz - 1 MHz;'1:1\n")
+                    _file.write('\ncorrente;CH1_App;CH2_App;CH3_Vpp;CH1_Arms;CH2_Arms;CH3_Vrms\n')
+                    _file.close()
 
-                rms_list = dso.get_results(3, pic_name)
+                    for set_iout in self.cfg.ps_iout:
+                        print('Iniciando teste com a corrente de ' + str(set_iout) + 'A\n')
+                        self.drs.set_slowref(set_iout)
 
-                _file = open('ripple_results_iso.csv', 'a')
-                _file.write(str(set_iout) + ';')
+                        print('Aguardando ' + str(self.cfg.warmup_time) + ' segundos para maior estabilidade da medida...\n')
+                        time.sleep(self.cfg.warmup_time) # WarmUpTime
 
-                print('salvando medidas no arquivo...\n')
-                for j in vpp_list:
-                    write_value = str(j)
-                    _file.write(write_value.replace('.', ','))
-                    _file.write(';')
-                for k in rms_list:
-                    write_value = str(k)
-                    _file.write(write_value.replace('.', ','))
-                    _file.write(';')
-                _file.write('\n')
-                _file.close()
-            drs.turn_off()
+                        while round(self.drs.read_bsmp_variable(27, 'float')) != set_iout:
+                            print('Corrente de saída errada')
+                            time.sleep(5)
 
-            print('**********************************************************')
-            if next_module != None:
-                pause = input('\nTroque os cabos de medição para medir o ' + next_module + ' e tecle enter\n')
-            else:
-                print('Fim do teste!!!')
+                        print('Iniciando processo de escala automática do osciloscópio...\n')
+                        self.dso.auto_scale(3)
+                        print('Realizando medidas...\n')
+                        vpp_list = self.dso.single_shot(self.cfg.measurements, 3)
+                        print('Obtendo resultados e salvando imagem da tela...\n')
 
-    drs.Connect(drs_port)
-    for module in group_module_list:
-        if group_module_list.index(module) == 0:
-            pause = input('\nConecte os cabos de medição para iniciar o teste\n')
-        if not module == None:
-            module_name = 'modulo ' + str(group_module_list.index(module) + 1)
-            try:
-                if not group_module_list[group_module_list.index(module) + 1] == None:
-                    next_module = 'modulo ' + str(group_module_list.index(module) + 2)
-                else:
-                    next_module = None
-            except:
-                next_module = None
+                        pic_name = module_name + '_' + str(set_iout) + 'A_iso'
 
-            print('Iniciando medidas conjuntas do ' + module_name + '...\n')
-            for i in group_module_list:
-                drs.SetSlaveAdd(i)
-                time.sleep(0.5)
-                drs.turn_on()
-                time.sleep(0.5)
-                drs.closed_loop()
-                time.sleep(0.5)
-            drs.set_slowref_fbp(8)
-            time.sleep(0.5)
-            drs.set_slowref_fbp(10)
-            time.sleep(0.5)
+                        rms_list = self.dso.get_results(3, pic_name)
 
-            dso.connect(dso_addr)
-            time.sleep(1)
-            dso.setup_config(dso_file)
-            time.sleep(5)
+                        _file = open('ripple_results_iso.csv', 'a')
+                        _file.write(str(set_iout) + ';')
 
-            _file = open('ripple_results_con.csv', 'a')
-            _file.write('NS bastidor: ' + str(bastidor) + '\n')
-            _file.write(module_name + '\n')
-            _file.write("\nCH1: corrente @ 10 Hz - 3 kHz;'1:100\n")
-            _file.write("CH2: corrente @ 10 Hz - 500 kHz;'1:1\n")
-            _file.write("CH3: tensão @ 10 Hz - 1 MHz;'1:1\n")
-            _file.write('\ncorrente;CH1_App;CH2_App;CH3_Vpp;CH1_Arms;CH2_Arms;CH3_Vrms\n')
-            _file.close()
+                        print('salvando medidas no arquivo...\n')
+                        for j in vpp_list:
+                            write_value = str(j)
+                            _file.write(write_value.replace('.', ','))
+                            _file.write(';')
+                        for k in rms_list:
+                            write_value = str(k)
+                            _file.write(write_value.replace('.', ','))
+                            _file.write(';')
+                        _file.write('\n')
+                        _file.close()
+                    self.drs.turn_off()
 
-            for set_iout in ps_iout:
-                drs.SetSlaveAdd(module)
-                time.sleep(0.5)
-                print('Iniciando teste com a corrente de ' + str(set_iout) + 'A\n')
-                drs.set_slowref(set_iout)
-                print('Aguardando ' + str(test_config.WarmUpTime) + ' segundos para maior estabilidade da medida...\n')
-                time.sleep(test_config.WarmUpTime) # WarmUpTime
+                    print('**********************************************************')
+                    if next_module != None:
+                        pause = input('\nTroque os cabos de medição para medir o ' + next_module + ' e tecle enter\n')
+                    else:
+                        print('Fim do teste!!!')
 
-                while round(drs.read_bsmp_variable(27, 'float')) != set_iout:
-                    print('Corrente de saída errada')
+            self.drs.Connect(self.cfg.com_port)
+            for module in self.cfg.group_module_list:
+                if self.cfg.group_module_list.index(module) == 0:
+                    pause = input('\nConecte os cabos de medição para iniciar o teste\n')
+                if not module == None:
+                    module_name = 'modulo ' + str(self.cfg.group_module_list.index(module) + 1)
+                    try:
+                        if not self.cfg.group_module_list[self.cfg.group_module_list.index(module) + 1] == None:
+                            next_module = 'modulo ' + str(self.cfg.group_module_list.index(module) + 2)
+                        else:
+                            next_module = None
+                    except:
+                        next_module = None
+
+                    print('Iniciando medidas conjuntas do ' + module_name + '...\n')
+                    for i in self.cfg.group_module_list:
+                        self.drs.SetSlaveAdd(i)
+                        time.sleep(0.5)
+                        self.drs.turn_on()
+                        time.sleep(0.5)
+                        self.drs.closed_loop()
+                        time.sleep(0.5)
+                    self.drs.set_slowref_fbp(8)
+                    time.sleep(0.5)
+                    self.drs.set_slowref_fbp(10)
+                    time.sleep(0.5)
+
+                    self.dso.connect(self.cfg.dso_addr)
+                    time.sleep(1)
+                    self.dso.setup_config(self.cfg.dso_file)
                     time.sleep(5)
 
-                print('Iniciando processo de escala automática do osciloscópio...\n')
-                dso.auto_scale(3)
-                print('Realizando medidas...\n')
-                vpp_list = dso.single_shot(test_config.Measurements, 3)
-                print('Obtendo resultados e salvando imagem da tela...\n')
+                    _file = open('ripple_results_con.csv', 'a')
+                    _file.write('NS self.cfg.bastidor: ' + str(self.cfg.bastidor) + '\n')
+                    _file.write(module_name + '\n')
+                    _file.write("\nCH1: corrente @ 10 Hz - 3 kHz;'1:100\n")
+                    _file.write("CH2: corrente @ 10 Hz - 500 kHz;'1:1\n")
+                    _file.write("CH3: tensão @ 10 Hz - 1 MHz;'1:1\n")
+                    _file.write('\ncorrente;CH1_App;CH2_App;CH3_Vpp;CH1_Arms;CH2_Arms;CH3_Vrms\n')
+                    _file.close()
 
-                pic_name = module_name + '_' + str(set_iout) + 'A_con'
-                rms_list = dso.get_results(3, pic_name)
+                    for set_iout in self.cfg.ps_iout:
+                        self.drs.SetSlaveAdd(module)
+                        time.sleep(0.5)
+                        print('Iniciando teste com a corrente de ' + str(set_iout) + 'A\n')
+                        self.drs.set_slowref(set_iout)
+                        print('Aguardando ' + str(self.cfg.warmup_time) + ' segundos para maior estabilidade da medida...\n')
+                        time.sleep(self.cfg.warmup_time) # WarmUpTime
 
-                _file = open('ripple_results_con.csv', 'a')
-                _file.write(str(set_iout) + ';')
+                        while round(self.drs.read_bsmp_variable(27, 'float')) != set_iout:
+                            print('Corrente de saída errada')
+                            time.sleep(5)
 
-                print('salvando medidas no arquivo...\n')
-                for j in vpp_list:
-                    write_value = str(j)
-                    _file.write(write_value.replace('.', ','))
-                    _file.write(';')
-                for k in rms_list:
-                    write_value = str(k)
-                    _file.write(write_value.replace('.', ','))
-                    _file.write(';')
-                _file.write('\n')
-                _file.close()
+                        print('Iniciando processo de escala automática do osciloscópio...\n')
+                        self.dso.auto_scale(3)
+                        print('Realizando medidas...\n')
+                        vpp_list = self.dso.single_shot(self.cfg.measurements, 3)
+                        print('Obtendo resultados e salvando imagem da tela...\n')
 
-            for i in group_module_list:
-                drs.SetSlaveAdd(i)
-                time.sleep(0.5)
-                drs.turn_off()
-                time.sleep(0.5)
-            print('**********************************************************')
-            if next_module != None:
-                pause = input('\nTroque os cabos de medição para medir o ' + next_module + ' e tecle enter\n')
-            else:
-                print('Fim do teste!!!')
-else:
-    print('\nCorrija os dados e reinicie o teste.\n')
-################################################################################
-################################################################################
+                        pic_name = module_name + '_' + str(set_iout) + 'A_con'
+                        rms_list = self.dso.get_results(3, pic_name)
+
+                        _file = open('ripple_results_con.csv', 'a')
+                        _file.write(str(set_iout) + ';')
+
+                        print('salvando medidas no arquivo...\n')
+                        for j in vpp_list:
+                            write_value = str(j)
+                            _file.write(write_value.replace('.', ','))
+                            _file.write(';')
+                        for k in rms_list:
+                            write_value = str(k)
+                            _file.write(write_value.replace('.', ','))
+                            _file.write(';')
+                        _file.write('\n')
+                        _file.close()
+
+                    for i in self.cfg.group_module_list:
+                        self.drs.SetSlaveAdd(i)
+                        time.sleep(0.5)
+                        self.drs.turn_off()
+                        time.sleep(0.5)
+                    print('**********************************************************')
+                    if next_module != None:
+                        pause = input('\nTroque os cabos de medição para medir o ' + next_module + ' e tecle enter\n')
+                    else:
+                        print('Fim do teste!!!')
+        else:
+            print('\nCorrija os dados e reinicie o teste.\n')
+        ################################################################################
+        ################################################################################
