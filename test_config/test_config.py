@@ -5,8 +5,8 @@ class LinearityConfig(object):
         self.bastidor_list = [1041182350, 1041182353]
         self.individual_module_list = [[9, 10, 11, 12], [13, 14, 15, 16]]
         self.channel_list = [[101, 102, 103, 104], [201, 202, 203, 204]]
-        self.warmup_time = 1
-        self.stb_time = 1
+        self.warmup_time = 3*3600
+        self.stb_time = 120
 
 
 class ResolutionConfig(object):
@@ -17,7 +17,7 @@ class ResolutionConfig(object):
         self.individual_module_list = [[9, 10, 11, 12], [13, 14, 15, 16]]
         self.idc_list = [5, 0, -5]
         self.channel_list = [[101, 102, 103, 104], [201, 202, 203, 204]]
-        self.warmup_time = 1
+        self.warmup_time = 3*3600
         self.nbits = 18
 
 
@@ -45,8 +45,8 @@ class CrossTalkConfig(object):
         self.idc_set_test_list = [10, 0, -10]
         self.idc_set_current_list = [0, 10, 0, -10, 0]
         self.channel_list = [[101, 102, 103, 104], [201, 202, 203, 204]]
-        self.step_time = 5
-        self.warmup_time = 1
+        self.step_time = 60
+        self.warmup_time = 3*3600
 
 
 class FrequencyResponseConfig(object):
@@ -84,8 +84,6 @@ class StabilityConfig(object):
         self.channel_list = [[101, 102, 103, 104], [201, 202, 203, 204]]
         self.ambient_temperature_channel = 105
         self.idc_list = [10, 0, -10]
-        self.warmup_time = 1
-        self.cooling_time = 1
-        self.trigger_time = 1
+        self.cooling_time = 3*3600
         self.sampling_period = 60
-        self.test_time = 600
+        self.test_time = 15*3600

@@ -15,7 +15,7 @@ class Stability(object):
         self.drs = SerialDRS()
         self.cfg = StabilityConfig()
 
-    
+
     def stability_test(self):
         ################################################################################
         ###################### CONFIRMANDO DADOS DE CONFIGURAÇÃO #######################
@@ -28,10 +28,8 @@ class Stability(object):
         print('Lista de canais do multimetro:                ' + str(self.cfg.channel_list))
         print('Canal de medição da temperatura ambiente:     ' + str(self.cfg.ambient_temperature_channel))
         print('Período de amostragem:                        ' + str(self.cfg.sampling_period))
-        print('Tempo de WarmUp dos módulos de potência:      ' + str(self.cfg.warmup_time))
         print('Tempo de esfriamento dos módulos de potência: ' + str(self.cfg.cooling_time))
         print('Lista de correntes de teste:                  ' + str(self.cfg.idc_list))
-        print('Tempo de trigger do multímetro:               ' + str(self.cfg.trigger_time))
         print('Tempo de teste:                               ' + str(self.cfg.test_time))
         # ctrl = input('\nOs dados estão corretos?(y/n): ')
         ctrl = 'y'
@@ -53,8 +51,9 @@ class Stability(object):
                     vdc_channels = vdc_channels + str(self.cfg.channel_list[i][self.cfg.individual_module_list[i].index(module)]) + ','
                     all_channels_list.append(self.cfg.channel_list[i][self.cfg.individual_module_list[i].index(module)])
                     count = count + 1
+            all_channels_list.append(self.cfg.ambient_temperature_channel)
             all_channels_list = sorted(all_channels_list)
-            scan_channels = vdc_channels + str(self.cfg.ambiente_temperature_channel)
+            scan_channels = vdc_channels + str(self.cfg.ambient_temperature_channel)
 
             ################################################################################
             ######################## CONFIGURANDO O MULTIMETRO #############################
@@ -71,33 +70,33 @@ class Stability(object):
 
             inst.write('CONF:TEMP RTD, 85, (@'                  + str(self.cfg.ambient_temperature_channel) + ')')
             time.sleep(0.5)
-            inst.write('SENS:TEMP:TRAN:FRTD:RES 100:NPLC 1, (@' + str(self.cfg.ambient_temperature_channel) + ')')
+            inst.write('SENS:TEMP:TRAN:FRTD:RES 100, (@' + str(self.cfg.ambient_temperature_channel) + ')')
             time.sleep(0.5)
 
             inst.write('ROUT:SCAN (@' + scan_channels + ')')
             time.sleep(0.5)
             ################################################################################
             ################################################################################
-            
+
             file_name_list = []
 
             for bastidor in self.cfg.bastidor_list:
-                for module in self.cfg.individual_module_list[self.cfg.bastidor_list.index(bastidor)]:
-                    file_name_list.append('Estabilidade_NS' + str(bastidor) + '.csv')
-                                        
+                file_name_list.append('Estabilidade_NS' + str(bastidor) + '.csv')
+
             for file_name in file_name_list:
                 _file = open(file_name, 'a')
                 _file.write('time stamp;')
-                    
+
                 for i in self.cfg.individual_module_list[file_name_list.index(file_name)]:
-                    _file.write('CH' + str(i + ';'))
+                    _file.write('CH' + str(i) + ';')
+                _file.write('temp_modulo1;temp_modulo2;temp_modulo3;temp_modulo4;')
                 _file.write('CH' + str(self.cfg.ambient_temperature_channel) + '\n')
                 _file.close()
-            
+
             for idc in self.cfg.idc_list:
                 print('\nInício do teste de estabilidade com módulos a ' + str(idc) + 'A')
                 print('Aguardando tempo de esfriamento dos módulos...')
-                print(time.sleep(self.cfg.cooling_time))
+                time.sleep(self.cfg.cooling_time)
                 print('Início do teste...')
 
                 for bastidor in self.cfg.bastidor_list:
@@ -110,19 +109,20 @@ class Stability(object):
                         time.sleep(0.5)
                         self.drs.closed_loop()
                         time.sleep(0.5)
-            
-                for j in range(self.cfg.bastidor_list):
+
+                for j in range(len(self.cfg.bastidor_list)):
                     for k in self.cfg.individual_module_list[j]:
                         self.drs.SetSlaveAdd(k)
                         time.sleep(0.5)
                         self.drs.set_slowref(idc)
                         time.sleep(0.5)
-                
+
                 sleep_time = self.cfg.sampling_period - round((count * 6.67) + 0.033)
 
-                for l in range(self.cfg.test_time/self.cfg.sampling_period):
+                for l in range(int(self.cfg.test_time/self.cfg.sampling_period)):
                     inst.write('READ?')
                     read = inst.read()
+                    read = read.replace('\n', '')
                     read = read.split(',')
 
                     for m in file_name_list:
@@ -131,36 +131,41 @@ class Stability(object):
                         _file.close()
 
                     for ch in all_channels_list:
-                        for n in range(file_name_list):
+                        for n in range(len(file_name_list)):
                             if ch in self.cfg.channel_list[n]:
                                 _file = open(file_name_list[n], 'a')
                                 write_ch = str(read[all_channels_list.index(ch)])
                                 write_ch = write_ch.replace('.', ',')
                                 _file.write(write_ch + ';')
                                 _file.close()
-                            
+
                             elif ch == self.cfg.ambient_temperature_channel:
                                 write_temp = str(read[all_channels_list.index(ch)])
                                 write_temp = write_temp.replace('.', ',')
-                    
+
                     for bastidor in self.cfg.bastidor_list:
                         for module in self.cfg.individual_module_list[self.cfg.bastidor_list.index(bastidor)]:
                             self.drs.SetSlaveAdd(module)
-                            time.sleep(0.5)
+                            time.sleep(0.1)
                             mod_temperature = str(self.drs.read_bsmp_variable(30, 'float'))
                             mod_temperature = mod_temperature.replace('.', ',')
 
-                            for name in file_name_list:
-                                _file = open(name, 'a')
-                                _file.write(mod_temperature + ';')
-                                _file.close()
-                    
+                            _file = open(file_name_list[self.cfg.bastidor_list.index(bastidor)], 'a')
+                            _file.write(mod_temperature + ';')
+                            _file.close()
+
                     for name in file_name_list:
                                 _file = open(name, 'a')
                                 _file.write(write_temp + '\n')
                                 _file.close()
 
                     time.sleep(sleep_time)
+
+                for bastidor in self.cfg.bastidor_list:
+                    for module in self.cfg.individual_module_list[self.cfg.bastidor_list.index(bastidor)]:
+                        self.drs.SetSlaveAdd(module)
+                        time.sleep(0.5)
+                        self.drs.turn_off()
         ################################################################################
         ############################### FIM DO TESTE ###################################
         ################################################################################
