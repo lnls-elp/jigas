@@ -13,7 +13,6 @@ from test_config import CrossTalkConfig
 class CrossTalk(object):
     def __init__(self):
         self.drs = SerialDRS()
-        self.now = datetime.now()
         self.cfg = CrossTalkConfig()
 
 
@@ -31,7 +30,8 @@ class CrossTalk(object):
         print('Lista de canais do multímetro:           ' + str(self.cfg.channel_list))
         print('Tempo de degrau de corrente:             ' + str(self.cfg.step_time))
         print('Tempo de aquecimento dos módulos:        ' + str(self.cfg.warmup_time))
-        ctrl = input('\nOs dados estão corretos?(y/n): ')
+        # ctrl = input('\nOs dados estão corretos?(y/n): ')
+        ctrl = 'y'
         ################################################################################
         ################################################################################
 
@@ -56,6 +56,8 @@ class CrossTalk(object):
                     for module_ in self.cfg.individual_module_list[k]:
                         self.drs.SetSlaveAdd(module_)
                         time.sleep(0.5)
+                        self.drs.reset_interlocks()
+                        time.sleep(0.5)
                         self.drs.turn_on()
                         time.sleep(0.5)
                         self.drs.closed_loop()
@@ -76,8 +78,10 @@ class CrossTalk(object):
                     ################################################################################
                     ################################################################################
 
-                    for idc in self.cfg.self.cfg.idc_set_test_list:
+                    for idc in self.cfg.idc_set_test_list:
                         self.drs.SetSlaveAdd(module)
+                        time.sleep(0.5)
+                        self.drs.reset_interlocks()
                         time.sleep(0.5)
                         self.drs.set_slowref(idc)
 
@@ -97,6 +101,8 @@ class CrossTalk(object):
                             for aux in auxiliary_module_list:
                                 self.drs.SetSlaveAdd(aux)
                                 time.sleep(0.5)
+                                self.drs.reset_interlocks()
+                                time.sleep(0.5)
                                 self.drs.set_slowref(step)
                                 time.sleep(0.5)
                             time.sleep(1)
@@ -115,6 +121,8 @@ class CrossTalk(object):
 
                     for module__ in self.cfg.individual_module_list[k]:
                         self.drs.SetSlaveAdd(module__)
+                        time.sleep(0.5)
+                        self.drs.reset_interlocks()
                         time.sleep(0.5)
                         self.drs.turn_off()
                     inst.close()

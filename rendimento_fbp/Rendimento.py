@@ -13,7 +13,6 @@ from test_config import EficiencyConfig
 class Eficiency(object):
     def __init__(self):
         self.drs = SerialDRS()
-        self.now = datetime.now()
         self.cfg = EficiencyConfig()
 
 
@@ -33,7 +32,8 @@ class Eficiency(object):
         print('Canal de leitura da tensão de entrada:   ' + str(self.cfg.input_voltage_channel))
         print('Canal de leitura da tensão de saída:     ' + str(self.cfg.output_voltage_channel))
         print('Tempo de aquecimento dos módulos:        ' + str(self.cfg.warmup_time))
-        ctrl = input('\nOs dados estão corretos?(y/n): ')
+        # ctrl = input('\nOs dados estão corretos?(y/n): ')
+        ctrl = 'y'
         ################################################################################
         ################################################################################
 
@@ -45,6 +45,8 @@ class Eficiency(object):
             self.drs.Connect(self.cfg.com_port)
             time.sleep(0.5)
             self.drs.SetSlaveAdd(self.cfg.slot_address)
+            time.sleep(0.5)
+            self.drs.reset_interlocks()
             time.sleep(0.5)
 
             ################################################################################
@@ -114,7 +116,7 @@ class Eficiency(object):
         ################################################################################
         ############################### FIM DO TESTE ###################################
         ################################################################################
-        
-        
+
+
         else:
             print('Corrija os dados e reinicie o teste!')

@@ -13,7 +13,6 @@ from test_config import LinearityConfig
 class Linearity(object):
     def __init__(self):
         self.drs = SerialDRS()
-        self.now = datetime.now()
         self.cfg = LinearityConfig()
 
 
@@ -28,8 +27,10 @@ class Linearity(object):
         print('Lista de módulos para teste individual:  ' + str(self.cfg.individual_module_list))
         print('Lista de canais do multimetro:           ' + str(self.cfg.channel_list))
         print('Tempo de WarmUp dos módulos de potência: ' + str(self.cfg.warmup_time))
+        print('Tempo de estabilização da medida:        ' + str(self.cfg.stb_time))
 
-        ctrl = input('\nOs dados estão corretos?(y/n): ')
+        # ctrl = input('\nOs dados estão corretos?(y/n): ')
+        ctrl = 'y'
         ################################################################################
         ################################################################################
 
@@ -46,8 +47,8 @@ class Linearity(object):
                     ################################################################################
                     ######################## CONFIGURANDO O MULTIMETRO #############################
                     ################################################################################
-                    channel = self.cfg.channel_list[self.cfg.individual_module_list[i].index(module)]
-
+                    channel = str(self.cfg.channel_list[i][self.cfg.individual_module_list[i].index(module)])
+                    print(channel)
                     rm   = visa.ResourceManager()
                     inst = rm.open_resource(self.cfg.inst_addr)
 
@@ -61,11 +62,13 @@ class Linearity(object):
                     ################################################################################
 
 
-                    _file = open('Linearidade_' + module + '_NS' + str(self.cfg.bastidor_list.index(i)) + '.csv', 'a')
+                    _file = open('Linearidade_' + str(module) + '_NS' + str(self.cfg.bastidor_list[i]) + '.csv', 'a')
                     _file.write('time stamp;VDC;Ref;temp\n')
 
                     reference = -10
                     self.drs.SetSlaveAdd(module)
+                    time.sleep(0.5)
+                    self.drs.reset_interlocks()
                     time.sleep(0.5)
                     self.drs.turn_on()
                     time.sleep(0.5)
@@ -75,19 +78,21 @@ class Linearity(object):
 
                     print('Aguardando tempo de WarmUp...')
                     time.sleep(self.cfg.warmup_time)
-                    print('Inicio do teste do modulo ' + module + ':')
-                    print(str(self.now.datetime.now()))
+                    print('Inicio do teste do modulo ' + str(module) + ':')
+                    print(str(datetime.now()))
 
                     for j in range(201):
-                        reference = reference + (j * 0.1)
-                        time.sleep(120) # alterar para 120
+                        reference = -10 + (j * 0.1)
+                        print(reference)
+                        self.drs.set_slowref(reference)
+                        time.sleep(self.cfg.stb_time) # alterar para 120
 
                         write_reference = str(reference)
                         temperature = str(self.drs.read_bsmp_variable(30, 'float'))
 
                         inst.write('READ?')
                         read = str(float(inst.read()))
-                        _file.write(str(self.now.datetime.now()) + ';' + read.replace('.', ',') +\
+                        _file.write(str(datetime.now()) + ';' + read.replace('.', ',') +\
                                     ';' + write_reference.replace('.', ',')            +\
                                     ';' + temperature.replace('.', ',') + '\n')
 
@@ -95,7 +100,7 @@ class Linearity(object):
                     _file.close()
 
                     print('Fim do teste: ')
-                    print(str(self.now.datetime.now()))
+                    print(str(datetime.now()))
         ################################################################################
         ############################### FIM DO TESTE ###################################
         ################################################################################

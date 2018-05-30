@@ -13,7 +13,6 @@ from test_config import ResolutionConfig
 class Resolution(object):
     def __init__(self):
         self.drs = SerialDRS()
-        self.now = datetime.now()
         self.cfg = ResolutionConfig()
 
 
@@ -31,7 +30,8 @@ class Resolution(object):
         print('Tempo de WarmUp dos módulos de potência: ' + str(self.cfg.warmup_time))
         print('Número de bits para o teste:             ' + str(self.cfg.nbits))
 
-        ctrl = input('\nOs dados estão corretos?(y/n): ')
+        # ctrl = input('\nOs dados estão corretos?(y/n): ')
+        ctrl = 'y'
         ################################################################################
         ################################################################################
 
@@ -48,7 +48,9 @@ class Resolution(object):
                     ################################################################################
                     ######################## CONFIGURANDO O MULTIMETRO #############################
                     ################################################################################
-                    channel = self.cfg.channel_list[self.cfg.individual_module_list[i].index(module)]
+                    print(i)
+                    print(module)
+                    channel = str(self.cfg.channel_list[i][self.cfg.individual_module_list[i].index(module)])
 
                     rm   = visa.ResourceManager()
                     inst = rm.open_resource(self.cfg.inst_addr)
@@ -64,11 +66,13 @@ class Resolution(object):
 
 
                     for idc in self.cfg.idc_list:
-                        _file = open('Resolucao_' + module + '_NS' + str(self.cfg.bastidor_list.index(i)) + '.csv', 'a')
+                        _file = open('Resolucao_' + str(module) + '_NS' + str(self.cfg.bastidor_list[i]) + '.csv', 'a')
                         _file.write('IDC = ' + str(idc) + 'A\n')
                         _file.write('time stamp;VDC;Ref;temp\n')
 
                         self.drs.SetSlaveAdd(module)
+                        time.sleep(0.5)
+                        self.drs.reset_interlocks()
                         time.sleep(0.5)
                         self.drs.turn_on()
                         time.sleep(0.5)
@@ -77,15 +81,16 @@ class Resolution(object):
                         reference = idc - ((10/(2 ** self.cfg.nbits)) *15)
                         self.drs.set_slowref(reference)
 
-                        print('Aguardando tempo de WarmUp...')
+                        print('\nAguardando tempo de WarmUp...')
                         time.sleep(self.cfg.warmup_time)
-                        print('Inicio do teste do ' + module + ', IDC = ' + str(idc) + 'A:')
+                        print('#########################################################################')
+                        print('\nInicio do teste do modulo ' + str(module) + ', IDC = ' + str(idc) + 'A:')
                         print(str(datetime.now()))
 
-                        for i in range(30):
-                            if not i == 0:
+                        for j in range(30):
+                            if not j == 0:
                                 reference = reference + (10/(2 ** self.cfg.nbits))
-                            
+
                             print('\nReference: ' + str(reference))
                             self.drs.set_slowref(reference)
                             time.sleep(0.5)
@@ -93,7 +98,7 @@ class Resolution(object):
                             write_reference = str(reference)
                             time.sleep(5)
 
-                            for j in range(5):
+                            for k in range(5):
                                 inst.write('READ?')
                                 read = str(float(inst.read()))
                                 _file.write(str(datetime.now()) + ';'       +\
@@ -101,8 +106,9 @@ class Resolution(object):
                                             write_reference.replace('.', ',') + ';' +\
                                             temperature.replace('.', ',') + '\n')
 
-                        print('Fim do teste: ')
+                        print('\nFim do teste: ')
                         print(str(datetime.now()))
+                        print('#########################################################################')
 
                         self.drs.turn_off()
                         _file.close()

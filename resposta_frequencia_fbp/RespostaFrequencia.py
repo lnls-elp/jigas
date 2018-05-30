@@ -13,7 +13,6 @@ from test_config import FrequencyResponseConfig
 class FrequencyResponse(object):
     def __init__(self):
         self.drs = SerialDRS()
-        self.now = datetime.now()
         self.cfg = FrequencyResponseConfig
 
 
@@ -31,7 +30,8 @@ class FrequencyResponse(object):
         print('Canal do multímetro para leitura de frequência:   ' + str(self.cfg.channel_freq))
         print('Canal do multímetro para leitura do valor eficaz: ' + str(self.cfg.channel_rms))
 
-        ctrl = input('\nOs dados estão corretos?(y/n): ')
+        # ctrl = input('\nOs dados estão corretos?(y/n): ')
+        ctrl = 'y'
         ################################################################################
         ################################################################################
 
@@ -102,6 +102,8 @@ class FrequencyResponse(object):
                             amplitude = 10
                             self.drs.SetSlaveAdd(module)
                             time.sleep(0.5)
+                            self.drs.reset_interlocks()
+                            time.sleep(0.5)
                             self.drs.turn_on()
                             time.sleep(0.5)
                             self.drs.select_op_mode('Cycle')
@@ -114,6 +116,8 @@ class FrequencyResponse(object):
                         elif loop == 'closed':
                             amplitude = 0.1
                             self.drs.SetSlaveAdd(module)
+                            time.sleep(0.5)
+                            self.drs.reset_interlocks()
                             time.sleep(0.5)
                             self.drs.turn_on()
                             time.sleep(0.5)

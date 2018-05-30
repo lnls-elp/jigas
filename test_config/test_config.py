@@ -1,30 +1,31 @@
-class GeneralTests(object):
+class LinearityConfig(object):
     def __init__(self):
         self.com_port = 'COM12'
         self.inst_addr = 'GPIB::8::INSTR'
-
-
-class LinearityConfig(GeneralTests):
-    def __init__(self):
-        self.bastidor_list = [1041182345, 1041182347]
-        self.individual_module_list = [[1, 2, 3, 4], [5, 6, 7, 8]]
+        self.bastidor_list = [1041182350, 1041182353]
+        self.individual_module_list = [[9, 10, 11, 12], [13, 14, 15, 16]]
         self.channel_list = [[101, 102, 103, 104], [201, 202, 203, 204]]
-        self.warmup_time = 10800
+        self.warmup_time = 1
+        self.stb_time = 1
 
 
-class ResolutionConfig(GeneralTests):
+class ResolutionConfig(object):
     def __init__(self):
-        self.bastidor_list = [1041182345, 1041182347]
-        self.individual_module_list = [[1, 2, 3, 4], [5, 6, 7, 8]]
+        self.com_port = 'COM12'
+        self.inst_addr = 'GPIB::8::INSTR'
+        self.bastidor_list = [1041182350, 1041182353]
+        self.individual_module_list = [[9, 10, 11, 12], [13, 14, 15, 16]]
         self.idc_list = [5, 0, -5]
         self.channel_list = [[101, 102, 103, 104], [201, 202, 203, 204]]
-        self.warmup_time = 10800
+        self.warmup_time = 1
         self.nbits = 18
 
 
-class EficiencyConfig(GeneralTests):
+class EficiencyConfig(object):
     def __init__(self):
-        self.bastidor = 1041182345
+        self.com_port = 'COM12'
+        self.inst_addr = 'GPIB::8::INSTR'
+        self.bastidor = [1041182350]
         self.individual_module_list = [1, 2, 3, 4]
         self.slot_address = 1
         self.ps_iout = [0, 1, -1, 5, -5, 10, -10]
@@ -35,29 +36,35 @@ class EficiencyConfig(GeneralTests):
         self.warmup_time = 600
 
 
-class CrossTalkConfig(GeneralTests):
+class CrossTalkConfig(object):
     def __init__(self):
-        self.bastidor_list = [1041182345, 1041182347]
-        self.individual_module_list = [[1, 2, 3, 4], [5, 6, 7, 8]]
+        self.com_port = 'COM12'
+        self.inst_addr = 'GPIB::8::INSTR'
+        self.bastidor_list = [1041182350, 1041182353]
+        self.individual_module_list = [[9, 10, 11, 12], [13, 14, 15, 16]]
         self.idc_set_test_list = [10, 0, -10]
         self.idc_set_current_list = [0, 10, 0, -10, 0]
         self.channel_list = [[101, 102, 103, 104], [201, 202, 203, 204]]
-        self.step_time = 60
-        self.warmup_time = 2*3600
+        self.step_time = 5
+        self.warmup_time = 1
 
 
-class FrequencyResponseConfig(GeneralTests):
+class FrequencyResponseConfig(object):
     def __init__(self):
-        self.bastidor = [1041182345]
-        self.individual_module_list = [1, 2, 3, 4, 5]
+        self.com_port = 'COM12'
+        self.inst_addr = 'GPIB::8::INSTR'
+        self.bastidor = [1041182350]
+        self.individual_module_list = [1, 2, 3, 4]
         self.idc_list = [5, 0, -5]
         self.ctrl_loop = ['open', 'closed']
         self.channel_freq = 101
         self.channel_rms = 102
 
 
-class RippleConfig(GeneralTests):
+class RippleConfig(object):
     def __init__(self):
+        self.com_port = 'COM12'
+        self.inst_addr = 'GPIB::8::INSTR'
         self.dso_addr = ''
         self.dso_file = 'ripple_fbp.scp'
         self.bastidor = [1041182345]
