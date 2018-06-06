@@ -236,7 +236,7 @@ class PowerModuleTest(QThread):
                 self.update_gui.emit('')
 
             if serial[2] != None:
-                mod_result1[2].append(self.FBP.Read_iMod3())
+                mod_result1[2].append(self.FBP.Read_iMod4())
                 self.update_gui.emit('       corrente de saída do módulo 3: ' + str(mod_result1[2][load_current.index(set_current)]))
                 time.sleep(0.1)
                 mod_result2[2].append(self.FBP.Read_vOutMod3())
