@@ -106,7 +106,7 @@ class RackTest(QThread):
 
             if test_setup:
                 for j in range(0, 10):
-                    if (round(list_iout0[j])==-2) and (round(list_iout1[j])==1) and (round(list_iout2[j])==-3) and (round(list_iout3[j])==3):
+                    if (round(list_iout0[j])==-2) and (round(list_iout1[j])==1) and (round(list_iout2[j])==-3) and ((round(list_iout3[j]) == 3) or (round(list_iout3[j]) == 2)):
                         if result:
                             log.test_result = 'Aprovado'
                             result = True
