@@ -88,7 +88,7 @@ class RackTest(QThread):
                 list_iout1.append(self.FBP.Read_iMod2())
                 list_iout2.append(self.FBP.Read_iMod3())
                 list_iout3.append(self.FBP.Read_iMod4())
-                self.update_gui.emit('aguarde 60 segundos para o início da ' + str(i+1) + ' leitura')
+                self.update_gui.emit('aguarde 5 segundos para o início da ' + str(i+1) + ' leitura')
                 time.sleep(5) # Alterar para 60s
                 self.update_gui.emit('leitura ' + str(i+1) + ':')
                 self.update_gui.emit('iout0 = ' + str(list_iout0[i]) + ' A')
