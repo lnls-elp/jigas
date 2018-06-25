@@ -13,7 +13,7 @@ from test_config import FrequencyResponseConfig
 class FrequencyResponse(object):
     def __init__(self):
         self.drs = SerialDRS()
-        self.cfg = FrequencyResponseConfig
+        self.cfg = FrequencyResponseConfig()
 
 
     def frequency_response_test(self):
@@ -69,7 +69,8 @@ class FrequencyResponse(object):
                         time.sleep(0.5)
                         inst.write('ROUT:SCAN (@' + str(self.cfg.channel_rms) + ',' + str(self.cfg.channel_freq) + ')')
 
-                        print('\nInício do teste de resposta em frequência em malha aberta...')
+                        print('\nInício do teste de resposta em frequência em malha aberta do módulo ' + str(module))
+                        print('\nPor favor, certifique-se de que o cabo de saída está ligado ao módulo ' + str(module))
                         print('\nPor favor, selecione:')
                         print('                       -O ganho do amplificador diferencial para 1')
                         print('                       -A frequência de corte do amplificador diferencial para 100kHz')
@@ -82,10 +83,11 @@ class FrequencyResponse(object):
                         time.sleep(0.5)
                         inst.write('ROUT:SCAN (@' + str(self.cfg.channel_freq) + ',' + str(self.cfg.channel_rms) + ')')
 
-                        print('\nInício do teste de resposta em frequência em malha fechada...')
+                        print('\nInício do teste de resposta em frequência em malha fechada do módulo ' + str(module))
+                        print('\nPor favor, certifique-se de que o cabo de saída está ligado ao módulo ' + str(module))
                         print('\nPor favor, selecione:')
                         print('                       -O ganho do amplificador diferencial para 100')
-                        print('                       -A frequência de corte do amplificador diferencial para >1MHz')
+                        print('                       -A frequência de corte do amplificador diferencial para 100kHz')
                         pause = input('\nTecle enter para continuar')
                     ################################################################################
                     ################################################################################

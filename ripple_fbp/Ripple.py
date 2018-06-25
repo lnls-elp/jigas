@@ -44,7 +44,7 @@ class Ripple(object):
                 if self.cfg.individual_module_list.index(module) == 0:
                     pause = input('\nConecte os cabos de medição para iniciar o teste\n')
                 if not module == None:
-                    module_name = 'modulo ' + str(self.cfg.individual_module_list.index(module) + 1)
+                    module_name = 'modulo ' + str(module)
                     try:
                         if not self.cfg.individual_module_list[self.cfg.individual_module_list.index(module) + 1] == None:
                             next_module = 'modulo ' + str(self.cfg.individual_module_list.index(module) + 2)
@@ -140,10 +140,10 @@ class Ripple(object):
                         time.sleep(0.5)
                         self.drs.closed_loop()
                         time.sleep(0.5)
-                    self.drs.set_slowref_fbp(8)
-                    time.sleep(0.5)
-                    self.drs.set_slowref_fbp(10)
-                    time.sleep(0.5)
+                        self.drs.set_slowref(8)
+                        time.sleep(0.5)
+                        self.drs.set_slowref(10)
+                        time.sleep(0.5)
 
                     self.dso.connect(self.cfg.dso_addr)
                     time.sleep(1)
