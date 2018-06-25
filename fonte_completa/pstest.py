@@ -63,7 +63,7 @@ class PowerSupplyTest(QThread):
                     print('Configurando UDC da Fonte...')
                     self.FBP.SetSlaveAdd(1)      # Endereço do controlador
                     time.sleep(0.5)
-                    self.FBP.Config_nHRADC(4)
+                    self.FBP.Config_nHRADC(2)
                 elif i == 1:
                     print('Configurando UDC da jiga...')
                     self.FBP.SetSlaveAdd(5)      # Endereço do controlador
@@ -129,7 +129,7 @@ class PowerSupplyTest(QThread):
             '''########################### Teste Liga/Desliga ###########################'''
             '''##########################################################################'''
             self.update_gui.emit('Iniciando teste liga/desliga dos módulos de potência...')
-            for module in range(4):
+            for module in range(2):
                 self.FBP.TurnOn(2**module)
                 time.sleep(1)
                 # self.FBP.OpenLoop(2**module)
@@ -156,9 +156,9 @@ class PowerSupplyTest(QThread):
             self.FBP.Read_ps_SoftInterlocks()
             self.FBP.Read_ps_HardInterlocks()
 
-            self.FBP.TurnOn(0b1111)   # liga todos os módulos
+            self.FBP.TurnOn(0b0011)   # liga todos os módulos
             time.sleep(5)
-            self.FBP.OpenLoop(0b1111) # todos os módulos em malha aberta
+            self.FBP.OpenLoop(0b0011) # todos os módulos em malha aberta
 
             if (abs(self.FBP.Read_iMod1()) > 12) or \
                (abs(self.FBP.Read_iMod2()) > 12) or \
@@ -172,9 +172,9 @@ class PowerSupplyTest(QThread):
             '''################## Teste em Malha Aberta com 21.5% #######################'''
             '''##########################################################################'''
             self.update_gui.emit('Iniciando teste com módulos a 4A...')
-            self.FBP.ClosedLoop(15)
+            self.FBP.ClosedLoop(0b0011)
             time.sleep(1)
-            for module in range(4):
+            for module in range(2):
                 if module == 0:
                     self.FBP.SetISlowRefx4(4, 0, 0, 0) # ciclo de trabalho
                 elif module == 1:                      # alterado para 21.5%
@@ -232,7 +232,7 @@ class PowerSupplyTest(QThread):
             self.update_gui.emit('Iniciando teste com módulos a -4A...')
             self.FBP.ClosedLoop(15)
             time.sleep(1)
-            for module in range(4):
+            for module in range(2):
                 if module == 0:
                     self.FBP.SetISlowRefx4(-4, 0, 0, 0) # ciclo de trabalho
                 elif module == 1:                      # alterado para 21.5%
@@ -278,8 +278,8 @@ class PowerSupplyTest(QThread):
             '''##########################################################################'''
             self.update_gui.emit('Iniciando teste com módulos em malha fechada a 5A...')
 
-            for module in range(4):
-                self.FBP.ClosedLoop(15)
+            for module in range(2):
+                self.FBP.ClosedLoop(0b0011)
                 time.sleep(1)
                 if module == 0:
                     self.FBP.SetISlowRefx4(5, 0, 0, 0)
@@ -319,7 +319,7 @@ class PowerSupplyTest(QThread):
                 if module == 0 or module == 1 or module == 2 or module == 3:
                     self.FBP.SetISlowRefx4(0, 0, 0, 0)
                 time.sleep(2)
-                self.FBP.OpenLoop(15)
+                self.FBP.OpenLoop(0b0011)
                 time.sleep(2)
             '''##########################################################################'''
 
@@ -329,14 +329,14 @@ class PowerSupplyTest(QThread):
             '''################### Teste em Malha Fechada com 10A #######################'''
             '''##########################################################################'''
             self.update_gui.emit('Iniciando teste com módulos em malha fechada a 10A...')
-            self.FBP.ClosedLoop(0b1111)
+            self.FBP.ClosedLoop(0b0011)
             time.sleep(2)
             self.FBP.OpMode(0)
             time.sleep(2)
             self.FBP.SetISlowRefx4(10, 10, 10, 10)
             time.sleep(1)
 
-            for module in range(4):
+            for module in range(2):
                 time.sleep(5)
                 MeasureList = self._save_CurrentMeasurement(module)
                 for current in MeasureList:
@@ -396,7 +396,7 @@ class PowerSupplyTest(QThread):
             time.sleep(0.5)
             self.FBP.SetISlowRefx4(-10, -10, -10, -10)
 
-            for module in range(4):
+            for module in range(2):
                 time.sleep(5)
                 MeasureList = self._save_CurrentMeasurement(module)
                 for current in MeasureList:
@@ -453,7 +453,7 @@ class PowerSupplyTest(QThread):
             time.sleep(1)
             self.FBP.TurnOff(0b1111)
 
-            for module in range(4):
+            for module in range(2):
                 log = PowerSupplyLog()
                 log.id_canal_power_supply = module + 1
 
