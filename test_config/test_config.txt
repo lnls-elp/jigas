@@ -46,7 +46,7 @@ class CrossTalkConfig(object):
         self.idc_set_current_list = [0, 10, 0, -10, 0]
         self.channel_list = [[101, 102, 103, 104], [201, 202, 203, 204]]
         self.step_time = 60
-        self.warmup_time = 0#2*3600
+        self.warmup_time = 2*3600
 
 
 class FrequencyResponseConfig(object):

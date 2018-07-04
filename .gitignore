@@ -1,6 +1,8 @@
 *.pyc
 *.bak
 *.csv
+test_config.py
+test_exe.py
 relatorio_teste/relatorios/
 common/build
 common/dist

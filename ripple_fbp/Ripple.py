@@ -123,7 +123,7 @@ class Ripple(object):
                 if self.cfg.group_module_list.index(module) == 0:
                     pause = input('\nConecte os cabos de medição para iniciar o teste\n')
                 if not module == None:
-                    module_name = 'modulo ' + str(self.cfg.group_module_list.index(module) + 1)
+                    module_name = 'modulo ' + str(module)
                     try:
                         if not self.cfg.group_module_list[self.cfg.group_module_list.index(module) + 1] == None:
                             next_module = 'modulo ' + str(self.cfg.group_module_list.index(module) + 2)
