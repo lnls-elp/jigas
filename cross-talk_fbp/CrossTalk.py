@@ -71,7 +71,7 @@ class CrossTalk(object):
 
                     inst.write('CONF:VOLT:DC (@'          + channels + ')')
                     time.sleep(0.5)
-                    inst.write('SENS:VOLT:DC:NPLC 1, (@' + channels + ')')
+                    inst.write('SENS:VOLT:DC:NPLC 10, (@' + channels + ')')
                     time.sleep(0.5)
                     inst.write('ROUT:SCAN (@'             + channels + ')')
                     time.sleep(0.5)
@@ -105,6 +105,7 @@ class CrossTalk(object):
                                 time.sleep(0.5)
                                 self.drs.set_slowref(step)
                                 time.sleep(0.5)
+                            time.sleep(1)
 
                             for n in range(self.cfg.step_time):
                                 _file.write(str(datetime.now()))
@@ -116,7 +117,7 @@ class CrossTalk(object):
                                 for value in read:
                                     _file.write(';' + value.replace('.', ','))
 
-                                time.sleep(0.77)
+                                time.sleep(1)
 
                     for module__ in self.cfg.individual_module_list[k]:
                         self.drs.SetSlaveAdd(module__)
