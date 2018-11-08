@@ -1,6 +1,8 @@
 from common.pydrs import SerialDRS
 from DSOX_3024A import DSOX_3024A_USB
 
+import SwitchingBoard
+
 import time
 
 
@@ -52,6 +54,8 @@ class Ripple(object):
                         next_module = None
 
                     print('Iniciando medidas isoladas do ' + module_name + '...\n')
+
+                    SwitchingBoard.switchingBoard_FBP(module)
 
                     self.drs.SetSlaveAdd(module)
                     time.sleep(0.5)
@@ -114,7 +118,9 @@ class Ripple(object):
 
                     print('**********************************************************')
                     if next_module != None:
-                        pause = input('\nTroque os cabos de medição para medir o ' + next_module + ' e tecle enter\n')
+                        SwitchingBoard.switchingBoard_FBP(self.cfg.individual_module_list.[self.cfg.individual_module_list.index(module) + 1])
+                        # pause = input('\nTroque os cabos de medição para medir o ' + next_module + ' e tecle enter\n')
+
                     else:
                         print('Fim do teste!!!')
 
