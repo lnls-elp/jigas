@@ -20,6 +20,8 @@ class DSOX_3024A_USB(object):
 		self.inst = self.rm.open_resource(visa_address)
 		del self.inst.timeout
 
+	def disconnect(self):
+		self.inst.close()	
 
 	def get_setup(self):
 		self.inst.write(':SYSTem:SETup?')

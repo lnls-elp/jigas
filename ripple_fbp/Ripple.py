@@ -43,6 +43,8 @@ class Ripple(object):
         ################################################################################
         if (ctrl == 'y'):
             # self.drs.Connect(self.cfg.com_port, baud=9600) RETIRAR_COMENTARIO
+            self.dso.connect(self.cfg.dso_addr)
+            time.sleep(1)
             for module in self.cfg.individual_module_list:
                 if self.cfg.individual_module_list.index(module) == 0:
                     if self.cfg.switching_mode:
@@ -71,8 +73,6 @@ class Ripple(object):
                     # self.drs.closed_loop() RETIRAR_COMENTARIO
                     # time.sleep(0.5) RETIRAR_COMENTARIO
 
-                    self.dso.connect(self.cfg.dso_addr)
-                    time.sleep(1)
                     self.dso.setup_config(self.cfg.dso_file)
                     time.sleep(5)
 
@@ -133,8 +133,11 @@ class Ripple(object):
 
                     else:
                         print('Fim do teste!!!')
+                        self.dso.disconnect()
 
             # self.drs.Connect(self.cfg.com_port, baud=9600) RETIRAR_COMENTARIO
+            self.dso.connect(self.cfg.dso_addr)
+            time.sleep(1)
             for module in self.cfg.group_module_list:
                 if self.cfg.group_module_list.index(module) == 0:
                     if self.cfg.switching_mode:
@@ -171,8 +174,6 @@ class Ripple(object):
                         time.sleep(0.5)
                         RETIRAR_COMENTARIO
                     '''
-                    self.dso.connect(self.cfg.dso_addr)
-                    time.sleep(1)
                     self.dso.setup_config(self.cfg.dso_file)
                     time.sleep(5)
 
@@ -238,6 +239,7 @@ class Ripple(object):
 
                     else:
                         print('Fim do teste!!!')
+                        dso.disconnect()
         else:
             print('\nCorrija os dados e reinicie o teste.\n')
         ################################################################################
