@@ -73,6 +73,7 @@ class RippleConfig(object):
         self.ps_iout = [0, 2, 4, 6, 8, 10, -10, -8, -6, -4, -2]
         self.warmup_time = 10
         self.measurements = 10
+        self.switching_mode = True
 
 
 class StabilityConfig(object):
