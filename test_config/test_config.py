@@ -70,9 +70,9 @@ class RippleConfig(object):
         self.bastidor = [1041182353]
         self.individual_module_list = [1, 2, 3, 4]
         self.group_module_list = [1, 2, 3, 4]
-        self.ps_iout = [0, 2]
-        self.warmup_time = 10
-        self.measurements = 10
+        self.ps_iout = [0]
+        self.warmup_time = 1
+        self.measurements = 1
         self.switching_mode = True
 
 

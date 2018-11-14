@@ -239,7 +239,7 @@ class Ripple(object):
 
                     else:
                         print('Fim do teste!!!')
-                        dso.disconnect()
+                        self.dso.disconnect()
         else:
             print('\nCorrija os dados e reinicie o teste.\n')
         ################################################################################
