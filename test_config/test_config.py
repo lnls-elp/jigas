@@ -65,12 +65,12 @@ class RippleConfig(object):
     def __init__(self):
         self.com_port = 'COM12'
         self.inst_addr = 'GPIB::8::INSTR'
-        self.dso_addr = 'USB0::2391::6054::MY53510501::INSTR'
+        self.dso_addr = 'USB0::2391::6054::MY52492161::INSTR'
         self.dso_file = '../ripple_fbp/ripple_fbp.scp'
         self.bastidor = [1041182353]
-        self.individual_module_list = [13, 14, 15, 16]
-        self.group_module_list = [13, 14, 15, 16]
-        self.ps_iout = [0, 2, 4, 6, 8, 10, -10, -8, -6, -4, -2]
+        self.individual_module_list = [1, 2, 3, 4]
+        self.group_module_list = [1, 2, 3, 4]
+        self.ps_iout = [0, 2]
         self.warmup_time = 10
         self.measurements = 10
         self.switching_mode = True
