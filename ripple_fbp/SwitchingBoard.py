@@ -25,35 +25,35 @@ GPIO.output(27,0)
 
 def switchingBoard_FBP(rele):
     if rele == 1:
-        print ("\tCarga OFF: 1 \n\tCargas ON: 2,3,4 e TestLoad")
+        # print ("\tCarga OFF: 1 \n\tCargas ON: 2,3,4 e TestLoad")
         GPIO.output(3,1)
         GPIO.output(4,0)
         GPIO.output(17,0)
         GPIO.output(27,0)
         
     elif rele == 2:
-        print ("\tCarga OFF: 2 \n\tCargas ON: 1,3,4 e TestLoad")
+        # print ("\tCarga OFF: 2 \n\tCargas ON: 1,3,4 e TestLoad")
         GPIO.output(3,0)
         GPIO.output(4,1)
         GPIO.output(17,0)
         GPIO.output(27,0)
         
     elif rele == 3:
-        print ("\tCarga OFF: 3 \n\tCargas ON: 1,2,4 e TestLoad")
+        # print ("\tCarga OFF: 3 \n\tCargas ON: 1,2,4 e TestLoad")
         GPIO.output(3,0)
         GPIO.output(4,0)
         GPIO.output(17,1)
         GPIO.output(27,0)
         
     elif rele == 4:
-        print ("\tCarga OFF: 4 \n\tCargas ON: 1,2,3 TestLoad")
+        # print ("\tCarga OFF: 4 \n\tCargas ON: 1,2,3 TestLoad")
         GPIO.output(3,0)
         GPIO.output(4,0)
         GPIO.output(17,0)
         GPIO.output(27,1)
 
     elif rele == 5:
-        print ("\tCarga OFF: TestLoad \n\tCargas ON: 1,2,3 e 4")
+        # print ("\tCarga OFF: TestLoad \n\tCargas ON: 1,2,3 e 4")
         GPIO.output(3,0)
         GPIO.output(4,0)
         GPIO.output(17,0)
