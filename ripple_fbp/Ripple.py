@@ -133,6 +133,7 @@ class Ripple(object):
 
                     else:
                         print('Fim do teste!!!')
+                        SwitchingBoard.switchingBoard_FBP(5)
                         self.dso.disconnect()
 
             # self.drs.Connect(self.cfg.com_port, baud=9600) RETIRAR_COMENTARIO
@@ -239,6 +240,7 @@ class Ripple(object):
 
                     else:
                         print('Fim do teste!!!')
+                        SwitchingBoard.switchingBoard_FBP(5)
                         self.dso.disconnect()
         else:
             print('\nCorrija os dados e reinicie o teste.\n')
