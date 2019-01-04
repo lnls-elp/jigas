@@ -34,7 +34,7 @@ class Ripple(object):
         print('Tempo de WarmUp dos módulos de potência:              ' + str(self.cfg.warmup_time))
         print('Switching Mode:                                       ' + str(self.cfg.switching_mode))
 
-        ctrl = input('\nOs dados estão corretos?(y/n): ')
+        ctrl = 'y' #input('\nOs dados estão corretos?(y/n): ')
         ################################################################################
         ################################################################################
 
