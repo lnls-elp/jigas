@@ -42,7 +42,7 @@ class Ripple(object):
         ############################### ROTINA DE TESTE ################################
         ################################################################################
         if (ctrl == 'y'):
-            self.drs.Connect(self.cfg.com_port, baud=9600) #RETIRAR_COMENTARIO
+            self.drs.Connect(self.cfg.com_port)#, baud=9600) #RETIRAR_COMENTARIO
             self.dso.connect(self.cfg.dso_addr)
             time.sleep(1)
             for module in self.cfg.individual_module_list:
