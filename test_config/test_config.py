@@ -63,16 +63,16 @@ class FrequencyResponseConfig(object):
 
 class RippleConfig(object):
     def __init__(self):
-        self.com_port = 'COM12'
+        self.com_port = '/dev/virtualcom'
         self.inst_addr = 'GPIB::8::INSTR'
         self.dso_addr = 'USB0::2391::6054::MY52492161::INSTR'
         self.dso_file = '../ripple_fbp/ripple_fbp.scp'
-        self.bastidor = [1041182353]
+        self.bastidor = [1043949057]
         self.individual_module_list = [1, 2, 3, 4]
         self.group_module_list = [1, 2, 3, 4]
-        self.ps_iout = [0]
-        self.warmup_time = 1
-        self.measurements = 1
+        self.ps_iout = [0, 2, 4, 6, 8, 10, -10, -8, -6, -4, -2]
+        self.warmup_time = 10
+        self.measurements = 10
         self.switching_mode = True
 
 
