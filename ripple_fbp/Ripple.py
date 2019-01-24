@@ -110,7 +110,7 @@ class Ripple(object):
                             time.sleep(5)
                         
                         print('Iniciando processo de escala automática do osciloscópio...\n')
-                        self.dso.auto_scale(3)
+                        # self.dso.auto_scale(3)
                         print('Realizando medidas...\n')
                         vpp_list = self.dso.single_shot(self.cfg.measurements, 3)
                         print('Obtendo resultados e salvando imagem da tela...\n')
@@ -143,21 +143,21 @@ class Ripple(object):
 
                         print(final_results_list)
                         
-                        for a in ordered_current_list:
-                            for b in final_results_list:
-                                if a == b[0]:
-                                    write_list.append(b)
-                        print('bla')
-                        print(write_list)
-                        print('bla')
+                    for a in ordered_current_list:
+                        for b in final_results_list:
+                            if a == b[0]:
+                                write_list.append(b)
+                    print('bla')
+                    print(write_list)
+                    print('bla')
 
-                        _file = open('ripple_results_iso.csv', 'a')
-                        for line in final_results_list:
-                            for element in line:
-                                _file.write(str(element))
-                                _file.write(';')
-                            _file.write('\n')
-                        _file.close()
+                    _file = open('ripple_results_iso.csv', 'a')
+                    for line in final_results_list:
+                        for element in line:
+                            _file.write(str(element))
+                            _file.write(';')
+                        _file.write('\n')
+                    _file.close()
                     self.drs.turn_off()
 
                     print('**********************************************************')
