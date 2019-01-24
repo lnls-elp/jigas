@@ -52,7 +52,7 @@ class Ripple(object):
             final_results_list = []
             write_list = []
             ordered_current_list = []
-            
+
             for iout in self.cfg.ps_iout:
                 ordered_current_list.append(iout)
             ordered_current_list.sort()
@@ -132,11 +132,11 @@ class Ripple(object):
                             elif vpp_list.index(j) == 2:
                                 results_list.append(j/self.cfg.bw1meg_coeff)
                         for k in rms_list:
-                            if rms_list.index(j) == 0:
+                            if rms_list.index(k) == 0:
                                 results_list.append(j/self.cfg.bw3k_coeff)
-                            elif rms_list.index(j) == 1:
+                            elif rms_list.index(k) == 1:
                                 results_list.append(j/self.cfg.bw500k_coeff)
-                            elif rms_list.index(j) == 2:
+                            elif rms_list.index(k) == 2:
                                 results_list.append(j/self.cfg.bw1meg_coeff)
 
                         final_results_list.append(results_list)
