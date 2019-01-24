@@ -140,6 +140,8 @@ class Ripple(object):
                                 results_list.append(j/self.cfg.bw1meg_coeff)
 
                         final_results_list.append(results_list)
+
+                        print(final_results_list)
                         
                         for a in ordered_current_list:
                             for b in final_results_list:
