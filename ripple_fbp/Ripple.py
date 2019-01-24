@@ -51,7 +51,10 @@ class Ripple(object):
 
             final_results_list = []
             write_list = []
-            ordered_current_list = self.cfg.ps_iout
+            ordered_current_list = []
+            
+            for iout in self.cfg.ps_iout:
+                ordered_current_list.append(iout)
             ordered_current_list.sort()
 
             for module in self.cfg.individual_module_list:
