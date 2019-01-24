@@ -85,9 +85,6 @@ class Ripple(object):
                     self.drs.closed_loop()
                     time.sleep(0.5)
 
-                    self.dso.setup_config(self.cfg.dso_file)
-                    time.sleep(5)
-
                     _file = open('ripple_results_iso.csv', 'a')
 
                     _file.write('NS self.cfg.bastidor: ' + str(self.cfg.bastidor) + '\n')
@@ -102,13 +99,32 @@ class Ripple(object):
                         print('Iniciando teste com a corrente de ' + str(set_iout) + 'A\n')
                         self.drs.set_slowref(set_iout)
 
+                        print('Verificando a corrente de saída pela leitura do HRADC...\n')
+                        while round(self.drs.read_bsmp_variable(27, 'float')) != set_iout:
+                            print('Corrente de saída errada (corrente lida pelo HRADC não condiz com o valor setado)\n')
+                            time.sleep(5)
+
+                        print('Verificando a corrente de saída pela leitura do DCCT e do osciloscópio...\n')
+                        self.dso.do_command('RUN')
+                        time.sleep(2)
+                        self.dso.do_command(':MEASure:SOURce CHANnel2')
+                        time.sleep(1)
+                        self.dso.do_command(':CHANnel2:COUPling DC')
+                        time.sleep(1)
+                        self.dso.do_command(':CHANnel2:OFFSet 0V')
+                        time.sleep(1)
+                        self.dso.do_command(':CHANnel2:SCALe 5V')
+                        time.sleep(1)
+
+                        while round(float(self.dso.query_command(':MEASure:VAVerage?'))) != set_iout:
+                            print('Corrente de saída errada (corrente lida pelo osciloscópio não condiz com o valor setado)\n')
+                        
                         print('Aguardando ' + str(self.cfg.warmup_time) + ' segundos para maior estabilidade da medida...\n')
                         time.sleep(self.cfg.warmup_time) # WarmUpTime
 
-                        while round(self.drs.read_bsmp_variable(27, 'float')) != set_iout:
-                            print('Corrente de saída errada')
-                            time.sleep(5)
-                        
+                        self.dso.setup_config(self.cfg.dso_file)
+                        time.sleep(5)
+
                         print('Iniciando processo de escala automática do osciloscópio...\n')
                         self.dso.auto_scale(3)
                         print('Realizando medidas...\n')
@@ -214,9 +230,6 @@ class Ripple(object):
                         self.drs.set_slowref(10)
                         time.sleep(0.5)
                     
-                    self.dso.setup_config(self.cfg.dso_file)
-                    time.sleep(5)
-
                     _file = open('ripple_results_con.csv', 'a')
                     _file.write('NS self.cfg.bastidor: ' + str(self.cfg.bastidor) + '\n')
                     _file.write(module_name + '\n')
@@ -232,13 +245,31 @@ class Ripple(object):
                         print('Iniciando teste com a corrente de ' + str(set_iout) + 'A\n')
                         self.drs.set_slowref(set_iout)
                         
-                        print('Aguardando ' + str(self.cfg.warmup_time) + ' segundos para maior estabilidade da medida...\n')
-                        time.sleep(self.cfg.warmup_time) # WarmUpTime
-
                         while round(self.drs.read_bsmp_variable(27, 'float')) != set_iout:
                             print('Corrente de saída errada')
                             time.sleep(5)
-                        
+
+                        print('Verificando a corrente de saída pela leitura do DCCT e do osciloscópio...\n')
+                        self.dso.do_command('RUN')
+                        time.sleep(2)
+                        self.dso.do_command(':MEASure:SOURce CHANnel2')
+                        time.sleep(1)
+                        self.dso.do_command(':CHANnel2:COUPling DC')
+                        time.sleep(1)
+                        self.dso.do_command(':CHANnel2:OFFSet 0V')
+                        time.sleep(1)
+                        self.dso.do_command(':CHANnel2:SCALe 5V')
+                        time.sleep(1)
+
+                        while round(float(self.dso.query_command(':MEASure:VAVerage?'))) != set_iout:
+                            print('Corrente de saída errada (corrente lida pelo osciloscópio não condiz com o valor setado)\n')
+
+                        print('Aguardando ' + str(self.cfg.warmup_time) + ' segundos para maior estabilidade da medida...\n')
+                        time.sleep(self.cfg.warmup_time) # WarmUpTime
+
+                        self.dso.setup_config(self.cfg.dso_file)
+                        time.sleep(5)
+
                         print('Iniciando processo de escala automática do osciloscópio...\n')
                         self.dso.auto_scale(3)
                         print('Realizando medidas...\n')

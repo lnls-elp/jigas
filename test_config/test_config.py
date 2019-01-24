@@ -71,8 +71,8 @@ class RippleConfig(object):
         self.individual_module_list = [1, 2, 3, 4]
         self.group_module_list = [1, 2, 3, 4]
         self.ps_iout = [0, 2, 4, 6, 8, 10, -10, -8, -6, -4, -2]
-        self.warmup_time = 1
-        self.measurements = 1
+        self.warmup_time = 5
+        self.measurements = 10
         self.switching_mode = True
         self.bw3k_coeff = 100
         self.bw500k_coeff = 1

@@ -27,6 +27,11 @@ class DSOX_3024A_USB(object):
 		self.inst.write(':SYSTem:SETup?')
 		return self.inst.read_raw()
 
+	def do_command(self, command):
+		self.inst.write(command)
+
+	def query_command(self, command):
+		return self.inst.query(command)
 
 	def setup_config(self,file_name):
 		file = open(file_name, 'r')
