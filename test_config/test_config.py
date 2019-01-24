@@ -69,8 +69,8 @@ class RippleConfig(object):
         self.dso_file = '../ripple_fbp/ripple_fbp.scp'
         self.bastidor = [1043949057]
         self.individual_module_list = [1]#[1, 2, 3, 4]
-        self.group_module_list = [1]#[1, 2, 3, 4]
-        self.ps_iout = [0]#[0, 2, 4, 6, 8, 10, -10, -8, -6, -4, -2]
+        self.group_module_list = []#[1, 2, 3, 4]
+        self.ps_iout = [0, 2]#[0, 2, 4, 6, 8, 10, -10, -8, -6, -4, -2]
         self.warmup_time = 1
         self.measurements = 1
         self.switching_mode = True
