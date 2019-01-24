@@ -110,7 +110,7 @@ class Ripple(object):
                             time.sleep(5)
                         
                         print('Iniciando processo de escala automática do osciloscópio...\n')
-                        # self.dso.auto_scale(3)
+                        self.dso.auto_scale(3)
                         print('Realizando medidas...\n')
                         vpp_list = self.dso.single_shot(self.cfg.measurements, 3)
                         print('Obtendo resultados e salvando imagem da tela...\n')
@@ -141,15 +141,10 @@ class Ripple(object):
 
                         final_results_list.append(results_list)
 
-                        print(final_results_list)
-                        
                     for a in ordered_current_list:
                         for b in final_results_list:
                             if a == b[0]:
                                 write_list.append(b)
-                    print('bla')
-                    print(write_list)
-                    print('bla')
 
                     _file = open('ripple_results_iso.csv', 'a')
                     for line in write_list:
@@ -175,6 +170,15 @@ class Ripple(object):
             self.drs.Connect(self.cfg.com_port)
             self.dso.connect(self.cfg.dso_addr)
             time.sleep(1)
+
+            final_results_list = []
+            write_list = []
+            ordered_current_list = []
+
+            for iout in self.cfg.ps_iout:
+                ordered_current_list.append(iout)
+            ordered_current_list.sort()
+
             for module in self.cfg.group_module_list:
                 if self.cfg.group_module_list.index(module) == 0:
                     if self.cfg.switching_mode:
@@ -227,6 +231,7 @@ class Ripple(object):
                         time.sleep(0.5)
                         print('Iniciando teste com a corrente de ' + str(set_iout) + 'A\n')
                         self.drs.set_slowref(set_iout)
+                        
                         print('Aguardando ' + str(self.cfg.warmup_time) + ' segundos para maior estabilidade da medida...\n')
                         time.sleep(self.cfg.warmup_time) # WarmUpTime
 
@@ -247,16 +252,36 @@ class Ripple(object):
                         _file.write(str(set_iout) + ';')
 
                         print('salvando medidas no arquivo...\n')
+                        
                         for j in vpp_list:
-                            write_value = str(j)
-                            _file.write(write_value.replace('.', ','))
-                            _file.write(';')
+                            if vpp_list.index(j) == 0:
+                                results_list.append(j/self.cfg.bw3k_coeff)
+                            elif vpp_list.index(j) == 1:
+                                results_list.append(j/self.cfg.bw500k_coeff)
+                            elif vpp_list.index(j) == 2:
+                                results_list.append(j/self.cfg.bw1meg_coeff)
                         for k in rms_list:
-                            write_value = str(k)
-                            _file.write(write_value.replace('.', ','))
+                            if rms_list.index(k) == 0:
+                                results_list.append(j/self.cfg.bw3k_coeff)
+                            elif rms_list.index(k) == 1:
+                                results_list.append(j/self.cfg.bw500k_coeff)
+                            elif rms_list.index(k) == 2:
+                                results_list.append(j/self.cfg.bw1meg_coeff)
+
+                        final_results_list.append(results_list)
+                    
+                    for a in ordered_current_list:
+                        for b in final_results_list:
+                            if a == b[0]:
+                                write_list.append(b)
+                    
+                    _file = open('ripple_results_con.csv', 'a')
+                    for line in write_list:
+                        for element in line:
+                            _file.write(str(element).replace('.', ','))
                             _file.write(';')
                         _file.write('\n')
-                        _file.close()
+                    _file.close()
 
                     for i in self.cfg.group_module_list:
                         self.drs.SetSlaveAdd(i)
