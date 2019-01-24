@@ -92,9 +92,9 @@ class Ripple(object):
 
                     _file.write('NS self.cfg.bastidor: ' + str(self.cfg.bastidor) + '\n')
                     _file.write(module_name + '\n')
-                    _file.write("\nCH1: corrente @ 10 Hz - 3 kHz;'1:100\n")
-                    _file.write("CH2: corrente @ 10 Hz - 500 kHz;'1:1\n")
-                    _file.write("CH3: tensão @ 10 Hz - 1 MHz;'1:1\n")
+                    _file.write("\nCH1: corrente @ 10 Hz - 3 kHz\n")
+                    _file.write("CH2: corrente @ 10 Hz - 500 kHz\n")
+                    _file.write("CH3: tensão @ 10 Hz - 1 MHz\n")
                     _file.write('\ncorrente;CH1_App;CH2_App;CH3_Vpp;CH1_Arms;CH2_Arms;CH3_Vrms\n')
                     _file.close()
 
@@ -152,9 +152,9 @@ class Ripple(object):
                     print('bla')
 
                     _file = open('ripple_results_iso.csv', 'a')
-                    for line in final_results_list:
+                    for line in write_list:
                         for element in line:
-                            _file.write(str(element))
+                            _file.write(str(element).replace('.', ','))
                             _file.write(';')
                         _file.write('\n')
                     _file.close()
