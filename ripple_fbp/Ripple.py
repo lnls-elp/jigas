@@ -148,6 +148,8 @@ class Ripple(object):
                                 if a == b[0]:
                                     write_list.append(b)
 
+                        print(write_list)
+
                         _file = open('ripple_results_iso.csv', 'a')
                         for line in final_results_list:
                             for element in line:
