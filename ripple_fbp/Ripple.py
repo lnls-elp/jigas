@@ -33,8 +33,11 @@ class Ripple(object):
         print('Lista de valores de corrente de saída:                ' + str(self.cfg.ps_iout))
         print('Tempo de WarmUp dos módulos de potência:              ' + str(self.cfg.warmup_time))
         print('Switching Mode:                                       ' + str(self.cfg.switching_mode))
+        print('Coeficiente da medida de corrente 3 kHz:              ' + str(self.cfg.bw3k_coeff))
+        print('Coeficiente da medida de corrente 500 kHz:            ' + str(self.cfg.bw500k_coeff))
+        print('Coeficiente da medida de tensão 1 MHz:                ' + str(self.cfg.bw1meg_coeff))
 
-        ctrl = 'y' #input('\nOs dados estão corretos?(y/n): ')
+        ctrl = input('\nOs dados estão corretos?(y/n): ')
         ################################################################################
         ################################################################################
 
@@ -42,9 +45,15 @@ class Ripple(object):
         ############################### ROTINA DE TESTE ################################
         ################################################################################
         if (ctrl == 'y'):
-            self.drs.Connect(self.cfg.com_port)#, baud=9600) #RETIRAR_COMENTARIO
+            self.drs.Connect(self.cfg.com_port)
             self.dso.connect(self.cfg.dso_addr)
             time.sleep(1)
+
+            final_results_list = []
+            write_list = []
+            ordered_current_list = self.cfg.ps_iout
+            ordered_current_list.sort()
+
             for module in self.cfg.individual_module_list:
                 if self.cfg.individual_module_list.index(module) == 0:
                     if self.cfg.switching_mode:
@@ -66,12 +75,12 @@ class Ripple(object):
                         print('Comutando saída do ' + module_name + '...\n')
                         SwitchingBoard.switchingBoard_FBP(module)
 
-                    self.drs.SetSlaveAdd(module) #RETIRAR_COMENTARIO
-                    time.sleep(0.5) #RETIRAR_COMENTARIO
-                    self.drs.turn_on() #RETIRAR_COMENTARIO
-                    time.sleep(0.5) #RETIRAR_COMENTARIO
-                    self.drs.closed_loop() #RETIRAR_COMENTARIO
-                    time.sleep(0.5) #RETIRAR_COMENTARIO
+                    self.drs.SetSlaveAdd(module)
+                    time.sleep(0.5)
+                    self.drs.turn_on()
+                    time.sleep(0.5)
+                    self.drs.closed_loop()
+                    time.sleep(0.5)
 
                     self.dso.setup_config(self.cfg.dso_file)
                     time.sleep(5)
@@ -88,7 +97,7 @@ class Ripple(object):
 
                     for set_iout in self.cfg.ps_iout:
                         print('Iniciando teste com a corrente de ' + str(set_iout) + 'A\n')
-                        self.drs.set_slowref(set_iout) #RETIRAR_COMENTARIO
+                        self.drs.set_slowref(set_iout)
 
                         print('Aguardando ' + str(self.cfg.warmup_time) + ' segundos para maior estabilidade da medida...\n')
                         time.sleep(self.cfg.warmup_time) # WarmUpTime
@@ -96,7 +105,6 @@ class Ripple(object):
                         while round(self.drs.read_bsmp_variable(27, 'float')) != set_iout:
                             print('Corrente de saída errada')
                             time.sleep(5)
-                            #RETIRAR_COMENTARIO
                         
                         print('Iniciando processo de escala automática do osciloscópio...\n')
                         self.dso.auto_scale(3)
@@ -108,21 +116,41 @@ class Ripple(object):
 
                         rms_list = self.dso.get_results(3, pic_name)
 
-                        _file = open('ripple_results_iso.csv', 'a')
-                        _file.write(str(set_iout) + ';')
+                        results_list = []
+                        results_list.append(set_iout)
 
                         print('salvando medidas no arquivo...\n')
+                        
                         for j in vpp_list:
-                            write_value = str(j)
-                            _file.write(write_value.replace('.', ','))
-                            _file.write(';')
+                            if vpp_list.index(j) == 0:
+                                results_list.append(j/self.cfg.bw3k_coeff)
+                            elif vpp_list.index(j) == 1:
+                                results_list.append(j/self.cfg.bw500k_coeff)
+                            elif vpp_list.index(j) == 2:
+                                results_list.append(j/self.cfg.bw1meg_coeff)
                         for k in rms_list:
-                            write_value = str(k)
-                            _file.write(write_value.replace('.', ','))
-                            _file.write(';')
-                        _file.write('\n')
+                            if rms_list.index(j) == 0:
+                                results_list.append(j/self.cfg.bw3k_coeff)
+                            elif rms_list.index(j) == 1:
+                                results_list.append(j/self.cfg.bw500k_coeff)
+                            elif rms_list.index(j) == 2:
+                                results_list.append(j/self.cfg.bw1meg_coeff)
+
+                        final_results_list.append(results_list)
+                        
+                        for a in ordered_current_list:
+                            for b in final_results_list:
+                                if a == b[0]:
+                                    write_list.append(b)
+
+                        _file = open('ripple_results_iso.csv', 'a')
+                        for line in final_results_list:
+                            for element in line:
+                                _file.write(str(element))
+                                _file.write(';')
+                            _file.write('\n')
                         _file.close()
-                    self.drs.turn_off() #RETIRAR_COMENTARIO
+                    self.drs.turn_off()
 
                     print('**********************************************************')
                     if next_module != None:
@@ -136,7 +164,7 @@ class Ripple(object):
                         SwitchingBoard.switchingBoard_FBP(5)
                         self.dso.disconnect()
 
-            self.drs.Connect(self.cfg.com_port, baud=9600) #RETIRAR_COMENTARIO
+            self.drs.Connect(self.cfg.com_port)
             self.dso.connect(self.cfg.dso_addr)
             time.sleep(1)
             for module in self.cfg.group_module_list:
@@ -173,7 +201,6 @@ class Ripple(object):
                         time.sleep(0.5)
                         self.drs.set_slowref(10)
                         time.sleep(0.5)
-                        #RETIRAR_COMENTARIO
                     
                     self.dso.setup_config(self.cfg.dso_file)
                     time.sleep(5)
@@ -188,17 +215,16 @@ class Ripple(object):
                     _file.close()
 
                     for set_iout in self.cfg.ps_iout:
-                        self.drs.SetSlaveAdd(module) #RETIRAR_COMENTARIO
-                        time.sleep(0.5) #RETIRAR_COMENTARIO
+                        self.drs.SetSlaveAdd(module)
+                        time.sleep(0.5)
                         print('Iniciando teste com a corrente de ' + str(set_iout) + 'A\n')
-                        self.drs.set_slowref(set_iout) #RETIRAR_COMENTARIO
+                        self.drs.set_slowref(set_iout)
                         print('Aguardando ' + str(self.cfg.warmup_time) + ' segundos para maior estabilidade da medida...\n')
                         time.sleep(self.cfg.warmup_time) # WarmUpTime
 
                         while round(self.drs.read_bsmp_variable(27, 'float')) != set_iout:
                             print('Corrente de saída errada')
                             time.sleep(5)
-                            #RETIRAR_COMENTARIO
                         
                         print('Iniciando processo de escala automática do osciloscópio...\n')
                         self.dso.auto_scale(3)
@@ -229,7 +255,6 @@ class Ripple(object):
                         time.sleep(0.5)
                         self.drs.turn_off()
                         time.sleep(0.5)
-                        #RETIRAR_COMENTARIO
                     
                     print('**********************************************************')
                     if next_module != None:

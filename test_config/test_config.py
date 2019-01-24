@@ -71,9 +71,12 @@ class RippleConfig(object):
         self.individual_module_list = [1, 2, 3, 4]
         self.group_module_list = [1, 2, 3, 4]
         self.ps_iout = [0, 2, 4, 6, 8, 10, -10, -8, -6, -4, -2]
-        self.warmup_time = 10
-        self.measurements = 10
+        self.warmup_time = 1
+        self.measurements = 1
         self.switching_mode = True
+        self.bw3k_coeff = 100
+        self.bw500k_coeff = 1
+        self.bw1meg_coeff = 1
 
 
 class StabilityConfig(object):
