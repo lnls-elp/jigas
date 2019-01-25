@@ -77,6 +77,12 @@ class Ripple(object):
                         print('Comutando saída do ' + module_name + '...\n')
                         SwitchingBoard.switchingBoard_FBP(module)
 
+                    for i in self.cfg.individual_module_list:
+                        self.drs.SetSlaveAdd(i)
+                        time.sleep(0.5)
+                        self.drs.turn_off()
+                        time.sleep(0.5)
+
                     self.drs.SetSlaveAdd(module)
                     time.sleep(0.5)
                     self.drs.turn_on()
@@ -155,7 +161,6 @@ class Ripple(object):
 
                         final_results_list.append(results_list)
                     
-                    final_results_list = []
                     for a in ordered_current_list:
                         for b in final_results_list:
                             if a == b[0]:
@@ -168,6 +173,7 @@ class Ripple(object):
                             _file.write(';')
                         _file.write('\n')
                     _file.close()
+                    final_results_list = []
                     self.drs.turn_off()
 
                     print('**********************************************************')
@@ -300,7 +306,6 @@ class Ripple(object):
 
                         final_results_list.append(results_list)
                     
-                    final_results_list = []
                     for a in ordered_current_list:
                         for b in final_results_list:
                             if a == b[0]:
@@ -313,6 +318,7 @@ class Ripple(object):
                             _file.write(';')
                         _file.write('\n')
                     _file.close()
+                    final_results_list = []
 
                     for i in self.cfg.group_module_list:
                         self.drs.SetSlaveAdd(i)
