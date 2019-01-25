@@ -174,6 +174,7 @@ class Ripple(object):
                         _file.write('\n')
                     _file.close()
                     final_results_list = []
+                    write_list = []
                     self.drs.turn_off()
 
                     print('**********************************************************')
@@ -319,6 +320,7 @@ class Ripple(object):
                         _file.write('\n')
                     _file.close()
                     final_results_list = []
+                    write_list = []
 
                     for i in self.cfg.group_module_list:
                         self.drs.SetSlaveAdd(i)
