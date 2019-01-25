@@ -5,7 +5,6 @@ import SwitchingBoard
 
 import time
 
-
 import sys
 sys.path.insert(0, '../test_config/')
 
@@ -132,7 +131,6 @@ class Ripple(object):
                         print('Obtendo resultados e salvando imagem da tela...\n')
 
                         pic_name = module_name + '_' + str(set_iout) + 'A_iso'
-
                         rms_list = self.dso.get_results(3, pic_name)
 
                         results_list = []
@@ -149,14 +147,15 @@ class Ripple(object):
                                 results_list.append(j/self.cfg.bw1meg_coeff)
                         for k in rms_list:
                             if rms_list.index(k) == 0:
-                                results_list.append(j/self.cfg.bw3k_coeff)
+                                results_list.append(k/self.cfg.bw3k_coeff)
                             elif rms_list.index(k) == 1:
-                                results_list.append(j/self.cfg.bw500k_coeff)
+                                results_list.append(k/self.cfg.bw500k_coeff)
                             elif rms_list.index(k) == 2:
-                                results_list.append(j/self.cfg.bw1meg_coeff)
+                                results_list.append(k/self.cfg.bw1meg_coeff)
 
                         final_results_list.append(results_list)
-
+                    
+                    final_results_list = []
                     for a in ordered_current_list:
                         for b in final_results_list:
                             if a == b[0]:
@@ -279,8 +278,8 @@ class Ripple(object):
                         pic_name = module_name + '_' + str(set_iout) + 'A_con'
                         rms_list = self.dso.get_results(3, pic_name)
 
-                        _file = open('ripple_results_con.csv', 'a')
-                        _file.write(str(set_iout) + ';')
+                        results_list = []
+                        results_list.append(set_iout)
 
                         print('salvando medidas no arquivo...\n')
                         
@@ -293,14 +292,15 @@ class Ripple(object):
                                 results_list.append(j/self.cfg.bw1meg_coeff)
                         for k in rms_list:
                             if rms_list.index(k) == 0:
-                                results_list.append(j/self.cfg.bw3k_coeff)
+                                results_list.append(k/self.cfg.bw3k_coeff)
                             elif rms_list.index(k) == 1:
-                                results_list.append(j/self.cfg.bw500k_coeff)
+                                results_list.append(k/self.cfg.bw500k_coeff)
                             elif rms_list.index(k) == 2:
-                                results_list.append(j/self.cfg.bw1meg_coeff)
+                                results_list.append(k/self.cfg.bw1meg_coeff)
 
                         final_results_list.append(results_list)
                     
+                    final_results_list = []
                     for a in ordered_current_list:
                         for b in final_results_list:
                             if a == b[0]:
