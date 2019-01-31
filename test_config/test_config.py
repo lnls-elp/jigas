@@ -51,14 +51,17 @@ class CrossTalkConfig(object):
 
 class FrequencyResponseConfig(object):
     def __init__(self):
-        self.com_port = 'COM12'
-        self.inst_addr = 'GPIB::8::INSTR'
+        self.com_port = '/dev/virtualcom'
+        self.inst_addr = 'ASRL/dev/ttyUSB0::INSTR'
         self.bastidor = [1041182350]
         self.individual_module_list = [9, 10, 11, 12]
         self.idc_list = [5, 0, -5]
         self.ctrl_loop = ['open', 'closed']
         self.channel_freq = 101
         self.channel_rms = 102
+        self.switching_mode = True
+        self.open_loop_amplitude_reference = 1
+        self.closed_loop_amplitude_reference = 0.1 
 
 
 class RippleConfig(object):

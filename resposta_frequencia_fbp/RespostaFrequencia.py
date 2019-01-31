@@ -1,6 +1,8 @@
 from common.pydrs import SerialDRS
 from datetime     import datetime
 
+import SwitchingBoard
+
 import time
 import visa
 
@@ -29,9 +31,11 @@ class FrequencyResponse(object):
         print('Teste em malha aberta/fechada:                    ' + str(self.cfg.ctrl_loop))
         print('Canal do multímetro para leitura de frequência:   ' + str(self.cfg.channel_freq))
         print('Canal do multímetro para leitura do valor eficaz: ' + str(self.cfg.channel_rms))
+        print('Switching Mode:                                   ' + str(self.cfg.switching_mode))
+        print('Open Loop amplitude reference:                    ' + str(self.cfg.open_loop_amplitude_reference))
+        print('Closed Loop amplitude reference:                  ' + str(self.cfg.closed_loop_amplitude_reference))
 
-        # ctrl = input('\nOs dados estão corretos?(y/n): ')
-        ctrl = 'y'
+        ctrl = input('\nOs dados estão corretos?(y/n): ')
         ################################################################################
         ################################################################################
 
@@ -63,7 +67,7 @@ class FrequencyResponse(object):
                     time.sleep(0.5)
 
                     if loop == 'open':
-                        inst.write('CALC:SCALE:GAIN 1, (@'    + str(self.cfg.channel_rms) + ')')
+                        inst.write('CALC:SCALE:GAIN 0.1, (@'    + str(self.cfg.channel_rms) + ')')
                         time.sleep(0.5)
                         inst.write('CALC:SCALE:STATE ON, (@'  + str(self.cfg.channel_rms) + ')')
                         time.sleep(0.5)
@@ -74,10 +78,16 @@ class FrequencyResponse(object):
                         print('\nPor favor, selecione:')
                         print('                       -O ganho do amplificador diferencial para 1')
                         print('                       -A frequência de corte do amplificador diferencial para 100kHz')
-                        pause = input('\nTecle enter para continuar')
+                        
+                        if not self.cfg.switching_mode:
+                            pause = input('\nTecle enter para continuar')
+                        else:
+                            for time in range(10):
+                                print(str(10 - time) + '...')
+                                time.sleep(1)
 
                     elif loop == 'closed':
-                        inst.write('CALC:SCALE:GAIN 0.01, (@' + str(self.cfg.channel_rms) + ')')
+                        inst.write('CALC:SCALE:GAIN 0.1, (@' + str(self.cfg.channel_rms) + ')')
                         time.sleep(0.5)
                         inst.write('CALC:SCALE:STATE ON, (@'  + str(self.cfg.channel_rms) + ')')
                         time.sleep(0.5)
@@ -88,7 +98,13 @@ class FrequencyResponse(object):
                         print('\nPor favor, selecione:')
                         print('                       -O ganho do amplificador diferencial para 100')
                         print('                       -A frequência de corte do amplificador diferencial para 100kHz')
-                        pause = input('\nTecle enter para continuar')
+                        
+                        if not self.cfg.switching_mode:
+                            pause = input('\nTecle enter para continuar')
+                        else:
+                            for time in range(10):
+                                print(str(10 - time) + '...')
+                                time.sleep(1)
                     ################################################################################
                     ################################################################################
 
@@ -98,16 +114,34 @@ class FrequencyResponse(object):
                         _file.write('IDC = ' + str(idc) + 'A\n')
                         _file.write('time stamp;Set Frequency [Hz];Read Frequency [Hz];Irms [A]\n')
 
-                        amplitude = 0
-
                         if loop == 'open':
-                            amplitude = 10
+                            duty_cycle = [5, 45]
+                            iout = []
+
+                            if self.cfg.switching_mode:
+                                print('\nComutando saída do módulo ' + str(module) + '...')
+                                SwitchingBoard.switchingBoard_FBP(module)
+
                             self.drs.SetSlaveAdd(module)
                             time.sleep(0.5)
                             self.drs.reset_interlocks()
                             time.sleep(0.5)
                             self.drs.turn_on()
                             time.sleep(0.5)
+
+                            for duty in duty_cycle:
+                                self.drs.set_slowref(duty)
+                                time.sleep(0.5)
+                                iout.append(self.drs.read_bsmp_variable(27, 'float'))
+                                time.sleep(0.5)
+                            
+                            try:
+                                alfa = (duty_cycle[1]-duty_cycle[0])/(iout[1]-iout[0])
+                            except:
+                                print('ERRO! VERIFIQUE AS CONEXÕES DO MÓDULO E REINICIE O CONTROLADOR')
+
+                            amplitude = alfa * (self.cfg.open_loop_amplitude_reference - iout[1]) + duty_cycle[1]
+
                             self.drs.select_op_mode('Cycle')
                             time.sleep(0.5)
                             self.drs.cfg_siggen(0, 0, 10, amplitude, 0, 0, 0, 0, 0)
