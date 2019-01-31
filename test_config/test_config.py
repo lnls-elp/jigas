@@ -54,7 +54,7 @@ class FrequencyResponseConfig(object):
         self.com_port = '/dev/virtualcom'
         self.inst_addr = 'ASRL/dev/ttyUSB0::INSTR'
         self.bastidor = [1041182350]
-        self.individual_module_list = [9, 10, 11, 12]
+        self.individual_module_list = [1, 2, 3, 4]
         self.idc_list = [5, 0, -5]
         self.ctrl_loop = ['open', 'closed']
         self.channel_freq = 101
