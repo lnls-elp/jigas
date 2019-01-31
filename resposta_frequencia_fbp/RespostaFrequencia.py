@@ -82,8 +82,8 @@ class FrequencyResponse(object):
                         if not self.cfg.switching_mode:
                             pause = input('\nTecle enter para continuar')
                         else:
-                            for time in range(10):
-                                print(str(10 - time) + '...')
+                            for count_time in range(10):
+                                print(str(10 - count_time) + '...')
                                 time.sleep(1)
 
                     elif loop == 'closed':
@@ -102,8 +102,8 @@ class FrequencyResponse(object):
                         if not self.cfg.switching_mode:
                             pause = input('\nTecle enter para continuar')
                         else:
-                            for time in range(10):
-                                print(str(10 - time) + '...')
+                            for count_time in range(10):
+                                print(str(10 - count_time) + '...')
                                 time.sleep(1)
                     ################################################################################
                     ################################################################################
