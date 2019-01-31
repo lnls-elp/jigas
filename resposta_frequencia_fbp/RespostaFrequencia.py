@@ -51,7 +51,7 @@ class FrequencyResponse(object):
                     ################################################################################
                     ######################## CONFIGURANDO O MULTIMETRO #############################
                     ################################################################################
-                    rm   = visa.ResourceManager()
+                    rm   = visa.ResourceManager('@py')
                     inst = rm.open_resource(self.cfg.inst_addr)
 
                     del inst.timeout
