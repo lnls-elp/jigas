@@ -1,5 +1,6 @@
 from common.pydrs import SerialDRS
-from datetime     import datetime
+from DSOX_3024A import DSOX_3024A_USB
+from datetime import datetime
 
 import SwitchingBoard
 
@@ -15,6 +16,7 @@ from test_config import FrequencyResponseConfig
 class FrequencyResponse(object):
     def __init__(self):
         self.drs = SerialDRS()
+        self.dso = DSOX_3024A_USB()
         self.cfg = FrequencyResponseConfig()
 
 
@@ -25,6 +27,8 @@ class FrequencyResponse(object):
         print('Confirme os dados:\n')
         print('Porta de comunicação:                             ' + str(self.cfg.com_port))
         print('Endereço do multímetro:                           ' + str(self.cfg.inst_addr))
+        print('Endereço do osciloscópio:                         ' + str(self.cfg.dso_addr))
+        print('Arquivo de configuração do osciloscópio:          ' + str(self.cfg.dso_file))
         print('Bastidor:                                         ' + str(self.cfg.bastidor))
         print('Lista de módulos para teste individual:           ' + str(self.cfg.individual_module_list))
         print('Lista de valores de offset:                       ' + str(self.cfg.idc_list))
@@ -46,13 +50,17 @@ class FrequencyResponse(object):
         ################################################################################
         if ctrl == 'y':
             self.drs.Connect(self.cfg.com_port)
+            self.dso.connect(self.cfg.dso_addr)
+            time.sleep(1)
+            self.dso.setup_config(self.cfg.dso_file)
+            time.sleep(1)
 
             for module in self.cfg.individual_module_list:
                 for loop in self.cfg.ctrl_loop:
                     ################################################################################
                     ######################## CONFIGURANDO O MULTIMETRO #############################
                     ################################################################################
-                    rm   = visa.ResourceManager('@py')
+                    rm = visa.ResourceManager('@py')
                     inst = rm.open_resource(self.cfg.inst_addr)
 
                     del inst.timeout
@@ -212,6 +220,13 @@ class FrequencyResponse(object):
                             time.sleep(0.5)
                             self.drs.enable_siggen()
                             time.sleep(0.5)
+                            self.dso.auto_scale(1)
+                            self.dso.timebase_set(1/(10*30))
+                            print('VPP:')
+                            vpp = self.dso.single_shot(1, 1)
+                            print(vpp)
+                            pause = input('break')
+
 
                         elif loop == 'closed':
                             amplitude = 0.1
