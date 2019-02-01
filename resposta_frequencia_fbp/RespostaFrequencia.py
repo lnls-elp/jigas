@@ -141,6 +141,13 @@ class FrequencyResponse(object):
                                 print('ERRO! VERIFIQUE AS CONEXÕES DO MÓDULO E REINICIE O CONTROLADOR')
 
                             amplitude = alfa * (self.cfg.open_loop_amplitude_reference - iout[1]) + duty_cycle[1]
+                            open_loop_offset = alfa * (idc - iout [1]) + duty_cycle[1]
+
+                            print('***********************************************************************')
+                            print(amplitude)
+                            print('***********************************************************************')
+                            print(open_loop_offset)
+                            print('***********************************************************************')
 
                             self.drs.select_op_mode('Cycle')
                             time.sleep(0.5)
@@ -177,7 +184,8 @@ class FrequencyResponse(object):
                                         + 'A' + ', frequência = ' + str(frequency) + 'Hz...')
 
                                     if loop == 'open':
-                                        self.drs.set_siggen(frequency, amplitude, idc)
+
+                                        self.drs.set_siggen(frequency, amplitude, open_loop_offset)
                                     elif loop == 'closed':
                                         self.drs.set_siggen(frequency, amplitude, idc)
                                     time.sleep(5)
