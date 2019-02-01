@@ -158,10 +158,10 @@ class FrequencyResponse(object):
                             print(successive_aprox_ctrl)
                             print('***********************************************************************')
 
-                            while abs(successive_aprox_ctrl - self.cfg.open_loop_amplitude_reference) > self.cfg.open_loop_tolerance_adjustment:
-                                if (successive_aprox_ctrl - self.cfg.open_loop_amplitude_reference) > self.cfg.open_loop_tolerance_adjustment:
+                            while abs(successive_aprox_ctrl - self.cfg.open_loop_amplitude_reference) > (self.cfg.open_loop_tolerance_adjustment * self.cfg.open_loop_amplitude_reference):
+                                if (successive_aprox_ctrl - self.cfg.open_loop_amplitude_reference) > (self.cfg.open_loop_tolerance_adjustment * self.cfg.open_loop_amplitude_reference):
                                     amplitude = amplitude - 0.01
-                                elif (successive_aprox_ctrl - self.cfg.open_loop_amplitude_reference) < self.cfg.open_loop_tolerance_adjustment:
+                                elif (successive_aprox_ctrl - self.cfg.open_loop_amplitude_reference) < (self.cfg.open_loop_tolerance_adjustment * self.cfg.open_loop_amplitude_reference):
                                     amplitude = amplitude + 0.01
                                 time.sleep(0.5)
                                 print('bla ******************')
@@ -171,6 +171,33 @@ class FrequencyResponse(object):
                                 successive_aprox_ctrl = self.drs.read_bsmp_variable(27, 'float')
                                 print(successive_aprox_ctrl)
                                 print('bla ******************')
+
+                            self.drs.set_slowref(open_loop_offset)
+                            time.sleep(0.5)
+                            successive_aprox_ctrl = self.drs.read_bsmp_variable(27, 'float')
+                            time.sleep(0.5)
+                            print('***********************************************************************')
+                            print(successive_aprox_ctrl)
+                            print('***********************************************************************')
+
+                            while abs(successive_aprox_ctrl - idc) > (self.cfg.open_loop_tolerance_adjustment * idc):
+                                if (successive_aprox_ctrl - idc) > (self.cfg.open_loop_tolerance_adjustment * idc):
+                                    open_loop_offset = open_loop_offset - 0.01
+                                elif (successive_aprox_ctrl - idc) < (self.cfg.open_loop_tolerance_adjustment * idc):
+                                    open_loop_offset = open_loop_offset + 0.01
+                                time.sleep(0.5)
+                                print('bla ******************')
+                                print(open_loop_offset)
+                                self.drs.set_slowref(open_loop_offset)
+                                time.sleep(0.5)
+                                successive_aprox_ctrl = self.drs.read_bsmp_variable(27, 'float')
+                                print(successive_aprox_ctrl)
+                                print('bla ******************')
+
+                            print(amplitude)
+                            print(open_loop_offset)
+
+                            pause = input('break')
 
                             self.drs.select_op_mode('Cycle')
                             time.sleep(0.5)
