@@ -142,7 +142,11 @@ class FrequencyResponse(object):
                                 print('ERRO! VERIFIQUE AS CONEXÕES DO MÓDULO E REINICIE O CONTROLADOR')
 
                             amplitude = alfa * (self.cfg.open_loop_amplitude_reference - iout[1]) + duty_cycle[1]
-                            open_loop_offset = alfa * (idc - iout[1]) + duty_cycle[1]
+                            
+                            if idc != 0:
+                                open_loop_offset = alfa * (idc - iout[1]) + duty_cycle[1]
+                            else:
+                                open_loop_offset = 0
 
                             print('***********************************************************************')
                             print(amplitude)
@@ -172,27 +176,30 @@ class FrequencyResponse(object):
                                 print(successive_aprox_ctrl)
                                 print('bla ******************')
 
-                            self.drs.set_slowref(open_loop_offset)
-                            time.sleep(0.5)
-                            successive_aprox_ctrl = self.drs.read_bsmp_variable(27, 'float')
-                            time.sleep(0.5)
-                            print('***********************************************************************')
-                            print(successive_aprox_ctrl)
-                            print('***********************************************************************')
-
-                            while abs(successive_aprox_ctrl - idc) > (self.cfg.open_loop_tolerance_adjustment * idc):
-                                if (successive_aprox_ctrl - idc) > (self.cfg.open_loop_tolerance_adjustment * idc):
-                                    open_loop_offset = open_loop_offset - 0.01
-                                elif (successive_aprox_ctrl - idc) < (self.cfg.open_loop_tolerance_adjustment * idc):
-                                    open_loop_offset = open_loop_offset + 0.01
-                                time.sleep(0.5)
-                                print('bla ******************')
-                                print(open_loop_offset)
+                            if idc != 0:
                                 self.drs.set_slowref(open_loop_offset)
                                 time.sleep(0.5)
                                 successive_aprox_ctrl = self.drs.read_bsmp_variable(27, 'float')
+                                time.sleep(0.5)
+                                print('***********************************************************************')
                                 print(successive_aprox_ctrl)
-                                print('bla ******************')
+                                print('***********************************************************************')
+
+                                while abs(successive_aprox_ctrl - idc) > (self.cfg.open_loop_tolerance_adjustment * idc):
+                                    if (successive_aprox_ctrl - idc) > (self.cfg.open_loop_tolerance_adjustment * idc):
+                                        open_loop_offset = open_loop_offset - 0.01
+                                    elif (successive_aprox_ctrl - idc) < (self.cfg.open_loop_tolerance_adjustment * idc):
+                                        open_loop_offset = open_loop_offset + 0.01
+                                    time.sleep(0.5)
+                                    print('bla ******************')
+                                    print(open_loop_offset)
+                                    self.drs.set_slowref(open_loop_offset)
+                                    time.sleep(0.5)
+                                    successive_aprox_ctrl = self.drs.read_bsmp_variable(27, 'float')
+                                    print(successive_aprox_ctrl)
+                                    print('bla ******************')
+                            else:
+                                open_loop_offset = 0
 
                             print(amplitude)
                             print(open_loop_offset)
