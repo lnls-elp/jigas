@@ -53,7 +53,7 @@ class FrequencyResponseConfig(object):
     def __init__(self):
         self.com_port = '/dev/virtualcom'
         self.inst_addr = 'ASRL/dev/ttyUSB0::INSTR'
-        self.dso_addr = 'USB0::2391::6054::MY52492161:0:INSTR'
+        self.dso_addr = 'USB0::2391::6054::MY52492161::0::INSTR'
         self.dso_file = '../ripple_fbp/ripple_fbp.scp'
         self.bastidor = [1041182350]
         self.individual_module_list = [1, 2, 3, 4]
