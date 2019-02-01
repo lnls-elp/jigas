@@ -162,7 +162,7 @@ class FrequencyResponse(object):
                             print(successive_aprox_ctrl)
                             print('***********************************************************************')
 
-                            while abs(successive_aprox_ctrl - self.cfg.open_loop_amplitude_reference) > (self.cfg.open_loop_tolerance_adjustment * self.cfg.open_loop_amplitude_reference):
+                            while abs(successive_aprox_ctrl - self.cfg.open_loop_amplitude_reference) > abs(self.cfg.open_loop_tolerance_adjustment * self.cfg.open_loop_amplitude_reference):
                                 if (successive_aprox_ctrl - self.cfg.open_loop_amplitude_reference) > (self.cfg.open_loop_tolerance_adjustment * self.cfg.open_loop_amplitude_reference):
                                     amplitude = amplitude - 0.01
                                 elif (successive_aprox_ctrl - self.cfg.open_loop_amplitude_reference) < (self.cfg.open_loop_tolerance_adjustment * self.cfg.open_loop_amplitude_reference):
@@ -185,7 +185,7 @@ class FrequencyResponse(object):
                                 print(successive_aprox_ctrl)
                                 print('***********************************************************************')
 
-                                while abs(successive_aprox_ctrl - idc) > (self.cfg.open_loop_tolerance_adjustment * idc):
+                                while abs(successive_aprox_ctrl - idc) > abs(self.cfg.open_loop_tolerance_adjustment * idc):
                                     if (successive_aprox_ctrl - idc) > (self.cfg.open_loop_tolerance_adjustment * idc):
                                         open_loop_offset = open_loop_offset - 0.01
                                     elif (successive_aprox_ctrl - idc) < (self.cfg.open_loop_tolerance_adjustment * idc):
