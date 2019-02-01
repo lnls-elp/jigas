@@ -61,8 +61,8 @@ class FrequencyResponseConfig(object):
         self.channel_rms = 102
         self.switching_mode = True
         self.open_loop_amplitude_reference = 1
-        self.closed_loop_amplitude_reference = 0.1 
-
+        self.closed_loop_amplitude_reference = 0.1
+        self.open_loop_tolerance_adjustment = 0.01
 
 class RippleConfig(object):
     def __init__(self):

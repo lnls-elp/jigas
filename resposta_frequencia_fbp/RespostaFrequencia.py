@@ -32,8 +32,9 @@ class FrequencyResponse(object):
         print('Canal do multímetro para leitura de frequência:   ' + str(self.cfg.channel_freq))
         print('Canal do multímetro para leitura do valor eficaz: ' + str(self.cfg.channel_rms))
         print('Switching Mode:                                   ' + str(self.cfg.switching_mode))
-        print('Open Loop amplitude reference:                    ' + str(self.cfg.open_loop_amplitude_reference))
-        print('Closed Loop amplitude reference:                  ' + str(self.cfg.closed_loop_amplitude_reference))
+        print('Referência de amplitude em malha aberta:          ' + str(self.cfg.open_loop_amplitude_reference))
+        print('Referência de amplitude em malha fechada:         ' + str(self.cfg.closed_loop_amplitude_reference))
+        print('Tolerância para malha aberta:                     ' + str(self.cfg.open_loop_tolerance_adjustment))
 
         ctrl = input('\nOs dados estão corretos?(y/n): ')
         ################################################################################
@@ -141,13 +142,35 @@ class FrequencyResponse(object):
                                 print('ERRO! VERIFIQUE AS CONEXÕES DO MÓDULO E REINICIE O CONTROLADOR')
 
                             amplitude = alfa * (self.cfg.open_loop_amplitude_reference - iout[1]) + duty_cycle[1]
-                            open_loop_offset = alfa * (idc - iout [1]) + duty_cycle[1]
+                            open_loop_offset = alfa * (idc - iout[1]) + duty_cycle[1]
 
                             print('***********************************************************************')
                             print(amplitude)
                             print('***********************************************************************')
                             print(open_loop_offset)
                             print('***********************************************************************')
+
+                            self.drs.set_slowref(amplitude)
+                            time.sleep(0.5)
+                            successive_aprox_ctrl = self.drs.read_bsmp_variable(27, 'float')
+                            time.sleep(0.5)
+                            print('***********************************************************************')
+                            print(successive_aprox_ctrl)
+                            print('***********************************************************************')
+
+                            while abs(successive_aprox_ctrl - self.cfg.open_loop_amplitude_reference) > self.open_loop_tolerance_adjustment:
+                                if (successive_aprox_ctrl - self.cfg.open_loop_amplitude_reference) > self.open_loop_tolerance_adjustment:
+                                    amplitude = amplitude - 0.01
+                                elif (successive_aprox_ctrl - self.cfg.open_loop_amplitude_reference) < self.cfg.open_loop_tolerance_adjustment:
+                                    amplitude = amplitude + 0.01
+                                time.sleep(0.5)
+                                print('bla ******************')
+                                print(amplitude)
+                                self.drs.set_slowref(amplitude)
+                                time.sleep(0.5)
+                                successive_aprox_ctrl = self.drs.read_bsmp_variable(27, 'float')
+                                print(successive_aprox_ctrl)
+                                print('bla ******************')
 
                             self.drs.select_op_mode('Cycle')
                             time.sleep(0.5)
