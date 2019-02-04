@@ -229,7 +229,6 @@ class FrequencyResponse(object):
                             time.sleep(0.5)
                             self.dso.do_command(':AUToscale')
                             time.sleep(5)
-                            self.dso.timebase_set(1/(10*30))
                             print('VPP:')
                             vpp = self.dso.single_shot(1, 1)
                             print(vpp)
