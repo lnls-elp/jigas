@@ -55,6 +55,13 @@ class FrequencyResponse(object):
             self.dso.setup_config(self.cfg.dso_file)
             time.sleep(1)
 
+            for i in self.cfg.individual_module_list:
+                self.drs.SetSlaveAdd(i)
+                time.sleep(0.5)
+                self.drs.turn_off()
+                time.sleep(0.5)
+            self.drs.reset_udc()
+
             for module in self.cfg.individual_module_list:
                 for loop in self.cfg.ctrl_loop:
                     ################################################################################
@@ -220,7 +227,8 @@ class FrequencyResponse(object):
                             time.sleep(0.5)
                             self.drs.enable_siggen()
                             time.sleep(0.5)
-                            self.dso.auto_scale(1)
+                            self.dso.do_command(':AUToscale')
+                            time.sleep(5)
                             self.dso.timebase_set(1/(10*30))
                             print('VPP:')
                             vpp = self.dso.single_shot(1, 1)
