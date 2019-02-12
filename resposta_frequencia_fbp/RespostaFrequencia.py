@@ -230,6 +230,10 @@ class FrequencyResponse(object):
                             time.sleep(0.5)
                             self.dso.do_command(':AUToscale')
                             time.sleep(5)
+                            self.dso.do_command('CHANnel2:OFF')
+                            self.dso.do_command('CHANnel3:OFF')
+                            self.dso.do_command('CHANnel4:OFF')
+                            self.dso.do_command('CHANnel1:OFFSet 0V')
                             print('VPP:')
                             vp = float(self.dso.single_shot(1, 1)[0])/2
                             print(vp)
