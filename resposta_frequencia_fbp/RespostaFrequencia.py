@@ -231,7 +231,7 @@ class FrequencyResponse(object):
                             self.dso.do_command(':AUToscale')
                             time.sleep(5)
                             print('VPP:')
-                            vp = float(self.dso.single_shot(1, 1))/2
+                            vp = float(self.dso.single_shot(1, 1)[0])/2
                             print(vp)
                             self.dso.do_command(':RUN')
                             pause = input('break')
