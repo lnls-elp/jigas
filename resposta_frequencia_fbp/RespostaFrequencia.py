@@ -6,6 +6,7 @@ import SwitchingBoard
 
 import time
 import visa
+import math
 
 import sys
 sys.path.insert(0, '../test_config/')
@@ -92,14 +93,14 @@ class FrequencyResponse(object):
                         print('\nInício do teste de resposta em frequência em malha aberta do módulo ' + str(module))
                         print('\nPor favor, certifique-se de que o cabo de saída está ligado ao módulo ' + str(module))
                         print('\nPor favor, selecione:')
-                        print('                       -O ganho do amplificador diferencial para 1')
+                        print('                       -O ganho do amplificador diferencial para 10')
                         print('                       -A frequência de corte do amplificador diferencial para 100kHz')
                         
                         if not self.cfg.switching_mode:
                             pause = input('\nTecle enter para continuar')
                         else:
                             for count_time in range(10):
-                                print(str(10 - count_time) + '...')
+                                print('\n' + str(10 - count_time) + '...')
                                 time.sleep(1)
 
                     elif loop == 'closed':
@@ -182,11 +183,11 @@ class FrequencyResponse(object):
                                     amplitude = amplitude - 0.01
                                 elif (successive_aprox_ctrl - self.cfg.open_loop_amplitude_reference) < (self.cfg.open_loop_tolerance_adjustment * self.cfg.open_loop_amplitude_reference):
                                     amplitude = amplitude + 0.01
-                                time.sleep(0.5)
+                                time.sleep(0.1)
                                 print('bla ******************')
                                 print(amplitude)
                                 self.drs.set_slowref(amplitude)
-                                time.sleep(0.5)
+                                time.sleep(0.1)
                                 successive_aprox_ctrl = self.drs.read_bsmp_variable(27, 'float')
                                 print(successive_aprox_ctrl)
                                 print('bla ******************')
@@ -205,11 +206,11 @@ class FrequencyResponse(object):
                                         open_loop_offset = open_loop_offset - 0.01
                                     elif (successive_aprox_ctrl - idc) < (self.cfg.open_loop_tolerance_adjustment * idc):
                                         open_loop_offset = open_loop_offset + 0.01
-                                    time.sleep(0.5)
+                                    time.sleep(0.1)
                                     print('bla ******************')
                                     print(open_loop_offset)
                                     self.drs.set_slowref(open_loop_offset)
-                                    time.sleep(0.5)
+                                    time.sleep(0.1)
                                     successive_aprox_ctrl = self.drs.read_bsmp_variable(27, 'float')
                                     print(successive_aprox_ctrl)
                                     print('bla ******************')
@@ -230,9 +231,15 @@ class FrequencyResponse(object):
                             self.dso.do_command(':AUToscale')
                             time.sleep(5)
                             print('VPP:')
-                            vpp = self.dso.single_shot(1, 1)
-                            print(vpp)
+                            vp = float(self.dso.single_shot(1, 1))/2
+                            print(vp)
+                            self.dso.do_command(':RUN')
                             pause = input('break')
+
+                            if 20*math.log10(vp/(self.cfg.open_loop_amplitude_reference/10)) > -1:
+                                print('ok')
+                            else:
+                                print('nok')
 
 
                         elif loop == 'closed':
