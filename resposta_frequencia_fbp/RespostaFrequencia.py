@@ -63,6 +63,14 @@ class FrequencyResponse(object):
                 time.sleep(0.5)
             self.drs.reset_udc()
 
+            print('\nInício do teste de resposta em frequência em malha aberta do módulo ' + str(module))
+            print('\nPor favor, certifique-se de que o cabo de saída está ligado ao módulo ' + str(module))
+            print('\nPor favor, selecione:')
+            print('                        -O ganho do amplificador diferencial para 10')
+            print('                        -A frequência de corte do amplificador diferencial para 100kHz')
+                        
+            pause = input('\nTecle enter para iniciar o teste')
+
             for module in self.cfg.individual_module_list:
                 for loop in self.cfg.ctrl_loop:
                     ################################################################################
@@ -90,41 +98,14 @@ class FrequencyResponse(object):
                         time.sleep(0.5)
                         inst.write('ROUT:SCAN (@' + str(self.cfg.channel_rms) + ',' + str(self.cfg.channel_freq) + ')')
 
-                        print('\nInício do teste de resposta em frequência em malha aberta do módulo ' + str(module))
-                        print('\nPor favor, certifique-se de que o cabo de saída está ligado ao módulo ' + str(module))
-                        print('\nPor favor, selecione:')
-                        print('                       -O ganho do amplificador diferencial para 10')
-                        print('                       -A frequência de corte do amplificador diferencial para 100kHz')
-                        
-                        if not self.cfg.switching_mode:
-                            pause = input('\nTecle enter para continuar')
-                        else:
-                            for count_time in range(10):
-                                print('\n' + str(10 - count_time) + '...')
-                                time.sleep(1)
-
                     elif loop == 'closed':
                         inst.write('CALC:SCALE:GAIN 0.1, (@' + str(self.cfg.channel_rms) + ')')
                         time.sleep(0.5)
                         inst.write('CALC:SCALE:STATE ON, (@'  + str(self.cfg.channel_rms) + ')')
                         time.sleep(0.5)
                         inst.write('ROUT:SCAN (@' + str(self.cfg.channel_freq) + ',' + str(self.cfg.channel_rms) + ')')
-
-                        print('\nInício do teste de resposta em frequência em malha fechada do módulo ' + str(module))
-                        print('\nPor favor, certifique-se de que o cabo de saída está ligado ao módulo ' + str(module))
-                        print('\nPor favor, selecione:')
-                        print('                       -O ganho do amplificador diferencial para 100')
-                        print('                       -A frequência de corte do amplificador diferencial para 100kHz')
-                        
-                        if not self.cfg.switching_mode:
-                            pause = input('\nTecle enter para continuar')
-                        else:
-                            for count_time in range(10):
-                                print(str(10 - count_time) + '...')
-                                time.sleep(1)
                     ################################################################################
                     ################################################################################
-
 
                     for idc in self.cfg.idc_list:
                         _file = open('RespFrequencia_' + str(module) + '_NS' + str(self.cfg.bastidor) + '.csv', 'a')
@@ -155,7 +136,9 @@ class FrequencyResponse(object):
                             try:
                                 alfa = (duty_cycle[1]-duty_cycle[0])/(iout[1]-iout[0])
                             except:
-                                print('ERRO! VERIFIQUE AS CONEXÕES DO MÓDULO E REINICIE O CONTROLADOR')
+                                print('\nERRO! VERIFIQUE AS CONEXÕES DO MÓDULO E REINICIE O CONTROLADOR')
+
+                            print('\nDescobrindo melhor ajuste de amplitude e offset para operação em malha aberta...')
 
                             amplitude = alfa * (self.cfg.open_loop_amplitude_reference - iout[1]) + duty_cycle[1]
                             
@@ -164,19 +147,10 @@ class FrequencyResponse(object):
                             else:
                                 open_loop_offset = 0
 
-                            print('***********************************************************************')
-                            print(amplitude)
-                            print('***********************************************************************')
-                            print(open_loop_offset)
-                            print('***********************************************************************')
-
                             self.drs.set_slowref(amplitude)
                             time.sleep(0.5)
                             successive_aprox_ctrl = self.drs.read_bsmp_variable(27, 'float')
                             time.sleep(0.5)
-                            print('***********************************************************************')
-                            print(successive_aprox_ctrl)
-                            print('***********************************************************************')
 
                             while abs(successive_aprox_ctrl - self.cfg.open_loop_amplitude_reference) > abs(self.cfg.open_loop_tolerance_adjustment * self.cfg.open_loop_amplitude_reference):
                                 if (successive_aprox_ctrl - self.cfg.open_loop_amplitude_reference) > (self.cfg.open_loop_tolerance_adjustment * self.cfg.open_loop_amplitude_reference):
@@ -184,22 +158,15 @@ class FrequencyResponse(object):
                                 elif (successive_aprox_ctrl - self.cfg.open_loop_amplitude_reference) < (self.cfg.open_loop_tolerance_adjustment * self.cfg.open_loop_amplitude_reference):
                                     amplitude = amplitude + 0.01
                                 time.sleep(0.1)
-                                print('bla ******************')
-                                print(amplitude)
                                 self.drs.set_slowref(amplitude)
                                 time.sleep(0.1)
                                 successive_aprox_ctrl = self.drs.read_bsmp_variable(27, 'float')
-                                print(successive_aprox_ctrl)
-                                print('bla ******************')
 
                             if idc != 0:
                                 self.drs.set_slowref(open_loop_offset)
                                 time.sleep(0.5)
                                 successive_aprox_ctrl = self.drs.read_bsmp_variable(27, 'float')
                                 time.sleep(0.5)
-                                print('***********************************************************************')
-                                print(successive_aprox_ctrl)
-                                print('***********************************************************************')
 
                                 while abs(successive_aprox_ctrl - idc) > abs(self.cfg.open_loop_tolerance_adjustment * idc):
                                     if (successive_aprox_ctrl - idc) > (self.cfg.open_loop_tolerance_adjustment * idc):
@@ -207,20 +174,11 @@ class FrequencyResponse(object):
                                     elif (successive_aprox_ctrl - idc) < (self.cfg.open_loop_tolerance_adjustment * idc):
                                         open_loop_offset = open_loop_offset + 0.01
                                     time.sleep(0.1)
-                                    print('bla ******************')
-                                    print(open_loop_offset)
                                     self.drs.set_slowref(open_loop_offset)
                                     time.sleep(0.1)
                                     successive_aprox_ctrl = self.drs.read_bsmp_variable(27, 'float')
-                                    print(successive_aprox_ctrl)
-                                    print('bla ******************')
                             else:
                                 open_loop_offset = 0
-
-                            print(amplitude)
-                            print(open_loop_offset)
-
-                            pause = input('break')
 
                             self.drs.select_op_mode('Cycle')
                             time.sleep(0.5)
@@ -234,16 +192,14 @@ class FrequencyResponse(object):
                             self.dso.do_command(':CHANnel3:DISPlay OFF')
                             self.dso.do_command(':CHANnel4:DISPlay OFF')
                             self.dso.do_command(':CHANnel1:OFFSet 0V')
-                            print('VPP:')
-                            vp = float(self.dso.single_shot(1, 1)[0])/2
-                            print(vp)
+                            vp = float(self.dso.single_shot(1, 1)[0])/20
                             self.dso.do_command(':RUN')
                             pause = input('break')
 
-                            if 20*math.log10(vp/(self.cfg.open_loop_amplitude_reference/10)) > -1:
-                                print('ok')
+                            if (20*math.log10(vp/(self.cfg.open_loop_amplitude_reference/10)) > -1) and (20*math.log10(vp/(self.cfg.open_loop_amplitude_reference/10)) < 1):
+                                print('\nAmplitude correta')
                             else:
-                                print('nok')
+                                raise NameError('\nErro: verifique os cabos de conexão e reinicie o teste')
 
 
                         elif loop == 'closed':
