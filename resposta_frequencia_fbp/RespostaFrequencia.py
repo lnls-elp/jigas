@@ -63,8 +63,8 @@ class FrequencyResponse(object):
                 time.sleep(0.5)
             self.drs.reset_udc()
 
-            print('\nInício do teste de resposta em frequência em malha aberta do módulo ' + str(module))
-            print('\nPor favor, certifique-se de que o cabo de saída está ligado ao módulo ' + str(module))
+            print('\nInício do teste de resposta em frequência')
+            #print('\nPor favor, certifique-se de que o cabo de saída está ligado ao módulo ' + str(module))
             print('\nPor favor, selecione:')
             print('                        -O ganho do amplificador diferencial para 10')
             print('                        -A frequência de corte do amplificador diferencial para 100kHz')
@@ -194,9 +194,10 @@ class FrequencyResponse(object):
                             self.dso.do_command(':CHANnel1:OFFSet 0V')
                             vp = float(self.dso.single_shot(1, 1)[0])/20
                             self.dso.do_command(':RUN')
-                            pause = input('break')
+                            time.sleep(1)
 
-                            if (20*math.log10(vp/(self.cfg.open_loop_amplitude_reference/10)) > -1) and (20*math.log10(vp/(self.cfg.open_loop_amplitude_reference/10)) < 1):
+                            print(vp)
+                            if (20*math.log10(vp/(self.cfg.open_loop_amplitude_reference)) > -1) and (20*math.log10(vp/(self.cfg.open_loop_amplitude_reference)) < 1):
                                 print('\nAmplitude correta')
                             else:
                                 raise NameError('\nErro: verifique os cabos de conexão e reinicie o teste')

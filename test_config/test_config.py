@@ -55,7 +55,7 @@ class FrequencyResponseConfig(object):
         self.inst_addr = 'ASRL/dev/ttyUSB0::INSTR'
         self.dso_addr = 'USB0::2391::6054::MY52492161::0::INSTR'
         self.dso_file = '../ripple_fbp/ripple_fbp.scp'
-        self.bastidor = [1041182350]
+        self.bastidor = [1043949046]
         self.individual_module_list = [1, 2, 3, 4]
         self.idc_list = [5, 0, -5]
         self.ctrl_loop = ['open', 'closed']
