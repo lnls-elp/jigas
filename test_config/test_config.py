@@ -55,9 +55,9 @@ class FrequencyResponseConfig(object):
         self.inst_addr = 'ASRL/dev/ttyUSB0::INSTR'
         self.dso_addr = 'USB0::2391::6054::MY52492161::0::INSTR'
         self.dso_file = '../ripple_fbp/ripple_fbp.scp'
-        self.bastidor = [1043949046]
-        self.individual_module_list = [1, 2, 3, 4]
-        self.idc_list = [5, 0, -5]
+        self.bastidor = [1043481589]
+        self.individual_module_list = [3, 4]
+        self.idc_list = [0]
         self.ctrl_loop = ['open', 'closed']
         self.channel_freq = 101
         self.channel_rms = 102
@@ -70,19 +70,18 @@ class RippleConfig(object):
     def __init__(self):
         self.com_port = '/dev/virtualcom'
         self.inst_addr = 'GPIB::8::INSTR'
-        self.dso_addr = 'USB0::2391::6054::MY52492161::INSTR'
+        self.dso_addr = 'USB0::2391::6054::MY52492161::0::INSTR'
         self.dso_file = '../ripple_fbp/ripple_fbp.scp'
-        self.bastidor = [1043949057]
-        self.individual_module_list = [1, 2, 3, 4]
-        self.group_module_list = [1, 2, 3, 4]
+        self.bastidor = [1043481589]
+        self.individual_module_list = []
+        self.group_module_list = [2, 3, 4]
         self.ps_iout = [0, 2, 4, 6, 8, 10, -10, -8, -6, -4, -2]
         self.warmup_time = 5
         self.measurements = 10
         self.switching_mode = True
         self.bw3k_coeff = 100
         self.bw500k_coeff = 1
-        self.bw1meg_coeff = 1
-
+        self.bw1meg_coeff = 1 
 
 class StabilityConfig(object):
     def __init__(self):

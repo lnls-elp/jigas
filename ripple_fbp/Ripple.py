@@ -3,6 +3,7 @@ from DSOX_3024A import DSOX_3024A_USB
 
 import SwitchingBoard
 
+import visa
 import time
 
 import sys
@@ -43,10 +44,18 @@ class Ripple(object):
         ################################################################################
         ############################### ROTINA DE TESTE ################################
         ################################################################################
+        
         if (ctrl == 'y'):
             self.drs.Connect(self.cfg.com_port)
             self.dso.connect(self.cfg.dso_addr)
+            print('ok')
             time.sleep(1)
+            
+            print('\nInício do teste de Ripple')
+            print('\nPor favor, selecione:')
+            print('                        -O ganho do amplificador diferencial para 100')
+            print('                        -A frequência de corte do amplificador diferencial para 3 kHz')
+            pause = input('\nTecle enter para iniciar o teste')
 
             final_results_list = []
             write_list = []
@@ -190,7 +199,7 @@ class Ripple(object):
                         self.dso.disconnect()
 
             self.drs.Connect(self.cfg.com_port)
-            self.dso.connect(self.cfg.dso_addr)
+            #self.dso.connect(self.cfg.dso_addr)
             time.sleep(1)
 
             final_results_list = []
@@ -331,7 +340,7 @@ class Ripple(object):
                     print('**********************************************************')
                     if next_module != None:
                         if self.cfg.switching_mode:
-                            SwitchingBoard.switchingBoard_FBP(self.cfg.individual_module_list[self.cfg.individual_module_list.index(module) + 1])
+                            SwitchingBoard.switchingBoard_FBP(self.cfg.group_module_list[self.cfg.group_module_list.index(module) + 1])
                         else:
                             pause = input('\nTroque os cabos de medição para medir o ' + next_module + ' e tecle enter\n')
 
