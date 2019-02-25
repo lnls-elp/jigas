@@ -3,7 +3,6 @@ from DSOX_3024A import DSOX_3024A_USB
 
 import SwitchingBoard
 
-import visa
 import time
 
 import sys
@@ -48,7 +47,6 @@ class Ripple(object):
         if (ctrl == 'y'):
             self.drs.Connect(self.cfg.com_port)
             self.dso.connect(self.cfg.dso_addr)
-            print('ok')
             time.sleep(1)
             
             print('\nInício do teste de Ripple')
@@ -196,11 +194,6 @@ class Ripple(object):
                     else:
                         print('Fim do teste!!!')
                         SwitchingBoard.switchingBoard_FBP(5)
-                        self.dso.disconnect()
-
-            self.drs.Connect(self.cfg.com_port)
-            #self.dso.connect(self.cfg.dso_addr)
-            time.sleep(1)
 
             final_results_list = []
             write_list = []
@@ -347,7 +340,8 @@ class Ripple(object):
                     else:
                         print('Fim do teste!!!')
                         SwitchingBoard.switchingBoard_FBP(5)
-                        self.dso.disconnect()
+            self.drs.Disconnect()
+            self.dso.disconnect()
         else:
             print('\nCorrija os dados e reinicie o teste.\n')
         ################################################################################
