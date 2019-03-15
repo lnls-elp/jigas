@@ -15,13 +15,16 @@ from Rendimento import Eficiency
 from RespostaFrequencia import FrequencyResponse
 from Ripple import Ripple
 
+serial = []
+serial.append(int(input('Digite o número serial do bastidor: ')))
+
 test1 = CrossTalk()
 test2 = Linearity()
 test3 = Resolution()
 test4 = Stability()
 test5 = Eficiency()
-test6 = FrequencyResponse()
-test7 = Ripple()
+test6 = FrequencyResponse(serial)
+test7 = Ripple(serial)
 
 # print('\nINICIANDO TESTE DE CROSS TALK...\n')
 # test1.cross_talk_test()
@@ -38,8 +41,8 @@ test7 = Ripple()
 # print('\nINICIANDO TESTE DE EFICIÊNCIA\n')
 # test5.eficiency_test()
 
-print('\nINICIANDO TESTE DE RESPOSTA EM FREQUÊNCIA\n')
-test6.frequency_response_test()
+# print('\nINICIANDO TESTE DE RESPOSTA EM FREQUÊNCIA\n')
+# test6.frequency_response_test()
 
 print('\nINICIANDO TESTE DE RIPPLE\n')
 test7.ripple_test()

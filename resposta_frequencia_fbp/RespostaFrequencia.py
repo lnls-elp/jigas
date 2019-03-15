@@ -15,15 +15,15 @@ from test_config import FrequencyResponseConfig
 
 
 class FrequencyResponse(object):
-    def __init__(self):
+    def __init__(self, serial):
         self.drs = SerialDRS()
         self.dso = DSOX_3024A_USB()
         self.cfg = FrequencyResponseConfig()
-
+        self.cfg.bastidor = serial
 
     def frequency_response_test(self):
-        self.cfg.bastidor = []
-        self.cfg.bastidor.append(int(input('Digite o número de série do bastidor: ')))
+        #self.cfg.bastidor = []
+        #self.cfg.bastidor.append(int(input('Digite o número de série do bastidor: ')))
         ################################################################################
         ###################### CONFIRMANDO DADOS DE CONFIGURAÇÃO #######################
         ################################################################################

@@ -12,15 +12,16 @@ from test_config import RippleConfig
 
 
 class Ripple(object):
-    def __init__(self):
+    def __init__(self, serial):
         self.drs = SerialDRS()
         self.dso = DSOX_3024A_USB()
         self.cfg = RippleConfig()
+        self.cfg.bastidor = serial
 
 
     def ripple_test(self):
-        self.cfg.bastidor = []
-        self.cfg.bastidor.append(int(input('\nDigite o número de série do bastidor: ')))
+        #self.cfg.bastidor = []
+        #self.cfg.bastidor.append(int(input('\nDigite o número de série do bastidor: ')))
         ################################################################################
         ###################### CONFIRMANDO DADOS DE CONFIGURAÇÃO #######################
         ################################################################################
