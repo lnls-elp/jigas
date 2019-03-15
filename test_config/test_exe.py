@@ -38,8 +38,8 @@ test7 = Ripple()
 # print('\nINICIANDO TESTE DE EFICIÊNCIA\n')
 # test5.eficiency_test()
 
-# print('\nINICIANDO TESTE DE RESPOSTA EM FREQUÊNCIA\n')
-# test6.frequency_response_test()
+print('\nINICIANDO TESTE DE RESPOSTA EM FREQUÊNCIA\n')
+test6.frequency_response_test()
 
 print('\nINICIANDO TESTE DE RIPPLE\n')
 test7.ripple_test()

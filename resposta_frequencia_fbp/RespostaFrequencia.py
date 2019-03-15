@@ -22,6 +22,8 @@ class FrequencyResponse(object):
 
 
     def frequency_response_test(self):
+        self.cfg.bastidor = []
+        self.cfg.bastidor.append(int(input('Digite o número de série do bastidor: ')))
         ################################################################################
         ###################### CONFIRMANDO DADOS DE CONFIGURAÇÃO #######################
         ################################################################################

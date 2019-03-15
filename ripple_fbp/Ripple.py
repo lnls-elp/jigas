@@ -19,6 +19,8 @@ class Ripple(object):
 
 
     def ripple_test(self):
+        self.cfg.bastidor = []
+        self.cfg.bastidor.append(int(input('\nDigite o número de série do bastidor: ')))
         ################################################################################
         ###################### CONFIRMANDO DADOS DE CONFIGURAÇÃO #######################
         ################################################################################
