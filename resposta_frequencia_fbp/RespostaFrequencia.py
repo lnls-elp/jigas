@@ -138,7 +138,7 @@ class FrequencyResponse(object):
                             try:
                                 alfa = (duty_cycle[1]-duty_cycle[0])/(iout[1]-iout[0])
                             except:
-                                print('\nERRO! VERIFIQUE AS CONEXÕES DO MÓDULO E REINICIE O CONTROLADOR')
+                                raise NameError('\nERRO! VERIFIQUE AS CONEXÕES DO MÓDULO E REINICIE O CONTROLADOR')
 
                             print('\nDescobrindo melhor ajuste de amplitude e offset para operação em malha aberta...')
 
