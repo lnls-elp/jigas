@@ -100,7 +100,8 @@ class Ripple(object):
                     self.drs.closed_loop()
                     time.sleep(0.5)
 
-                    _file = open('ripple_results_iso.csv', 'a')
+                    f_name = 'ripple_results_iso' + str(self.cfg.bastidor) + '.csv'
+                    _file = open(f_name, 'a')
 
                     _file.write('NS self.cfg.bastidor: ' + str(self.cfg.bastidor) + '\n')
                     _file.write(module_name + '\n')
@@ -176,7 +177,7 @@ class Ripple(object):
                             if a == b[0]:
                                 write_list.append(b)
 
-                    _file = open('ripple_results_iso.csv', 'a')
+                    _file = open(f_name, 'a')
                     for line in write_list:
                         for element in line:
                             _file.write(str(element).replace('.', ','))
@@ -240,7 +241,8 @@ class Ripple(object):
                         time.sleep(0.5)
                         self.drs.set_slowref(10)
                         time.sleep(0.5)
-                    
+                   
+                    f_name = 'ripple_results_con' + str(self.cfg.bastidor) + '.csv' 
                     _file = open('ripple_results_con.csv', 'a')
                     _file.write('NS self.cfg.bastidor: ' + str(self.cfg.bastidor) + '\n')
                     _file.write(module_name + '\n')
@@ -317,7 +319,7 @@ class Ripple(object):
                             if a == b[0]:
                                 write_list.append(b)
                     
-                    _file = open('ripple_results_con.csv', 'a')
+                    _file = open(f_name, 'a')
                     for line in write_list:
                         for element in line:
                             _file.write(str(element).replace('.', ','))

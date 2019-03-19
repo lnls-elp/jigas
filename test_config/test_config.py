@@ -55,7 +55,7 @@ class FrequencyResponseConfig(object):
         self.inst_addr = 'ASRL/dev/ttyUSB0::INSTR'
         self.dso_addr = 'USB0::2391::6054::MY52492161::0::INSTR'
         self.dso_file = '../ripple_fbp/ripple_fbp.scp'
-        self.bastidor = [1043602740]
+        self.bastidor = []
         self.individual_module_list = [1, 2, 3, 4]
         self.idc_list = [0]
         self.ctrl_loop = ['open', 'closed']
@@ -72,9 +72,9 @@ class RippleConfig(object):
         self.inst_addr = 'GPIB::8::INSTR'
         self.dso_addr = 'USB0::2391::6054::MY52492161::0::INSTR'
         self.dso_file = '../ripple_fbp/ripple_fbp.scp'
-        self.bastidor = [1043602740]
+        self.bastidor = []
         self.individual_module_list = [1, 2, 3, 4]
-        self.group_module_list = []#[1, 2, 3, 4]
+        self.group_module_list = [1, 2, 3, 4]
         self.ps_iout = [0, 2, 4, 6, 8, 10, -10, -8, -6, -4, -2]
         self.warmup_time = 5
         self.measurements = 10
