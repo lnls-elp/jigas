@@ -243,7 +243,7 @@ class Ripple(object):
                         time.sleep(0.5)
                    
                     f_name = 'ripple_results_con' + str(self.cfg.bastidor) + '.csv' 
-                    _file = open('ripple_results_con.csv', 'a')
+                    _file = open(f_name, 'a')
                     _file.write('NS self.cfg.bastidor: ' + str(self.cfg.bastidor) + '\n')
                     _file.write(module_name + '\n')
                     _file.write("\nCH1: corrente @ 10 Hz - 3 kHz;'1:100\n")
